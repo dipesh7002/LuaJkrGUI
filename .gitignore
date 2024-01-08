@@ -1,0 +1,6 @@
+cache/*.*
+*.dll
+*.bin
+*.exe
+*.lua
+*.ttf
