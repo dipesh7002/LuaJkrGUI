@@ -410,15 +410,13 @@ Com.ImgRect = {
         Obj.mAreaId = com_i
         return Obj
     end,
-
-
+    Event = function()
+    end,
     Update = function(self)
         local Dimension = vec2(self.mDimension_2f.x, self.mDimension_2f.y)
         local rect_gen = Generator(Shapes.rectangle, Dimension)
         -- Hello eVeryone
+        -- WHat 
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
     end
-
-
-
 }
