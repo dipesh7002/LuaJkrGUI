@@ -285,6 +285,7 @@ Com.PopupMenu = {
         local Obj = {
             mPosition_3f = vec3(0, 0, inDepth),
             mDimension_3f = vec3(0, 0, 0),
+            mFontObject = inFontObject,
         }
         setmetatable(Obj, self)
         self.__index = self
