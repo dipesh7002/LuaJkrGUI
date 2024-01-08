@@ -1,4 +1,3 @@
--- make 
 require "jkrgui.PrimitiveComponents"
 
 Com.NumberSliderObject = {
@@ -419,6 +418,6 @@ Com.ImgRect = {
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
     end
 
---rhnjutnjf7ysdfkhkhsdsdlk
+
 
 }

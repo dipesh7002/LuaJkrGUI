@@ -210,7 +210,7 @@ Jkr.ComponentObject = {
         mTransparentToMouse_b = false,
         New = function(self, inPosition_3f, inDimension_3f)
                 local Obj = {}
-                print("Component Construction")
+                --("Component Construction")
                 setmetatable(Obj, self)
                 self.__index = self
 
@@ -222,7 +222,7 @@ Jkr.ComponentObject = {
                 local pos = vec2(Obj.mPosition_3f.x, Obj.mPosition_3f.y)
                 local dim = vec2(Obj.mDimension_3f.x, Obj.mDimension_3f.y)
                 Obj.mBoundedRectId_i = E.set_bounded_rect(pos, dim, Int(Obj.mPosition_3f.z))
-                print("Component Construction Finished")
+                --("Component Construction Finished")
                 return Obj
         end,
 
@@ -258,6 +258,25 @@ Jkr.ComponentObject = {
 
 Jkr.Components = {}
 Jkr.Components.Static = {}
+Jkr.Components.Abstract = {}
+Jkr.Components.Util = {}
+
+
+Jkr.Components.Abstract.ImageObject = {
+        mId = nil,
+        New = function (self, inWidth, inHeight, inFileName)
+               local Obj = {}
+               setmetatable(Obj, self)
+               self.__index = self
+               if inFileName then
+                        Obj.mId = S.AddImage(inFileName)
+               else
+                        Obj.mId = S.AddImage(Int(inWidth), Int(inHeight))
+               end 
+               return Obj
+        end
+}
+
 
 Jkr.Components.Static.ShapeObject = {
         mScissorPosition_2f = nil,
@@ -265,16 +284,14 @@ Jkr.Components.Static.ShapeObject = {
         mComponentObject = nil,
         mShapeId = nil,
         mImageId = nil,
-        mImagePainter = nil,
         mFillColor = nil,
-        New = function(self, inPosition_3f, inDimension_3f, inImagePainter, inImageSize_2f)
+        New = function(self, inPosition_3f, inDimension_3f, inImageObject)
                 local Obj = {
                         mScissorPosition_2f = nil,
                         mScissorDimension_2f = nil,
                         mComponentObject = nil,
                         mShapeId = nil,
                         mImageId = nil,
-                        mImagePainter = nil,
                         mFillColor = nil
                 }
 
@@ -286,23 +303,20 @@ Jkr.Components.Static.ShapeObject = {
                 local rect_gen = Generator(Shapes.rectangle, Dimension)
                 Obj.mShapeId =  S.Add(rect_gen, Obj.mComponentObject.mPosition_3f)
 
-                Obj.mImagePainter = false or inImagePainter
-                if Obj.mImagePainter then
-                        Obj.mImageId = S.AddImage(Int(inImageSize_2f.x), Int(inImageSize_2f.y))
-                        S.CopyImage(Obj.mImageId, Obj.mImagePainter)
+                if inImageObject then
+                        Obj.mImageId = inImageObject.mId
+                else
+                        Obj.mImageId = nil
                 end
-                Obj.mFillColor = nil
+
+                Obj.mFillColor = vec4(1, 1, 1, 1)
                 return Obj
         end,
-        Update = function (self, inPosition_3f, inDimension_3f, inImagePainter, inImageSize_2f)
+        Update = function (self, inPosition_3f, inDimension_3f)
                local Dimension = vec2(inDimension_3f.x, inDimension_3f.y)
                local rect_gen = Generator(Shapes.rectangle, Dimension)
                S.Update(Int(self.mShapeId), rect_gen, inPosition_3f) 
                self.mComponentObject:Update(inPosition_3f, inDimension_3f)
-
-               if inImagePainter and inImageSize_2f then
-                -- Yet to do
-               end
         end,
         Event = function(self)
                 self.mComponentObject:Event()
@@ -316,10 +330,7 @@ Jkr.Components.Static.ShapeObject = {
                         S.BindFillMode(FillType.fill)
                 end
                 S.Draw(self.mFillColor, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mShapeId), Int(self.mShapeId), GetIdentityMatrix())
-        end,
-        CopyFromPainter = function (self)
-                S.CopyImage(Int(self.mImageId), self.mImagePainter)
-        end,
+        end
 }
 
 Jkr.Components.Static.TextObject = {
@@ -387,6 +398,7 @@ Jkr.Components.Static.TextObject = {
                         r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString)
                 end
         end,
+        -- TODO Remove this function
         SetScissor = function (self)
                 if self.mScissorPosition_2f and self.mScissorDimension_2f then
                         Jkr.set_scissor(self.mScissorPosition_2f, self.mScissorDimension_2f)
@@ -394,55 +406,37 @@ Jkr.Components.Static.TextObject = {
         end
 }
 
+Jkr.Components.Util.ImagePainter = {
+    mPainter = nil,
+    New = function(self, inFileName, inImageSize_2f, inStore_b, inGLSL, inX, inY, inZ)
+        local Obj = {}
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mPainter = Jkr.image_painter(inFileName, inGLSL, vec3(inX, inY, inZ))
 
-
-Jkr.ImagePainters = {
-}
-
-Jkr.ImagePainters.Create = function (inImageSize_2f, inStore_b, inGLSL)
-                local Obj =  {}
-                Obj.mPainter = Jkr.image_painter("RoundedRectangleCache.bin", inGLSL, vec3(16, 16, 1))
-
-                if inStore_b then
-                        Obj.mPainter:store()
-                else
-                        Obj.mPainter:load()
-                end
-                Obj.mPainter:register_image(Int(inImageSize_2f.x), Int(inImageSize_2f.y))
-                return Obj
+        if inStore_b then
+            Obj.mPainter:store()
+        else
+            Obj.mPainter:load()
         end
-
-Jkr.ImagePainters.RoundedRectangle = {
-        mGLSL = [[
-vec2 center = vec2(push.mPosDimen.x, push.mPosDimen.y);
-vec2 hw = vec2(push.mPosDimen.z, push.mPosDimen.w);
-float radius = push.mParam.x;
-vec2 Q = abs(xy - center) - hw;
-
-float color = distance(max(Q, vec2(0.0)), vec2(0.0)) + min(max(Q.x, Q.y), 0.0) - radius;
-color = smoothstep(-0.05, 0.05, -color);
-
-vec4 old_color = imageLoad(storageImage, to_draw_at);
-vec4 final_color = vec4(push.mColor.x * color, push.mColor.y * color, push.mColor.z * color, push.mColor.w * color);
-final_color = mix(final_color, old_color, 0.5);
-
-imageStore(storageImage, to_draw_at, final_color);
-]]
-}
-
-Jkr.ImagePainters.RoundedCircle = {
-        mGLSL = [[
-vec2 center = vec2(push.mPosDimen.x, push.mPosDimen.y);
-vec2 hw = vec2(push.mPosDimen.z, push.mPosDimen.w);
-float radius = push.mParam.x;
-
-float color = distance(xy, center) - radius;
-color = smoothstep(-0.05, 0.05, -color);
-
-vec4 old_color = imageLoad(storageImage, to_draw_at);
-vec4 final_color = vec4(push.mColor.x * color, push.mColor.y * color, push.mColor.z * color, push.mColor.w * color);
-final_color = mix(final_color, old_color, 0.5);
-
-imageStore(storageImage, to_draw_at, final_color);
-]]
+        Obj.mPainter:register_image(Int(inImageSize_2f.x), Int(inImageSize_2f.y))
+        return Obj
+    end,
+    NewFrom = function (self, inPainter, inFileName, inStore_b, inGLSL, inX, inY, inZ)
+        local Obj = {} 
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mPainter = inPainter.mPainter:make_from(inFileName, inGLSL)
+        if inStore_b then
+            Obj.mPainter:store()
+        else
+            Obj.mPainter:load()
+        end
+        Obj.mPainter:register_image_existing()
+        return Obj
+    end,
+    Paint = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject)
+        self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
+        S.CopyImage(Int(inImageObject.mId), self.mPainter)
+    end
 }
