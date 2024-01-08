@@ -311,7 +311,6 @@ Com.PopupMenu = {
 
 
 Com.ImgRect = {
-
     mDimension_3f = vec3(0, 0, 0),
     mPosition_3f = vec3(0, 0, 0),
     mId = nil,
