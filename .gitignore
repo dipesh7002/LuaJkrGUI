@@ -1,9 +1,9 @@
-cache/*.*
+cache/*.Compute
 *.dll
-*.bin
-*.exe
-*.lua
-*.ttf
+/*.bin
+/*.exe
+/*.lua
+/*.ttf
 jkrgui/.DS_Store
 aJkrLua
 .DS_Store
