@@ -214,7 +214,6 @@ Com.AreaObject = {
 
 Com.TextLabelObject = {
     mIds = vec2(0, 0),
-    mPositionToParent_3f = vec3(0, 0, 0),
     mPosition_3f = vec3(0, 0, 0),
     mDimension_3f = vec3(0, 0, 0),
     New = function(self, inText, inPosition_3f, inFontObject)
@@ -228,14 +227,13 @@ Com.TextLabelObject = {
         setmetatable(Obj, self)
         self.__index = self
         Obj.mPosition_3f = inPosition_3f
-        Obj.mPositionToParent_3f = inPosition_3f
         Com.NewComponent()
         Obj.mIds.x = com_i
         ComTable[com_i] = Jkr.Components.Static.TextObject:New(inText, inPosition_3f, inFontObject)
         -- "TextLabelObject Construction Finished")
         return Obj
     end,
-    Update = function(self, inPosition_3f, inString)
+    Update = function(self, inPosition_3f, inDimension_3f, inString)
         self.mPosition_3f = inPosition_3f
         if inString then
             ComTable[self.mIds.x].mString = inString
@@ -245,25 +243,43 @@ Com.TextLabelObject = {
 }
 
 Com.ImageLabelObject = {
-    mImageId = nil,
-    mRectId = nil,
-    mPosition_3f = vec3(0, 0, 0),
-    mPositionToParent_3f = vec3(0, 0, 0),
-    mDimension_3f = vec3(0, 0, 0),
-    New = function (self, inFileName, inPosition_3f, inDimension_3f, inParent)
+    mImageObjectAbs = nil,
+    mShapeId = nil,
+    New = function (self, inFileName, inPosition_3f, inDimension_3f)
         local Obj = {}
         setmetatable(Obj, self)
+        Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(0, 0, inFileName)
+        Com.NewComponent() 
+        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj.mImageObjectAbs)
+        return Obj
+    end,
+    NewEmpty  = function (self, inWidth, inHeight, inPosition_3f, inDimension_3f)
+        local Obj = {} 
+        setmetatable(Obj, self)
         self.__index = self
-        Obj.mImageId = S.AddImage(inFileName)
-        local dimen = vec2(inDimension_3f.x, inDimension_3f.y)
-        local gen = Generator(Shapes.rectangle, dimen)
-        Obj.mRectId = S.Add(gen, inPosition_3f)
+        Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(inWidth, inHeight, nil)
+        print(Obj.mImageObjectAbs)
+        Com.NewComponent()
+        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj.mImageObjectAbs)
+        Obj.mShapeId = com_i
+        return Obj
+    end,
+    NewExisting = function (self, inImageObject, inPosition_3f, inDimension_3f)
+        local Obj = {} 
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mImageObjectAbs = inImageObject
+        Com.NewComponent()
+        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, inImageObject)
         return Obj
     end,
     Update = function (self, inPosition_3f, inDimension_3f)
         local dimen = vec2(inDimension_3f.x, inDimension_3f.y)
         local gen = Generator(Shapes.rectangle, dimen)
         S.Update(Int(self.mRectId), gen, inPosition_3f) 
+    end,
+    TintColor = function (self, inColor_4f)
+        ComTable[self.mShapeId].mFillColor = inColor_4f
     end
 }
 
