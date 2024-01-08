@@ -4,3 +4,6 @@ cache/*.*
 *.exe
 *.lua
 *.ttf
+jkrgui/.DS_Store
+aJkrLua
+.DS_Store

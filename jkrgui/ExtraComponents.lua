@@ -257,11 +257,12 @@ Com.ContextMenu = {
         local mainareapos = vec3(inPosition_3f.x, inPosition_3f.y, self.mMainArea.mPosition_3f.z)
         self.mMainArea:Update(mainareapos, MainAreaDimension)
         for i = 1, inNoOfEntries, 1 do
-            local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1), self.mButtons[i].mPosition_3f.z)
+            local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1),
+                self.mButtons[i].mPosition_3f.z)
             self.mButtons[i]:Update(pos, inCellDimension_3f, inContextMenuTable[i].name)
         end
     end,
-    Event = function (self)
+    Event = function(self)
         local NoOfEntries = #self.mCurrentContextMenu
         for i = 1, NoOfEntries, 1 do
             self.mButtons[i]:Event()
@@ -285,14 +286,17 @@ Com.PopupMenu = {
         local Obj = {
             mPosition_3f = vec3(0, 0, inDepth),
             mDimension_3f = vec3(0, 0, 0),
+            mFontObject = inFontObject,
         }
         setmetatable(Obj, self)
         self.__index = self
         Obj.mMainArea = Com.AreaObject:New(vec3(0, 0, inDepth), vec3(0, 0, 0))
-        Obj.mHeadButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4), vec3(0, 0, 0))
+        Obj.mHeadButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4),
+            vec3(0, 0, 0))
         Obj.mHeadButton:TurnOffShadow()
         Obj.mInfo = Com.TextLabelObject:New(string.rep(" ", inMaxChars * 5), vec3(0, 0, inDepth - 3), inFontObject)
-        Obj.mButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4), vec3(0, 0, 0))
+        Obj.mButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4),
+            vec3(0, 0, 0))
         return Obj
     end,
 
@@ -302,7 +306,8 @@ Com.PopupMenu = {
         local buttonpos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
         self.mHeadButton:Update(buttonpos, buttondimen, inHeadString)
         local infopos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
-        self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f, inInfo)
+        self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f,
+            inInfo)
         buttonpos = vec3(inPosition_3f.x + inDimension_3f.y / 2, inPosition_3f.y + 25 * 2.5, inPosition_3f.z - 4)
         buttondimen = vec3(60, 25, 1)
         self.mButton:Update(buttonpos, buttondimen, "Cancel")
@@ -311,6 +316,8 @@ Com.PopupMenu = {
 
 
 Com.ImgRect = {
+
+
     mDimension_3f = vec3(0, 0, 0),
     mPosition_3f = vec3(0, 0, 0),
     mId = nil,
@@ -328,8 +335,9 @@ Com.ImgRect = {
         self.__index = self
         Com.NewComponent()
 
-        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png", vec2(inDimension_3f.x, inDimension_3f.y))
-        
+        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png",
+            vec2(inDimension_3f.x, inDimension_3f.y))
+
         ComTable[com_i].mFillColor = vec4(1, 0, 0, 1)
         ComTable[com_i].mComponentObject.mFocusOnHover_b = false
         -- com_i)
@@ -343,7 +351,103 @@ Com.ImgRect = {
         local Dimension = vec2(self.mDimension_2f.x, self.mDimension_2f.y)
         local rect_gen = Generator(Shapes.rectangle, Dimension)
         -- Hello eVeryone
-        -- WHat 
+        -- WHat
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
+    end
+}
+
+Com.HorizontalLayout = {
+    mPosition = vec3(0, 0, 0),
+    mPadding = vec3(0, 0, 0),
+    mDepth = nil,
+    New = function(self, inPosition_3f, inPadding, inDepth, ...)
+        local Obj = {
+            mPosition_3f = inPosition_3f,
+            mPadding = inPadding,
+            mDepth = inDepth,
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        local args = table.pack(...)
+        local noOfAgruments = args.n
+        local position = inPosition_3f
+        local totalDimension = vec3(0, 0, 0)
+        position.y = position.y + inPadding
+        for index, value in ipairs(args) do
+            local dimension = value.mDimension_3f
+            totalDimension.x = totalDimension.x + dimension.x + inPadding
+            if totalDimension.y < dimension.y then
+                totalDimension.y = dimension.y
+            end
+            value:Update(vec3(position.x, position.y, inDepth), dimension)
+            position.x = position.x + dimension.x + inPadding
+        end
+        Obj.mArea = Com.AreaObject:New(vec3(inPosition_3f.x - totalDimension.x, inPosition_3f.y, inDepth + 10),
+            totalDimension)
+        print("Area object ni banyo")
+
+        return Obj
+    end
+}
+
+Com.VerticalLayout = {
+    mPosition = vec3(0, 0, 0),
+    mPadding = vec3(0, 0, 0),
+    mDepth = nil,
+    New = function(self, inPosition_3f, inPadding, inDepth, ...)
+        local Obj = {
+            mPosition_3f = inPosition_3f,
+            mPadding = inPadding,
+            mDepth = inDepth,
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        local args = table.pack(...)
+        local noOfAgruments = args.n
+        local position = inPosition_3f
+        position.x = position.x + inPadding
+        for index, value in ipairs(args) do
+            local dimension = value.mDimension_3f
+            --Obj.mArea = Com.AreaObject:New(vec3(inPosition_3f.x, inPosition_3f.y, inDepth), vec3())
+            value:Update(position, dimension)
+            position.y = position.y + dimension.y + inPadding
+        end
+
+        return Obj
+    end
+}
+
+Com.Rotate = {
+
+}
+
+Com.StickMan = {
+    mSpeed = nil,
+    mPosition_3f = nil,
+    mDimensionX = 0,
+    mBody = nil,
+    mLeg1 = nil,
+    mLeg2 = nil,
+    New = function(self, inPosition_3f, inDimensionX, inSpeed)
+        local Obj = {
+            mPosition_3f = inPosition_3f,
+            mDimensionX = inDimensionX,
+            mSpeed = inSpeed,
+        }
+        --500 *377 for body of stickman
+        -- 190 * 247 for leg of stickman
+        Obj.mBody = Com.ImageLabelObject:New("stickman.png", inPosition_3f, vec3(inDimensionX, 377 * inDimensionX / 500,
+            1))
+        Obj.mLeg1 = Com.ImageLabelObject:New("leg1.png",
+            vec3(inPosition_3f.x + inDimensionX / 5, inPosition_3f.y + 377 * inDimensionX / 500, inPosition_3f.z),
+            vec3(inDimensionX / 3.5, 247 * inDimensionX / (190 * 3.5), 1))
+        Obj.mLeg2 = Com.ImageLabelObject:New("leg2.png",
+            vec3(inPosition_3f.x + inDimensionX/3, inPosition_3f.y + 377 * inDimensionX / 500, inPosition_3f.z),
+            vec3(inDimensionX / 3.5, 247 * inDimensionX / (190 * 3.5), 1))
+
+        return Obj
+    end,
+    Update = function (self)
+        
     end
 }
