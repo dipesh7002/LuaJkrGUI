@@ -305,7 +305,8 @@ Com.PopupMenu = {
         local infopos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
         self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f, inInfo)
         buttonpos = vec3(inPosition_3f.x + inDimension_3f.y / 2, inPosition_3f.y + 25 * 2.5, inPosition_3f.z - 4)
-        buttondimen = vec3(60, 25, 1)
+        local text_dimension = self.mFontObject:GetDimension("Cancel") 
+        buttondimen = vec3(text_dimension.x + 10, text_dimension.y + 10, 1)
         self.mButton:Update(buttonpos, buttondimen, "Cancel")
     end
 }
@@ -346,5 +347,31 @@ Com.ImgRect = {
         -- Hello eVeryone
         -- WHat 
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
+    end
+}
+Com.HorizontalLayout = { 
+    New = function (self, inPosition, inDimension,...)
+        local Obj = {
+            mPosition = inPosition,
+            mDimension = inDimension,
+        }
+        setmetatable(Obj,self)
+        self.__index = self
+        local TableObject = table.pack(...)
+        if inDimension == nil then
+          for index, value in ipairs(TableObject) do
+            inDimension = value.mDimension_3f
+            local inText = value.mText
+            value:Update(inPosition,inDimension, inText)
+            inPosition.x = inPosition.x + inDimension.x
+          end
+        else
+          for index, value in ipairs(TableObject) do
+            local inText = value.mText
+            value:Update(inPosition, inDimension, inText)
+            inPosition.x = inPosition.x + inDimension.x
+          end
+        end
+        return Obj
     end
 }
