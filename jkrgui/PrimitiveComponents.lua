@@ -145,12 +145,12 @@ Com.TextLabelObject = {
     mIds = vec2(0, 0),
     mPosition_3f = vec3(0, 0, 0),
     mDimension_3f = vec3(0, 0, 0),
-    New = function(self, inText, inPosition_3f, inFontObject)
+    New = function(self, inText, inPosition_3f, inDimension_3f, inFontObject)
         local Obj = {
             mIds = vec2(0, 0),
             mPosition_3f = vec3(0, 0, 0),
             mPositionToParent_3f = vec3(0, 0, 0),
-            mDimension_3f = vec3(0, 0, 0)
+            mDime, inDimension_3fnsion_3f = vec3(0, 0, 0)
         }
         setmetatable(Obj, self)
         self.__index = self
@@ -210,12 +210,11 @@ Com.ImageLabelObject = {
     end,
     PaintByComputeSingleTime = function(self, inPainterWithPainterParameters)
         local ip = inPainterWithPainterParameters
-        local compute_func = function ()
-            print("here")
-            ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
-        end
         Com.NewComponent_SingleTimeDispatch()
         ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
+            function()
+                ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
+            end
         )
     end,
 }
@@ -256,7 +255,7 @@ Com.TextButtonObject = {
         local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + inDimension_3f.y - self.mPadding,
             inPosition_3f.z - 3)
         if self.mText then
-            self.mTextObject:Update(Position, self.mText)
+            self.mTextObject:Update(Position, inDimension_3f, self.mText)
         end
     end,
     Event = function(self)
