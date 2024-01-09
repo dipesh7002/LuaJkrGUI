@@ -440,3 +440,19 @@ Jkr.Components.Util.ImagePainter = {
         end
     end
 }
+
+Jkr.Components.Abstract.Dispatchable = {
+        mDispatchFunction = nil,
+        mDispatchParameters = nil,
+        New = function(self, indispatchfunction, indispatchparamters)
+                local Obj = {}
+                setmetatable(Obj, self)
+                self.__index = self
+                Obj.mDispatchFunction = indispatchfunction
+                Obj.mDispatchParameters = indispatchparamters
+                return Obj
+        end,
+        Dispatch = function(self)
+                self.mDispatchFunction(self.mDispatchParameters)
+        end
+}

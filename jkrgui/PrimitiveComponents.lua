@@ -26,22 +26,17 @@ end
 
 Com.Draws = function()
     for _, com in ipairs(ComTable_Draw) do
-        if com.SetScissor then
-            com:SetScissor()
-        end
         com:Draw()
-        if com.SetScissor then
-            Jkr.reset_scissor()
-        end
     end
 end
 
-local i = 0
+local loaded = 1
 Com.Dispatches = function()
-    for _, com in ipairs(ComTable_SingleTimeDispatch) do
-        com:Dispatch()
+    if loaded < #ComTable_SingleTimeDispatch then
+        ComTable_SingleTimeDispatch[i]:Dispatch()
+        loaded = loaded + 1
     end
-    i = i + 1
+    loaded = 1
 end
 
 Com.AreaObject = {
@@ -89,7 +84,6 @@ Com.AreaObject = {
         ComTable_Draw[com_dri].mComponentObject.mFocusOnHover_b = false
         local bc = Theme.Colors.Area.Border
         ComTable_Draw[com_dri].mFillColor = vec4(bc.x, bc.y, bc.z, bc.w)
-        -- com_i)
         Obj.mIds.x = com_dri
         Obj.mOutlineId = com_dri
 
@@ -98,11 +92,8 @@ Com.AreaObject = {
         local nc = Theme.Colors.Area.Normal
         ComTable_Draw[com_dri].mFillColor = vec4(nc.x, nc.y, nc.z, nc.w)
         ComTable_Draw[com_dri].mComponentObject.mFocusOnHover_b = false
-        -- com_i)
         Obj.mIds.y = com_dri
         Obj.mAreaId = com_dri
-        -- "No Of Components", com_i)
-        -- "AreaObject Construction Finished")
         return Obj
     end,
     TurnOffShadow = function(self)
@@ -155,7 +146,6 @@ Com.TextLabelObject = {
     mPosition_3f = vec3(0, 0, 0),
     mDimension_3f = vec3(0, 0, 0),
     New = function(self, inText, inPosition_3f, inFontObject)
-        -- "TextLabelObject Construction")
         local Obj = {
             mIds = vec2(0, 0),
             mPosition_3f = vec3(0, 0, 0),
@@ -168,7 +158,6 @@ Com.TextLabelObject = {
         Com.NewComponent_Draw()
         Obj.mIds.x = com_dri
         ComTable_Draw[com_dri] = Jkr.Components.Static.TextObject:New(inText, inPosition_3f, inFontObject)
-        -- "TextLabelObject Construction Finished")
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inString)
@@ -219,16 +208,16 @@ Com.ImageLabelObject = {
     TintColor = function(self, inColor_4f)
         ComTable_Draw[self.mShapeId].mFillColor = inColor_4f
     end,
-    PaintImagesByIndex = function(inIndex, inPainterTable)
-        if inPainterTable[inIndex].label then
-            inPainterTable[inIndex].painter:Paint(inPainterTable[inIndex].posdimen, inPainterTable[inIndex].color,
-                inPainterTable[inIndex].param, inPainterTable[inIndex].label.mImageObjectAbs)
-            print("Color:", inPainterTable[inIndex].color.x, inPainterTable[inIndex].color.y, inPainterTable[inIndex].color.z)
-        else
-            inPainterTable[inIndex].painter:Paint(inPainterTable[inIndex].posdimen, inPainterTable[inIndex].color,
-                inPainterTable[inIndex].param, nil)
+    PaintByComputeSingleTime = function(self, inPainterWithPainterParameters)
+        local ip = inPainterWithPainterParameters
+        local compute_func = function ()
+            print("here")
+            ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
         end
-    end
+        Com.NewComponent_SingleTimeDispatch()
+        ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
+        )
+    end,
 }
 
 Com.TextButtonObject = {
@@ -283,13 +272,4 @@ Com.TextButtonObject = {
     SetFunction = function(self, inFunction)
         self.mFunction = inFunction
     end
-}
-
-Com.Scissor = {
-
-}
-
-
-Com.Dispatchable = {
-
 }
