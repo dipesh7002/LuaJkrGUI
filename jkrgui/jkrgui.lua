@@ -438,5 +438,29 @@ Jkr.Components.Util.ImagePainter = {
     Paint = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject)
         self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
         S.CopyImage(Int(inImageObject.mId), self.mPainter)
+    end,
+    PaintImages = function(self, inPosDimen_4f, inColor_4f, inParam_4f, ...)
+        self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
+        local args = table.pack(...)
+        for i, v in ipairs(args) do
+            S.CopyImage(Int(v.mId), self.mPainter)
+        end
     end
+}
+
+
+Jkr.Components.Abstract.Dispatchable = {
+        mDispatchFunction = nil,
+        mDispatchParameters = nil,
+        New = function(self, indispatchfunction, indispatchparamters)
+                local Obj = {}
+                setmetatable(Obj, self)
+                self.__index = self
+                Obj.mDispatchFunction = indispatchfunction
+                Obj.mDispatchParameters = indispatchparamters
+                return Obj
+        end,
+        Dispatch = function(self)
+                self.mDispatchFunction(self.mDispatchParameters)
+        end
 }

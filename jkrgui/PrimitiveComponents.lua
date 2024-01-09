@@ -1,9 +1,42 @@
 Com = {}
 ComTable = {}
+ComTable_Dispatch = {}
+ComTable_SingleTimeDispatch = {}
 
 com_i = 0
 Com.NewComponent = function()
     com_i = com_i + 1
+end
+
+com_disi = 0
+Com.NewComponent_Dispatch = function()
+    com_disi = com_disi + 1
+end
+
+com_sdisi = 0
+Com.NewComponent_SingleTimeDispatch = function()
+    com_sdisi = com_sdisi + 1
+end
+
+Com.Events = function()
+    for _, com in ipairs(ComTable_Draw) do
+        com:Event()
+    end
+end
+
+Com.Draws = function()
+    for _, com in ipairs(ComTable_Draw) do
+        com:Draw()
+    end
+end
+
+local loaded = 1
+Com.Dispatches = function()
+    if loaded < #ComTable_SingleTimeDispatch then
+        ComTable_SingleTimeDispatch[i]:Dispatch()
+        loaded = loaded + 1
+    end
+    loaded = 1
 end
 
 Com.Events = function()
@@ -280,7 +313,18 @@ Com.ImageLabelObject = {
     end,
     TintColor = function (self, inColor_4f)
         ComTable[self.mShapeId].mFillColor = inColor_4f
-    end
+    end,
+    PaintByComputeSingleTime = function(self, inPainterWithPainterParameters)
+        local ip = inPainterWithPainterParameters
+        local compute_func = function ()
+        end
+        Com.NewComponent_SingleTimeDispatch()
+        ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
+            function ()
+                ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
+            end
+        )
+    end,
 }
 
 
