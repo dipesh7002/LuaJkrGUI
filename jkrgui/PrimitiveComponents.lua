@@ -32,11 +32,11 @@ end
 
 local loaded = 1
 Com.Dispatches = function()
-    if loaded < #ComTable_SingleTimeDispatch then
-        ComTable_SingleTimeDispatch[i]:Dispatch()
+    if loaded <= #ComTable_SingleTimeDispatch then
+        print(loaded)
+        ComTable_SingleTimeDispatch[loaded]:Dispatch()
         loaded = loaded + 1
     end
-    loaded = 1
 end
 
 Com.Events = function()
@@ -52,92 +52,6 @@ Com.Draws = function()
         if com.SetScissor then Jkr.reset_scissor() end
     end
 end
-
-Com.GPS = {
-    mPadding = 10,
-    mPosition_3f = vec3(0, 0, 0),
-    mDimension_3f = vec3(0, 0, 0),
-    mBackDepthValue = 0,
-    mFrontDepthValue = 0,
-    New = function(self, inBackDepthValueAbsolute, inFrontDepthValueAbsolute, inPosition_3f)
-        local Obj = {
-            mPadding = 10,
-            mPosition_3f = vec3(0, 0, 0),
-            mDimension_3f = vec3(0, 0, 0),
-            mBackDepthValue = inBackDepthValueAbsolute,
-            mFrontDepthValue = inFrontDepthValueAbsolute
-        }
-        if not inPosition_3f then
-            Obj.mPosition_3f = vec3(Obj.mPadding, Obj.mPadding, inBackDepthValueAbsolute)
-        else
-            Obj.mPosition_3f = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + Obj.mPadding,
-                inBackDepthValueAbsolute)
-        end
-        setmetatable(Obj, self)
-        self.__index = self
-        return Obj
-    end,
-    StartOver = function(self)
-        self.mPosition_3f = vec3(self.mPadding, self.mPadding, self.mPosition_3f.z)
-    end,
-    PrintCurrent = function(self)
-    end,
-    SetDimension = function(self, inDimension_3f)
-        self.mDimension_3f = inDimension_3f
-    end,
-    Start = function(self)
-        self.mPosition_3f = vec3(self.mPadding, self.mPadding, self.mPadding)
-    end,
-    MoveDown = function(self)
-        self.mPosition_3f = vec3(
-            self.mPosition_3f.x,
-            self.mPosition_3f.y + self.mDimension_3f.y + self.mPadding,
-            self.mPosition_3f.z
-        )
-        self:PrintCurrent()
-    end,
-    MoveRight = function(self)
-        self.mPosition_3f = vec3(
-            self.mPosition_3f.x + self.mDimension_3f.x + self.mPadding,
-            self.mPosition_3f.y,
-            self.mPosition_3f.z
-        )
-        self:PrintCurrent()
-    end,
-    MoveUp = function(self)
-        self.mPosition_3f = vec3(
-            self.mPosition_3f.x,
-            self.mPosition_3f.y - (self.mDimension_3f.y + self.mPadding),
-            self.mPosition_3f.z
-        )
-        self:PrintCurrent()
-    end,
-    MoveLeft = function(self)
-        self.mPosition_3f = vec3(
-            self.mPosition_3f.x - (self.mDimension_3f.x + self.mPadding),
-            self.mPosition_3f.y,
-            self.mPosition_3f.z
-        )
-        self:PrintCurrent()
-    end,
-    MoveBackAbsolute = function(self)
-        self.mPosition_3f = vec3(
-            self.mPosition_3f.x,
-            self.mPosition_3f.y,
-            self.mBackDepthValue
-        )
-        self:PrintCurrent()
-    end,
-    MoveFrontAbsolute = function(self)
-        self.mPosition_3f = vec3(
-            self.mPosition_3f.x,
-            self.mPosition_3f.y,
-            self.mFrontDepthValue
-        )
-        self:PrintCurrent()
-    end
-}
-
 
 
 Com.AreaObject = {
@@ -321,6 +235,8 @@ Com.ImageLabelObject = {
         Com.NewComponent_SingleTimeDispatch()
         ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
             function ()
+                print("Here")
+                print("Param", ip.param.x, ip.param.y, ip.param.z, ip.param.w)
                 ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
             end
         )
