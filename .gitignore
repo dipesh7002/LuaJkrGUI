@@ -5,5 +5,10 @@ cache/*.Compute
 /*.lua
 /*.ttf
 jkrgui/.DS_Store
+*.png
 aJkrLua
 .DS_Store
+*.json
+.vs/*.*
+*.vsidx
+.wsuo

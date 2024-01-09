@@ -257,11 +257,12 @@ Com.ContextMenu = {
         local mainareapos = vec3(inPosition_3f.x, inPosition_3f.y, self.mMainArea.mPosition_3f.z)
         self.mMainArea:Update(mainareapos, MainAreaDimension)
         for i = 1, inNoOfEntries, 1 do
-            local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1), self.mButtons[i].mPosition_3f.z)
+            local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1),
+                self.mButtons[i].mPosition_3f.z)
             self.mButtons[i]:Update(pos, inCellDimension_3f, inContextMenuTable[i].name)
         end
     end,
-    Event = function (self)
+    Event = function(self)
         local NoOfEntries = #self.mCurrentContextMenu
         for i = 1, NoOfEntries, 1 do
             self.mButtons[i]:Event()
@@ -290,10 +291,12 @@ Com.PopupMenu = {
         setmetatable(Obj, self)
         self.__index = self
         Obj.mMainArea = Com.AreaObject:New(vec3(0, 0, inDepth), vec3(0, 0, 0))
-        Obj.mHeadButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4), vec3(0, 0, 0))
+        Obj.mHeadButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4),
+            vec3(0, 0, 0))
         Obj.mHeadButton:TurnOffShadow()
         Obj.mInfo = Com.TextLabelObject:New(string.rep(" ", inMaxChars * 5), vec3(0, 0, inDepth - 3), inFontObject)
-        Obj.mButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4), vec3(0, 0, 0))
+        Obj.mButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4),
+            vec3(0, 0, 0))
         return Obj
     end,
 
@@ -303,15 +306,19 @@ Com.PopupMenu = {
         local buttonpos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
         self.mHeadButton:Update(buttonpos, buttondimen, inHeadString)
         local infopos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
-        self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f, inInfo)
+        self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f,
+            inInfo)
         buttonpos = vec3(inPosition_3f.x + inDimension_3f.y / 2, inPosition_3f.y + 25 * 2.5, inPosition_3f.z - 4)
-        buttondimen = vec3(60, 25, 1)
+        local text_dimension = self.mFontObject:GetDimension("Cancel") 
+        buttondimen = vec3(text_dimension.x + 10, text_dimension.y + 10, 1)
         self.mButton:Update(buttonpos, buttondimen, "Cancel")
     end
 }
 
 
 Com.ImgRect = {
+
+
     mDimension_3f = vec3(0, 0, 0),
     mPosition_3f = vec3(0, 0, 0),
     mId = nil,
@@ -344,7 +351,33 @@ Com.ImgRect = {
         local Dimension = vec2(self.mDimension_2f.x, self.mDimension_2f.y)
         local rect_gen = Generator(Shapes.rectangle, Dimension)
         -- Hello eVeryone
-        -- WHat 
+        -- WHat
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
+    end
+}
+Com.HorizontalLayout = { 
+    New = function (self, inPosition, inDimension,...)
+        local Obj = {
+            mPosition = inPosition,
+            mDimension = inDimension,
+        }
+        setmetatable(Obj,self)
+        self.__index = self
+        local TableObject = table.pack(...)
+        if inDimension == nil then
+          for index, value in ipairs(TableObject) do
+            inDimension = value.mDimension_3f
+            local inText = value.mText
+            value:Update(inPosition,inDimension, inText)
+            inPosition.x = inPosition.x + inDimension.x
+          end
+        else
+          for index, value in ipairs(TableObject) do
+            local inText = value.mText
+            value:Update(inPosition, inDimension, inText)
+            inPosition.x = inPosition.x + inDimension.x
+          end
+        end
+        return Obj
     end
 }
