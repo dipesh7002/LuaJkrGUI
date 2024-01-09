@@ -49,7 +49,7 @@ Com.NumberSliderObject = {
         local up = vec3(p.x, p.y, p.z)
         local Factor = (p.x - d.x) / self.mDimension_3f.x
 
-        if ComTable[self.mKnobId.mAreaId].mComponentObject.mFocus_b or ComTable[self.mRodId.mAreaId].mComponentObject.mFocus_b then
+        if ComTable_Draw[self.mKnobId.mAreaId].mComponentObject.mFocus_b or ComTable_Draw[self.mRodId.mAreaId].mComponentObject.mFocus_b then
             self.mShouldSlide = true
         end
 
@@ -328,15 +328,15 @@ Com.ImgRect = {
 
         setmetatable(Obj, self)
         self.__index = self
-        Com.NewComponent()
+        Com.NewComponent_Draw()
 
-        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png", vec2(inDimension_3f.x, inDimension_3f.y))
+        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png", vec2(inDimension_3f.x, inDimension_3f.y))
         
-        ComTable[com_i].mFillColor = vec4(1, 0, 0, 1)
-        ComTable[com_i].mComponentObject.mFocusOnHover_b = false
+        ComTable_Draw[com_dri].mFillColor = vec4(1, 0, 0, 1)
+        ComTable_Draw[com_dri].mComponentObject.mFocusOnHover_b = false
         -- com_i)
-        Obj.mIds.y = com_i
-        Obj.mAreaId = com_i
+        Obj.mIds.y = com_dri
+        Obj.mAreaId = com_dri
         return Obj
     end,
     Event = function()
