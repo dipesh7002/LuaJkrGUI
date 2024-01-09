@@ -9,17 +9,17 @@ Com.TextCursorObject = {
         local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
-        Com.NewComponent()
-        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, nil, nil)
-        ComTable[com_i].mFillColor = inColor_4f
+        Com.NewComponent_Draw()
+        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, nil, nil)
+        ComTable_Draw[com_dri].mFillColor = inColor_4f
         print("TextCursorObject Construction Finished")
         Obj.mWidth = inDimension_3f.x
-        Obj.mShapeId = com_i
+        Obj.mShapeId = com_dri
         Obj.mHeight = inDimension_3f.y
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
-        ComTable[self.mShapeId]:Update(inPosition_3f, inDimension_3f)
+        ComTable_Draw[self.mShapeId]:Update(inPosition_3f, inDimension_3f)
     end
 }
 
@@ -54,10 +54,10 @@ Com.TextLineEditObject = {
         Obj.mShouldUpdate = false
         Obj.mShouldInputText = false
 
-        Com.NewComponent()
+        Com.NewComponent_Draw()
         local TextPosition = vec3(inPosition_3f.x, inPosition_3f.y + inDimension_3f.y, inPosition_3f.z)
-        ComTable[com_i] = Jkr.Components.Static.TextObject:New(Obj.mStartString, inPosition_3f, inFontObject)
-        Obj.mTextObjectId = com_i
+        ComTable_Draw[com_dri] = Jkr.Components.Static.TextObject:New(Obj.mStartString, inPosition_3f, inFontObject)
+        Obj.mTextObjectId = com_dri
         if inParent then
             Obj:SetParent(inParent)
         end
@@ -65,14 +65,14 @@ Com.TextLineEditObject = {
         return Obj
     end,
     Event = function(self)
-        local isClickedOn = ComTable[self.mAreaId].mComponentObject.mFocus_b
+        local isClickedOn = ComTable_Draw[self.mAreaId].mComponentObject.mFocus_b
 
         if isClickedOn then
             self.mShouldInputText = not self.mShouldInputText
-            ComTable[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Active
+            ComTable_Draw[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Active
         elseif not isClickedOn and E.is_left_button_pressed() then
             self.mShouldInputText = false
-            ComTable[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Normal
+            ComTable_Draw[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Normal
         end
 
         if self.mShouldInputText then
@@ -88,25 +88,25 @@ Com.TextLineEditObject = {
                     self.mCurrentString = utf8.sub(self.mCurrentString, 1, -2)
                 elseif is_enter then
                     self.mShouldInputText = false
-                    ComTable[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Normal
+                    ComTable_Draw[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Normal
                 end
             end
         end
 
         if self.mShouldUpdate then
-            ComTable[self.mTextObjectId].mString = self.mStartString
-            ComTable[self.mTextObjectId]:Update(self.mPosition_3f)
+            ComTable_Draw[self.mTextObjectId].mString = self.mStartString
+            ComTable_Draw[self.mTextObjectId]:Update(self.mPosition_3f)
 
             if self.mCurrentString == "" then
-                ComTable[self.mTextObjectId].mString = " "
+                ComTable_Draw[self.mTextObjectId].mString = " "
             else
-                ComTable[self.mTextObjectId].mString = self.mCurrentString
+                ComTable_Draw[self.mTextObjectId].mString = self.mCurrentString
             end
 
             local TextPosition = vec3(self.mPosition_3f.x + self.mPadding,
                 self.mPosition_3f.y + self.mDimension_3f.y - self.mPadding, self.mPosition_3f.z - 3)
-            ComTable[self.mTextObjectId]:Update(TextPosition)
-            local CursorPosByTypedText = ComTable[self.mTextObjectId].mFont:GetDimension(self.mCurrentString)
+            ComTable_Draw[self.mTextObjectId]:Update(TextPosition)
+            local CursorPosByTypedText = ComTable_Draw[self.mTextObjectId].mFont:GetDimension(self.mCurrentString)
             local CursorObjectPosition = vec3(
                 CursorPosByTypedText.x + self.mPosition_3f.x + self.mTextCursorObject.mWidth, self.mPosition_3f.y,
                 self.mPosition_3f.z - 3)
@@ -129,8 +129,8 @@ Com.TextLineEditObject = {
             self.mTextCursorObject:Update(CursorObjectPosition, CursorObjectDimension)
         end
         if inObject.mPosition_3f.x > 0 and inObject.mPosition_3f.y > 0 then
-            ComTable[self.mTextObjectId].mScissorPosition_2f = vec2(inObject.mPosition_3f.x, inObject.mPosition_3f.y)
-            ComTable[self.mTextObjectId].mScissorDimension_2f = vec2(inObject.mDimension_3f.x, inObject.mDimension_3f.y)
+            ComTable_Draw[self.mTextObjectId].mScissorPosition_2f = vec2(inObject.mPosition_3f.x, inObject.mPosition_3f.y)
+            ComTable_Draw[self.mTextObjectId].mScissorDimension_2f = vec2(inObject.mDimension_3f.x, inObject.mDimension_3f.y)
         end
         self.mShouldUpdate = true
     end,
@@ -178,12 +178,12 @@ Com.TextMultiLineEditObject = {
         Obj.mString = ""
         Obj.mStringCurrentLine = 1
         for i = 1, inMaxNoOfLines, 1 do
-            Com.NewComponent()
+            Com.NewComponent_Draw()
             local TextPosition = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + inCursorHeight * i,
                 inPosition_3f.z)
             local StartString = string.rep(" ", inMaxStringLength)
-            ComTable[com_i] = Jkr.Components.Static.TextObject:New(StartString, TextPosition, inFontObject)
-            Obj.mTextObjectIds[#Obj.mTextObjectIds + 1] = com_i
+            ComTable_Draw[com_dri] = Jkr.Components.Static.TextObject:New(StartString, TextPosition, inFontObject)
+            Obj.mTextObjectIds[#Obj.mTextObjectIds + 1] = com_dri
             Obj.mLineTexts[#Obj.mLineTexts + 1] = ""
         end
 
@@ -244,20 +244,20 @@ Com.TextMultiLineEditObject = {
 
         for i = 1, i__, 1 do
             local t_obj = self.mTextObjectIds[i]
-            ComTable[t_obj].mString = string.rep(" ", self.mMaxStringLength)
-            ComTable[t_obj]:Update(self.mPosition_3f)
+            ComTable_Draw[t_obj].mString = string.rep(" ", self.mMaxStringLength)
+            ComTable_Draw[t_obj]:Update(self.mPosition_3f)
             if self.mLineTexts[i] == "" then
-                ComTable[t_obj].mString = " "
+                ComTable_Draw[t_obj].mString = " "
             else
-                ComTable[t_obj].mString = self.mLineTexts[i]
+                ComTable_Draw[t_obj].mString = self.mLineTexts[i]
             end
 
             local TextPosition = vec3(self.mPosition_3f.x + self.mPadding,
                 self.mPosition_3f.y + self.mTextCursorObject.mHeight * i,
                 self.mPosition_3f.z - 3)
-            ComTable[t_obj]:Update(TextPosition)
+            ComTable_Draw[t_obj]:Update(TextPosition)
 
-            local CursorPosByTypedText = ComTable[t_obj].mFont:GetDimension(self.mLineTexts[i])
+            local CursorPosByTypedText = ComTable_Draw[t_obj].mFont:GetDimension(self.mLineTexts[i])
             local CursorObjectPosition = vec3(
                 CursorPosByTypedText.x + self.mPosition_3f.x,
                 self.mPosition_3f.y + (self.mTextCursorObject.mHeight) * (i - 1),
@@ -273,7 +273,7 @@ Com.TextMultiLineEditObject = {
         local eid = self.mCurrentLine
         local string_length = utf8.len(self.mLineTexts[eid])
         local CurrentTextObjectId = self.mTextObjectIds[eid]
-        local CurrentTextDimension = ComTable[CurrentTextObjectId].mFont:GetDimension(self.mLineTexts[eid])
+        local CurrentTextDimension = ComTable_Draw[CurrentTextObjectId].mFont:GetDimension(self.mLineTexts[eid])
 
 
         if self.mShouldInputText or inShouldAddAuto then
@@ -333,21 +333,21 @@ Com.TextMultiLineEditObject = {
         if self.mShouldUpdate then
             local t_obj = self.mTextObjectIds[eid]
 
-            ComTable[t_obj].mString = string.rep(" ", self.mMaxStringLength)
-            ComTable[t_obj]:Update(self.mPosition_3f)
+            ComTable_Draw[t_obj].mString = string.rep(" ", self.mMaxStringLength)
+            ComTable_Draw[t_obj]:Update(self.mPosition_3f)
 
 
             if self.mLineTexts[eid] == "" then
-                ComTable[t_obj].mString = " "
+                ComTable_Draw[t_obj].mString = " "
             else
-                ComTable[t_obj].mString = self.mLineTexts[eid]
+                ComTable_Draw[t_obj].mString = self.mLineTexts[eid]
             end
 
             local TextPosition = vec3(self.mPosition_3f.x + self.mPadding,
                 self.mPosition_3f.y + self.mTextCursorObject.mHeight * eid,
                 self.mPosition_3f.z - 3)
-            ComTable[t_obj]:Update(TextPosition)
-            local CursorPosByTypedText = ComTable[t_obj].mFont:GetDimension(self.mLineTexts[eid])
+            ComTable_Draw[t_obj]:Update(TextPosition)
+            local CursorPosByTypedText = ComTable_Draw[t_obj].mFont:GetDimension(self.mLineTexts[eid])
             local CursorObjectPosition = vec3(
                 CursorPosByTypedText.x + self.mPosition_3f.x,
                 self.mPosition_3f.y + (self.mTextCursorObject.mHeight) * (eid - 1),
@@ -373,13 +373,13 @@ Com.TextMultiLineEditObject = {
         end
     end,
     Event = function(self)
-        local isClickedOn = ComTable[self.mAreaId].mComponentObject.mFocus_b
+        local isClickedOn = ComTable_Draw[self.mAreaId].mComponentObject.mFocus_b
         if isClickedOn then
             self.mShouldInputText = not self.mShouldInputText
-            ComTable[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Active
+            ComTable_Draw[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Active
         elseif not isClickedOn and E.is_left_button_pressed() then
             self.mShouldInputText = false
-            ComTable[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Normal
+            ComTable_Draw[self.mTextCursorObject.mShapeId].mFillColor = Theme.Colors.Text.Cursor.Normal
         end
         self:AddCharacter(false)
     end
