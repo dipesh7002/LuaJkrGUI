@@ -168,7 +168,6 @@ Com.TextLabelObject = {
         local Obj = {
             mIds = vec2(0, 0),
             mPosition_3f = vec3(0, 0, 0),
-            mPositionToParent_3f = vec3(0, 0, 0),
             mDimension_3f = vec3(0, 0, 0)
         }
         setmetatable(Obj, self)
@@ -228,30 +227,27 @@ Com.ImageLabelObject = {
     TintColor = function (self, inColor_4f)
         ComTable[self.mShapeId].mFillColor = inColor_4f
     end,
-    PaintByComputeSingleTime = function(self, inPainterWithPainterParameters)
+    PaintByComputeSingleTime = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
         local ip = inPainterWithPainterParameters
         local compute_func = function ()
         end
         Com.NewComponent_SingleTimeDispatch()
         ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
             function ()
-                print("Here")
-                print("Param", ip.param.x, ip.param.y, ip.param.z, ip.param.w)
-                ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
+                inPainterWithRegisteredImage:BindImage()
+                ip.painter:BindPainter()
+                ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage) 
             end
         )
     end,
 }
 
-
-
 Com.TextButtonObject = {
-    mPositionToParent_3f = vec3(0, 0, 0),
     mPadding = 5,
     mTextObject = nil,
     mFunction = nil,
     mPressed = false,
-    New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f, inParent)
+    New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
         -- "TextButtonObject")
         local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
         setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
@@ -259,20 +255,61 @@ Com.TextButtonObject = {
         self.__index = self
 
         Obj.mTextObject = {}
-        Obj.mPositionToParent_3f = {}
         Obj.mPadding = {}
         Obj.mFunction = {}
         Obj.mPressed = {}
         Obj.mPressed = false
         Obj.mPadding = 5
-        Obj.mPositionToParent_3f = inPosition_3f
         local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + inDimension_3f.y - Obj.mPadding,
             inPosition_3f.z - 3)
         Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject)
-        if inParent then
-            Obj:SetParent(inParent)
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f, inString)
+        Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
+        local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + inDimension_3f.y - self.mPadding,
+            inPosition_3f.z - 3)
+        if inString then
+            self.mTextObject:Update(Position, nil, inString)
         end
-        -- "TextButtonObject Construction Finished")
+    end,
+    Event = function(self)
+        if ComTable[self.mAreaId].mComponentObject.mFocus_b then
+            self:Press()
+            -- self.mTextObject:Update(ComTable[self.mAreaId].mPosition_3f)
+            self.mPressed = true
+        else
+            self:Update(self.mPosition_3f, self.mDimension_3f)
+            self.mPressed = false
+        end
+    end,
+    SetFunction = function(self, inFunction)
+        self.mFunction = inFunction
+    end
+}
+
+
+Com.ImageButtonObject = {
+    mPadding = 5,
+    mTextObject = nil,
+    mFunction = nil,
+    mPressed = false,
+    New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
+        -- "TextButtonObject")
+        local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
+        setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
+        setmetatable(Obj, self)
+        self.__index = self
+
+        Obj.mTextObject = {}
+        Obj.mPadding = {}
+        Obj.mFunction = {}
+        Obj.mPressed = {}
+        Obj.mPressed = false
+        Obj.mPadding = 5
+        local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + inDimension_3f.y - Obj.mPadding,
+            inPosition_3f.z - 3)
+        Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject)
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inString)
