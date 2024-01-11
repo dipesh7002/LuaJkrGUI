@@ -229,8 +229,6 @@ Com.ImageLabelObject = {
     end,
     PaintByComputeSingleTime = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
         local ip = inPainterWithPainterParameters
-        local compute_func = function ()
-        end
         Com.NewComponent_SingleTimeDispatch()
         ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
             function ()
@@ -240,6 +238,12 @@ Com.ImageLabelObject = {
             end
         )
     end,
+    PaintByComputeDispatch = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
+        local ip = inPainterWithPainterParameters
+        inPainterWithRegisteredImage:BindImage()
+        ip.painter:BindPainter()
+        ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage) 
+    end
 }
 
 Com.TextButtonObject = {
