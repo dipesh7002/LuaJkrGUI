@@ -309,7 +309,7 @@ Com.PopupMenu = {
         self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f,
             inInfo)
         buttonpos = vec3(inPosition_3f.x + inDimension_3f.y / 2, inPosition_3f.y + 25 * 2.5, inPosition_3f.z - 4)
-        local text_dimension = self.mFontObject:GetDimension("Cancel") 
+        local text_dimension = self.mFontObject:GetDimension("Cancel")
         buttondimen = vec3(text_dimension.x + 10, text_dimension.y + 10, 1)
         self.mButton:Update(buttonpos, buttondimen, "Cancel")
     end
@@ -336,8 +336,9 @@ Com.ImgRect = {
         self.__index = self
         Com.NewComponent_Draw()
 
-        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png", vec2(inDimension_3f.x, inDimension_3f.y))
-        
+        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png",
+            vec2(inDimension_3f.x, inDimension_3f.y))
+
         ComTable_Draw[com_dri].mFillColor = vec4(1, 0, 0, 1)
         ComTable_Draw[com_dri].mComponentObject.mFocusOnHover_b = false
         -- com_i)
@@ -355,29 +356,69 @@ Com.ImgRect = {
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
     end
 }
-Com.HorizontalLayout = { 
-    New = function (self, inPosition, inDimension,...)
+
+
+--[[Com.ComboBox = {
+    mPosition_3f = nil,
+    mMainArea = nil,
+    mCellDimension_3f = nil,
+    mButtons1 = nil,
+    mButtons2 = nil,
+    mMaxNoOfEntries = nil,
+    mHeading = nil,
+    New = function(self, inCurrentComboContent, inPosition_3f, inCellDimension_3f, inFontObject, inNoOfEntries,
+                   inMaxStringLength,
+                   inDescriptionString)
         local Obj = {
-            mPosition = inPosition,
-            mDimension = inDimension,
+            mPosition_3f = inPosition_3f,
+            mCellDimension_3f = inCellDimension_3f,
+            mMaxNoOfEntries = inNoOfEntries,
+            mButtons = {},
+            mCurrentComboContent = inCurrentComboContent,
+            mFontObject = inFontObject,
         }
-        setmetatable(Obj,self)
+        setmetatable(Obj, self)
         self.__index = self
-        local TableObject = table.pack(...)
-        if inDimension == nil then
-          for index, value in ipairs(TableObject) do
-            inDimension = value.mDimension_3f
-            local inText = value.mText
-            value:Update(inPosition,inDimension, inText)
-            inPosition.x = inPosition.x + inDimension.x
-          end
-        else
-          for index, value in ipairs(TableObject) do
-            local inText = value.mText
-            value:Update(inPosition, inDimension, inText)
-            inPosition.x = inPosition.x + inDimension.x
-          end
+        local length_string = inFontObject:GetDimension(inDescriptionString)
+        local HeadPos = vec3(inPosition_3f.x - length_string.x,
+            inPosition_3f.y + inCellDimension_3f.y / 2 + length_string.y / 2, 1)
+        Obj.mHeading = Com.TextLabelObject:New(inDescriptionString, HeadPos, inFontObject)
+        Obj.mHeading:Update(HeadPos, inDescriptionString)
+        local MainAreaDimen = vec3(inCellDimension_3f.x + 20, inCellDimension_3f.y, 1)
+        Obj.mMainArea = Com.AreaObject:New(inPosition_3f, MainAreaDimen)
+        Obj.Buttons1 = Com.TextButtonObject:New(string.rep(" ", inMaxStringLength), inFontObject, inPosition_3f,
+            inCellDimension_3f)
+        local Button2Pos = vec3(inPosition_3f.x + inCellDimension_3f.x, inPosition_3f.y, inPosition_3f.z - 3)
+        local Button2Dimen = vec3(20, inCellDimension_3f.y, 1)
+        Obj.Buttons2 = Com.TextButtonObject:New("v", inFontObject, Button2Pos, Button2Dimen)
+        local button_dimension = vec3(0, 0, 0)
+        for i = 1, inNoOfEntries, 1 do
+            local pos = vec3(inPosition_3f.x, inPosition_3f.y - inCellDimension_3f.y * (i - 1), inPosition_3f.z - 3)
+            Obj.mButtons[i] = Com.TextButtonObject:New(string.rep(" ", inMaxStringLength), inFontObject, pos,
+                button_dimension)
+            Obj.mButtons[i]:TurnOffShadow()
+            i = i + 1
         end
         return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        local inNoOfEntries = #self.mCurrentComboContent
+        for i = 1, inNoOfEntries, 1 do
+            local pos = vec3(inPosition_3f.x, inPosition_3f.y + inDimension_3f.y * i,
+                inPosition_3f.z - 3)
+            self.mButtons[i]:Update(pos, inDimension_3f, self.mCurrentComboContent[i].name)
+            self.mButtons[i]:TurnOffShadow()
+            i = i + 1
+        end
+    end,
+    Event = function(self)
+        self.Buttons2:Event()
+        if self.Buttons2.mPressed  then
+            self:Update(self.mPosition_3f, self.mCellDimension_3f)
+        end
+        if E.is_left_button_pressed() and self.Buttons2.mPressed == false then
+            self:Update(vec3(0, 0, self.mPosition_3f.z), vec3(0, 0, 0))
+        end
     end
-}-- yaha maile arko branch banako thiye
+}]]--
+

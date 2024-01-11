@@ -2,6 +2,7 @@ Com = {}
 ComTable_Draw = {}
 ComTable_Dispatch = {}
 ComTable_SingleTimeDispatch = {}
+flag = 0
 
 com_dri = 0
 Com.NewComponent_Draw = function()
@@ -177,7 +178,8 @@ Com.ImageLabelObject = {
         setmetatable(Obj, self)
         Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(0, 0, inFileName)
         Com.NewComponent_Draw()
-        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj.mImageObjectAbs)
+        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj
+        .mImageObjectAbs)
         return Obj
     end,
     NewEmpty = function(self, inWidth, inHeight, inPosition_3f, inDimension_3f)
@@ -187,7 +189,8 @@ Com.ImageLabelObject = {
         Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(inWidth, inHeight, nil)
         print(Obj.mImageObjectAbs)
         Com.NewComponent_Draw()
-        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj.mImageObjectAbs)
+        ComTable_Draw[com_dri] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj
+        .mImageObjectAbs)
         Obj.mShapeId = com_dri
         return Obj
     end,
@@ -210,9 +213,9 @@ Com.ImageLabelObject = {
     end,
     PaintByComputeSingleTime = function(self, inPainterWithPainterParameters)
         local ip = inPainterWithPainterParameters
-        local compute_func = function ()
+        local compute_func = function()
             print("here")
-            ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs) 
+            ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs)
         end
         Com.NewComponent_SingleTimeDispatch()
         ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
@@ -251,12 +254,12 @@ Com.TextButtonObject = {
         -- "TextButtonObject Construction Finished")
         return Obj
     end,
-    Update = function(self, inPosition_3f, inDimension_3f)
+    Update = function(self, inPosition_3f, inDimension_3f, inString)
         Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
         local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + inDimension_3f.y - self.mPadding,
             inPosition_3f.z - 3)
-        if self.mText then
-            self.mTextObject:Update(Position, self.mText)
+        if inString then
+            self.mTextObject:Update(Position, nil, inString)
         end
     end,
     Event = function(self)
