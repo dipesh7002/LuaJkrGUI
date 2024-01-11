@@ -357,9 +357,12 @@ Com.ImgRect = {
 Com.HLayout = {
     mComponents = nil,
     mRatioTable = nil,
+    mPadding = nil,
 
-    New = function(self)
-        local Obj = {}
+    New = function(self, inPadding)
+        local Obj = {
+            mPadding = inPadding
+        }
         setmetatable(Obj, self)
         self.__index = self
 
@@ -372,7 +375,7 @@ Com.HLayout = {
     Update = function(self, inPosition_3f, inDimension_3f)
         local position = inPosition_3f
         local dimension = inDimension_3f
-        local paddingX = 5
+        local paddingX = self.mPadding
 
         if self.mRatioTable then
             for index, value in ipairs(self.mComponents) do
@@ -387,9 +390,12 @@ Com.HLayout = {
 Com.VLayout = {
     mComponents = nil,
     mRatioTable = nil,
+    mPadding = nil,
 
-    New = function(self)
-        local Obj = {}
+    New = function(self, inPadding)
+        local Obj = {
+            mPadding = inPadding
+        }
         setmetatable(Obj, self)
         self.__index = self
 
@@ -402,7 +408,7 @@ Com.VLayout = {
     Update = function(self, inPosition_3f, inDimension_3f)
         local position = inPosition_3f
         local dimension = inDimension_3f
-        local paddingY = 5
+        local paddingY = self.mPadding
 
         if self.mRatioTable then
             for index, value in ipairs(self.mComponents) do
