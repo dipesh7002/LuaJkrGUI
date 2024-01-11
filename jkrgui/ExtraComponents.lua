@@ -309,8 +309,7 @@ Com.PopupMenu = {
         self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f,
             inInfo)
         buttonpos = vec3(inPosition_3f.x + inDimension_3f.y / 2, inPosition_3f.y + 25 * 2.5, inPosition_3f.z - 4)
-        local text_dimension = self.mFontObject:GetDimension("Cancel") 
-        buttondimen = vec3(text_dimension.x + 10, text_dimension.y + 10, 1)
+        buttondimen = vec3(60, 25, 1)
         self.mButton:Update(buttonpos, buttondimen, "Cancel")
     end
 }
@@ -354,5 +353,3 @@ Com.ImgRect = {
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
     end
 }
-
-
