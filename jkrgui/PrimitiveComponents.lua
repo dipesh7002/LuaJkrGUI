@@ -194,9 +194,11 @@ Com.ImageLabelObject = {
     New = function (self, inFileName, inPosition_3f, inDimension_3f)
         local Obj = {}
         setmetatable(Obj, self)
+        self.__index = self
         Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(0, 0, inFileName)
         Com.NewComponent() 
         ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj.mImageObjectAbs)
+        self.mShapeId = com_i
         return Obj
     end,
     NewEmpty  = function (self, inWidth, inHeight, inPosition_3f, inDimension_3f)
@@ -220,9 +222,7 @@ Com.ImageLabelObject = {
         return Obj
     end,
     Update = function (self, inPosition_3f, inDimension_3f)
-        local dimen = vec2(inDimension_3f.x, inDimension_3f.y)
-        local gen = Generator(Shapes.rectangle, dimen)
-        S.Update(Int(self.mRectId), gen, inPosition_3f) 
+        ComTable[self.mShapeId]:Update(inPosition_3f, inDimension_3f)
     end,
     TintColor = function (self, inColor_4f)
         ComTable[self.mShapeId].mFillColor = inColor_4f

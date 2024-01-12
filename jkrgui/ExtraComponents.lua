@@ -353,3 +353,77 @@ Com.ImgRect = {
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
     end
 }
+Com.CheckButton = {
+    New = function(self, inTableOfString, inFontObject, inPadding)
+        local Obj = {
+            mTableOfString = inTableOfString,
+            mTableObjectForDescription = {},
+            mTableObjectForBox = {},
+            mPadding = inPadding,
+            RatioTable = {},
+            PositionForCheckbox = nil,
+        }
+
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.NoOfObject = #inTableOfString
+        for index, value in ipairs(inTableOfString) do
+            Obj.mTableObjectForDescription[index] = Com.TextButtonObject:New(inTableOfString[index].name,
+                inFontObject, vec3(0, 0, 80), vec3(0, 0, 0))
+            Obj.mTableObjectForBox[index] = Com.TextButtonObject:New(string.rep(" ", 10), inFontObject,
+                vec3(0, 0, 80), vec3(0, 0, 0))
+            Obj.RatioTable[index] = 1 / Obj.NoOfObject
+        end
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        local Position = inPosition_3f
+        local Dimension = inDimension_3f
+        VerticalLayoutForDescription = Com.VLayout:New(self.mPadding)
+        VerticalLayoutForDescription:AddComponents(self.mTableObjectForDescription, self.RatioTable)
+        VerticalLayoutForDescription:Update(Position, Dimension)
+        local DimensionForCheckBox = vec3(inDimension_3f.y / self.NoOfObject, inDimension_3f.y, inDimension_3f.z)
+        local PositionForCheckbox = vec3(inPosition_3f.x - DimensionForCheckBox.x + self.mPadding, inPosition_3f.y,
+            inPosition_3f.z)
+        VerticalLayoutForCheckBox = Com.VLayout:New(self.mPadding)
+        VerticalLayoutForCheckBox:AddComponents(self.mTableObjectForBox, self.RatioTable)
+        VerticalLayoutForCheckBox:Update(PositionForCheckbox, DimensionForCheckBox)
+    end
+}
+Com.ToggleButton = {
+    New = function(self, inPosition_3f, inDimension_3f)
+        local Obj = {}
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mTableForObject = {}
+        Obj.mPosition_3f = inPosition_3f
+        Obj.mDimension_3f = inDimension_3f
+        Obj.mFirst = true
+        Obj.mTableForObject[1] = Com.ImageLabelObject:New(
+            "materialicons/toggle/toggle_on/materialiconsoutlined/48dp/2x/outline_toggle_on_black_48dp.png",
+            inPosition_3f,
+            inDimension_3f)
+        Obj.mTableForObject[2] = Com.ImageLabelObject:New(
+            "materialicons/toggle/toggle_off/materialiconsoutlined/48dp/2x/outline_toggle_off_black_48dp.png",
+            vec3(0, 0, 0),
+            vec3(0, 0, 0))
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        if self.mFirst then
+            self.mTableForObject[1]:Update(inPosition_3f, inDimension_3f)
+            self.mTableForObject[2]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+        else
+            self.mTableForObject[2]:Update(inPosition_3f, inDimension_3f)
+            self.mTableForObject[1]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+        end
+    end,
+    Event = function(self)
+        local MousePos = E.get_mouse_pos()
+        if E.is_left_button_pressed() and MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
+            self.mFirst = not self.mFirst
+            print("pressed")
+            self:Update(self.mPosition_3f,self.mDimension_3f)
+        end
+    end
+}
