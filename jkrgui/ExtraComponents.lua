@@ -407,6 +407,7 @@ Com.ToggleButton = {
             "materialicons/toggle/toggle_off/materialiconsoutlined/48dp/2x/outline_toggle_off_black_48dp.png",
             vec3(0, 0, 0),
             vec3(0, 0, 0))
+        Obj.mTableForObject[1]:TintColor(vec4(1, 0, 0, 1))
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
@@ -420,10 +421,18 @@ Com.ToggleButton = {
     end,
     Event = function(self)
         local MousePos = E.get_mouse_pos()
-        if E.is_left_button_pressed() and MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
-            self.mFirst = not self.mFirst
-            print("pressed")
-            self:Update(self.mPosition_3f,self.mDimension_3f)
+        if MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
+            self.mTableForObject[1]:TintColor(vec4(0, 1, 0, 1))
+            self.mTableForObject[2]:TintColor(vec4(0,1,0,1))
+            
+            if E.is_left_button_pressed() then
+                self.mFirst = not self.mFirst
+                print("pressed")
+                self:Update(self.mPosition_3f, self.mDimension_3f)
+            end
+        else
+            self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
+            self.mTableForObject[2]:TintColor(vec4(0,0,1,1))
         end
     end
 }
