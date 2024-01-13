@@ -123,7 +123,9 @@ Com.WindowLayout = {
         ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function ()
             local offset = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
             local extent = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
-            Jkr.set_scissor(offset, extent)
+            if offset.x > 0 and offset.y > 0 then
+                Jkr.set_scissor(offset, extent)
+            end
         end)
     end,
     End = function(self)
