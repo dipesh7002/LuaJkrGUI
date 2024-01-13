@@ -259,7 +259,7 @@ Com.TextButtonObject = {
         setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
         setmetatable(Obj, self)
         self.__index = self
-
+        Obj.mText = inText
         Obj.mTextObject = {}
         Obj.mPadding = {}
         Obj.mFunction = {}

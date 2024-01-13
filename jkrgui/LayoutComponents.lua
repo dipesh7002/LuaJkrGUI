@@ -43,7 +43,6 @@ Com.VLayout = {
         }
         setmetatable(Obj, self)
         self.__index = self
-
         return Obj
     end,
     AddComponents = function(self, inComponentListTable, inRatioTable)

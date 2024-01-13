@@ -354,41 +354,70 @@ Com.ImgRect = {
     end
 }
 Com.CheckButton = {
-    New = function(self, inTableOfString, inFontObject, inPadding)
+    New = function(self, inTableOfString, inFontObject, inPadding, inLengthCellDimension)
         local Obj = {
             mTableOfString = inTableOfString,
             mTableObjectForDescription = {},
-            mTableObjectForBox = {},
+            mButtonChecked = {},
+            mButtonUnchecked = {},
             mPadding = inPadding,
-            RatioTable = {},
-            PositionForCheckbox = nil,
+            mLengthCellDimension = inLengthCellDimension,
+            mFirst = true,
+            mIndex = nil,
         }
 
         setmetatable(Obj, self)
         self.__index = self
+        Obj.mPosition_3f = {}
+        Obj.mDimension_3f = {}
         Obj.NoOfObject = #inTableOfString
         for index, value in ipairs(inTableOfString) do
             Obj.mTableObjectForDescription[index] = Com.TextButtonObject:New(inTableOfString[index].name,
                 inFontObject, vec3(0, 0, 80), vec3(0, 0, 0))
-            Obj.mTableObjectForBox[index] = Com.TextButtonObject:New(string.rep(" ", 10), inFontObject,
-                vec3(0, 0, 80), vec3(0, 0, 0))
-            Obj.RatioTable[index] = 1 / Obj.NoOfObject
+            Obj.mButtonChecked[index] = Com.ImageLabelObject:New("icons_material/radio_button_checked/baseline-2x.png",
+                vec3(0, 0, 0), vec3(0, 0, 0))
+            Obj.mButtonChecked[index]:TintColor(vec4(0, 0, 1, 1))
+            Obj.mButtonUnchecked[index] = Com.ImageLabelObject:New(
+                "icons_material/radio_button_unchecked/baseline-2x.png",
+                vec3(0, 0, 0), vec3(0, 0, 0))
+            Obj.mButtonUnchecked[index]:TintColor(vec4(0, 0, 1, 1))
         end
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
-        local Position = inPosition_3f
-        local Dimension = inDimension_3f
-        VerticalLayoutForDescription = Com.VLayout:New(self.mPadding)
-        VerticalLayoutForDescription:AddComponents(self.mTableObjectForDescription, self.RatioTable)
-        VerticalLayoutForDescription:Update(Position, Dimension)
-        local DimensionForCheckBox = vec3(inDimension_3f.y / self.NoOfObject, inDimension_3f.y, inDimension_3f.z)
-        local PositionForCheckbox = vec3(inPosition_3f.x - DimensionForCheckBox.x + self.mPadding, inPosition_3f.y,
-            inPosition_3f.z)
-        VerticalLayoutForCheckBox = Com.VLayout:New(self.mPadding)
-        VerticalLayoutForCheckBox:AddComponents(self.mTableObjectForBox, self.RatioTable)
-        VerticalLayoutForCheckBox:Update(PositionForCheckbox, DimensionForCheckBox)
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        for i = 1, self.NoOfObject, 1 do
+            if self.mIndex == i or self.mIndex == nil then
+                if self.mFirst then
+                    self.mButtonUnchecked[i]:Update(vec3(position.x, position.y, position.z), inDimension_3f)
+                    self.mButtonChecked[i]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+                else
+                    self.mButtonChecked[i]:Update(vec3(position.x, position.y, position.z), inDimension_3f)
+                    self.mButtonUnchecked[i]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+                end
+            end
+            self.mPosition_3f[i] = vec3(position.x, position.y, position.z)
+            self.mDimension_3f[i] = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+            position.y = position.y + inDimension_3f.y + self.mPadding
+        end
+        for i = 1, self.NoOfObject, 1 do
+            self.mTableObjectForDescription[i]:Update(vec3(self.mPosition_3f[i].x+inDimension_3f.x+self.mPadding,self.mPosition_3f[i].y,self.mPosition_3f[i].z),vec3(self.mLengthCellDimension,inDimension_3f.y,inDimension_3f.z),self.mTableObjectForDescription[i].mText) 
+        end
+    end,
+    Event = function(self)
+        local MousePos = E.get_mouse_pos()
+        for i = 1, self.NoOfObject, 1 do
+            if E.is_left_button_pressed() then
+                
+                if MousePos.x > self.mPosition_3f[i].x and MousePos.x < (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
+                    self.mFirst = not self.mFirst
+                    self.mIndex = i
+                    self:Update(self.mPosition_3f[1], self.mDimension_3f[1]) --first button ko position dinuprxaw
+                end
+            end
+        end
     end
+
 }
 Com.ToggleButton = {
     New = function(self, inPosition_3f, inDimension_3f)
@@ -400,11 +429,11 @@ Com.ToggleButton = {
         Obj.mDimension_3f = inDimension_3f
         Obj.mFirst = true
         Obj.mTableForObject[1] = Com.ImageLabelObject:New(
-            "materialicons/toggle/toggle_on/materialiconsoutlined/48dp/2x/outline_toggle_on_black_48dp.png",
+            "icons_material/toggle_on/baseline-2x.png",
             inPosition_3f,
             inDimension_3f)
         Obj.mTableForObject[2] = Com.ImageLabelObject:New(
-            "materialicons/toggle/toggle_off/materialiconsoutlined/48dp/2x/outline_toggle_off_black_48dp.png",
+            "icons_material/toggle_off/baseline-2x.png",
             vec3(0, 0, 0),
             vec3(0, 0, 0))
         Obj.mTableForObject[1]:TintColor(vec4(1, 0, 0, 1))
@@ -414,25 +443,21 @@ Com.ToggleButton = {
         if self.mFirst then
             self.mTableForObject[1]:Update(inPosition_3f, inDimension_3f)
             self.mTableForObject[2]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+            self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
         else
             self.mTableForObject[2]:Update(inPosition_3f, inDimension_3f)
             self.mTableForObject[1]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+            self.mTableForObject[2]:TintColor(vec4(0, 0, 0, 0.5))
         end
     end,
     Event = function(self)
         local MousePos = E.get_mouse_pos()
-        if MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
-            self.mTableForObject[1]:TintColor(vec4(0, 1, 0, 1))
-            self.mTableForObject[2]:TintColor(vec4(0,1,0,1))
-            
-            if E.is_left_button_pressed() then
-                self.mFirst = not self.mFirst
-                print("pressed")
-                self:Update(self.mPosition_3f, self.mDimension_3f)
-            end
+        if E.is_left_button_pressed() and MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
+            self.mFirst = not self.mFirst
+            self:Update(self.mPosition_3f, self.mDimension_3f)
         else
             self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
-            self.mTableForObject[2]:TintColor(vec4(0,0,1,1))
+            self.mTableForObject[2]:TintColor(vec4(0, 0, 0, 0.5))
         end
     end
 }
