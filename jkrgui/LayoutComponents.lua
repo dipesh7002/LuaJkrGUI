@@ -66,6 +66,37 @@ Com.VLayout = {
     end
 }
 
+
+--[[
+    Yo Chae WindowLayout ho,
+    Esko euta CentralComponent Object hunxa,
+    tyo mComponentObject vaneko chae Jkr.ComponentObject ho, gaera hernu tyaa k xa vanera
+    mainly, tei event ko laagi ho mouse maathi aauda focus garne na garne, left button thichda focus hune na hune
+    ani Z value anusaar kun chae Component(Jkr.ComponentObject) wala lai select garne jasto kura haru handle garxa 
+
+    ani yo use esari garne ho
+
+    WindowLayout = Com.WindowLayout:New(..blah..blah) -- HitArea vaneko chae tyo area jaa thichda mouse lai respond garxa window le
+    WindowLayout:Start() -- yo Start le scissor set garxa (scissor arthat kaichi, matlab tyo area ma matra draw hunxa, tyo area vanda baahira position xa vane draw hunna)
+        -- aba yaa naya component  banaune Jun Window vitra halnu parne xa
+        WindowLayout:SetCentralComponent(..componentname..)
+    WindowLayout:End()
+
+    Code Sample ---------------------------------------------------------------------------------------------------------------------------
+                    ImagePreload = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material\\4k\\outline.png")
+
+                    Window = Com.WindowLayout:New(vec3(400, 400, 80), vec3(100, 100, 1), vec2(100, 10))
+                    Window:Start()
+                            ImageLLable = Com.ImageLabelObject:NewExisting(ImagePreload, vec3(100, 100, 80), vec3(20, 20, 1))
+                            ImageLLable:TintColor(vec4(1, 0, 0, 1))
+                            ImageLLable2 = Com.ImageLabelObject:NewExisting(ImagePreload, vec3(100, 100, 80), vec3(20, 20, 1))
+                            ImageLLable2:TintColor(vec4(0, 0, 0, 1))
+                            VLayout = Com.VLayout:New(0)
+                            VLayout:AddComponents({ImageLLable2, ImageLLable}, {0.1, 0.9})
+                            Window:SetCentralComponent(VLayout)
+                    Window:End()
+    ---------------------------------------------------------------------------------------------------------------------------------------
+]]
 Com.WindowLayout = {
     mHitArea_2f = nil,
     mComponentObject = nil, -- yo hamro wala components haina, Jkr.ComponentObject wala component ho, esko naam fernu parlaa jasto xa TODO,
@@ -114,7 +145,7 @@ Com.WindowLayout = {
                     self.mPosition_3f.x = self.mPosition_3f.x + mpos.x
                     self.mPosition_3f.y = self.mPosition_3f.y + mpos.y
                     self.mCentralComponent:Update(self.mPosition_3f, self.mDimension_3f)
-                    self.mComponentObject:Update(self.mPosition_3f, self.mDimension_3f)
+                    self.mComponentObject:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
                     self.mMoving = true
                 else
                     self.mMoving = false
