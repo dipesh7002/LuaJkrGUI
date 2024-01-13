@@ -353,3 +353,62 @@ Com.ImgRect = {
         S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
     end
 }
+
+Com.ToggleButton = {
+    New = function(self, inPosition_3f, inDimension_3f)
+        local Obj = {}
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mTableForObject = {}
+        Obj.mPosition_3f = inPosition_3f
+        Obj.mDimension_3f = inDimension_3f
+        Obj.mFirst = true
+        Obj.mTableForObject[1] = Com.ImageLabelObject:New(
+            "icons_material/toggle_on/baseline-2x.png",
+            inPosition_3f,
+            inDimension_3f)
+        Obj.mTableForObject[2] = Com.ImageLabelObject:New(
+            "icons_material/toggle_off/baseline-2x.png",
+            vec3(0, 0, 0),
+            vec3(0, 0, 0))
+        Obj.mTableForObject[1]:TintColor(vec4(1, 0, 0, 1))
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        if self.mFirst then
+            self.mTableForObject[1]:Update(inPosition_3f, inDimension_3f)
+            self.mTableForObject[2]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+            self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
+        else
+            self.mTableForObject[2]:Update(inPosition_3f, inDimension_3f)
+            self.mTableForObject[1]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+            self.mTableForObject[2]:TintColor(vec4(0, 0, 0, 0.5))
+        end
+    end,
+    Event = function(self)
+        local MousePos = E.get_mouse_pos()
+        if E.is_left_button_pressed() and MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
+            self.mFirst = not self.mFirst
+            self:Update(self.mPosition_3f, self.mDimension_3f)
+        else
+            self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
+            self.mTableForObject[2]:TintColor(vec4(0, 0, 0, 0.5))
+        end
+    end
+}
+Com.ComboBox = {
+    New = function(self, inComboContent)
+        local Obj = {
+
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+
+    end,
+    Event = function(self)
+
+    end
+}
