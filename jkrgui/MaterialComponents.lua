@@ -1,6 +1,9 @@
 require "jkrgui.PrimitiveComponents"
 require "jkrgui.ExtraComponents"
 
+local MaterialFont = Jkr.FontObject:New("font.ttf", 4)
+
+
 local CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
     "icons_material/radio_button_checked/baseline-2x.png")
 local UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
@@ -63,7 +66,6 @@ Com.CheckButtonList = {
         local MousePos = E.get_mouse_pos()
         for i = 1, inNoOfEntries, 1 do
             if E.is_left_button_pressed() then
-
                 if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
                     (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
                     MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
@@ -75,4 +77,41 @@ Com.CheckButtonList = {
         end
     end
 
+}
+
+Com.MaterialWindow = {
+    mTitleBar = nil,
+    mVerticalLayout = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
+    mHitArea_2f = nil,
+    mTitleText = nil,
+    New = function(self, inPosition_3f, inDimension_3f, inHitArea_2f, inTitleText)
+        local Obj = Com.WindowLayout:New(inPosition_3f, inDimension_3f, inHitArea_2f)
+        setmetatable(self, Com.WindowLayout) -- Inherits WindowLayout
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mPosition_3f = inPosition_3f
+        Obj.mDimension_3f = inDimension_3f
+
+        Obj.mVerticalLayout = Com.VLayout:New(0)
+        Obj.mTitleText = inTitleText
+
+        return Obj
+    end,
+    SetCentralComponent = function(self, inComponent)
+        self.mTitleBar = Com.TextButtonObject:New(self.mTitleText, MaterialFont, self.mPosition_3f,
+            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        self.mVerticalLayout:AddComponents({ self.mTitleBar, inComponent })
+        local titleText = self.mTitleText
+        local windowobj = self
+        
+        local OverridenVLayoutUpdate = function(self, inPosition_3f, inDimension_3f)
+            self.mComponents[1]:Update(inPosition_3f, vec3(inDimension_3f.x, windowobj.mHitArea_2f.y, 1), titleText)
+            self.mComponents[2]:Update(vec3(inPosition_3f.x, inPosition_3f.y + windowobj.mHitArea_2f.y, inPosition_3f.z),
+                vec3(inDimension_3f.x, inDimension_3f.y - windowobj.mHitArea_2f.y, 1))
+        end
+        self.mVerticalLayout.Update = OverridenVLayoutUpdate
+        Com.WindowLayout.SetCentralComponent(self, self.mVerticalLayout)
+    end 
 }
