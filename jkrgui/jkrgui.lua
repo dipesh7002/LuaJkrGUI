@@ -280,17 +280,11 @@ Jkr.Components.Abstract.ImageObject = {
 
 
 Jkr.Components.Static.ShapeObject = {
-        mScissorPosition_2f = nil,
-        mScissorDimension_2f = nil,
-        mComponentObject = nil,
         mShapeId = nil,
         mImageId = nil,
         mFillColor = nil,
         New = function(self, inPosition_3f, inDimension_3f, inImageObject)
                 local Obj = {
-                        mScissorPosition_2f = nil,
-                        mScissorDimension_2f = nil,
-                        mComponentObject = nil,
                         mShapeId = nil,
                         mImageId = nil,
                         mFillColor = nil
@@ -299,10 +293,10 @@ Jkr.Components.Static.ShapeObject = {
                 setmetatable(Obj, self)
                 self.__index = self
 
-                Obj.mComponentObject = Jkr.ComponentObject:New(inPosition_3f, inDimension_3f)
-                local Dimension = vec2(Obj.mComponentObject.mDimension_3f.x, Obj.mComponentObject.mDimension_3f.y)
+                -- Obj.mComponentObject = Jkr.ComponentObject:New(inPosition_3f, inDimension_3f)
+                local Dimension = vec2(inDimension_3f.x, inDimension_3f.y)
                 local rect_gen = Generator(Shapes.rectangle, Dimension)
-                Obj.mShapeId =  S.Add(rect_gen, Obj.mComponentObject.mPosition_3f)
+                Obj.mShapeId =  S.Add(rect_gen, inPosition_3f)
 
                 if inImageObject then
                         Obj.mImageId = inImageObject.mId
@@ -317,7 +311,6 @@ Jkr.Components.Static.ShapeObject = {
                local Dimension = vec2(inDimension_3f.x, inDimension_3f.y)
                local rect_gen = Generator(Shapes.rectangle, Dimension)
                S.Update(Int(self.mShapeId), rect_gen, inPosition_3f) 
-               self.mComponentObject:Update(inPosition_3f, inDimension_3f)
         end,
         Event = function(self)
                 self.mComponentObject:Event()

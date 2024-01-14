@@ -82,35 +82,30 @@ Com.CheckButtonList = {
 Com.MaterialWindow = {
     mTitleBar = nil,
     mVerticalLayout = nil,
-    mPosition_3f = nil,
-    mDimension_3f = nil,
-    mHitArea_2f = nil,
     mTitleText = nil,
     New = function(self, inPosition_3f, inDimension_3f, inHitArea_2f, inTitleText)
         local Obj = Com.WindowLayout:New(inPosition_3f, inDimension_3f, inHitArea_2f)
         setmetatable(self, Com.WindowLayout) -- Inherits WindowLayout
         setmetatable(Obj, self)
         self.__index = self
-        Obj.mPosition_3f = inPosition_3f
-        Obj.mDimension_3f = inDimension_3f
-
         Obj.mVerticalLayout = Com.VLayout:New(0)
         Obj.mTitleText = inTitleText
-
         return Obj
     end,
     SetCentralComponent = function(self, inComponent)
-        self.mTitleBar = Com.TextButtonObject:New(self.mTitleText, MaterialFont, self.mPosition_3f,
-            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        self.mTitleBar = Com.TextButtonObject:New(self.mTitleText, MaterialFont, self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+
         self.mVerticalLayout:AddComponents({ self.mTitleBar, inComponent })
         local titleText = self.mTitleText
         local windowobj = self
         
         local OverridenVLayoutUpdate = function(self, inPosition_3f, inDimension_3f)
+            print("kldjafl")
             self.mComponents[1]:Update(inPosition_3f, vec3(inDimension_3f.x, windowobj.mHitArea_2f.y, 1), titleText)
             self.mComponents[2]:Update(vec3(inPosition_3f.x, inPosition_3f.y + windowobj.mHitArea_2f.y, inPosition_3f.z),
                 vec3(inDimension_3f.x, inDimension_3f.y - windowobj.mHitArea_2f.y, 1))
         end
+        self.mVerticalLayout.Update = nil
         self.mVerticalLayout.Update = OverridenVLayoutUpdate
         Com.WindowLayout.SetCentralComponent(self, self.mVerticalLayout)
     end 
