@@ -4,6 +4,8 @@ Com.HLayout = {
     mComponents = nil,
     mRatioTable = nil,
     mPadding = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
 
     New = function(self, inPadding)
         local Obj = {
@@ -19,8 +21,10 @@ Com.HLayout = {
         self.mRatioTable = inRatioTable
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
-        local position = inPosition_3f
-        local dimension = inDimension_3f
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
         local paddingX = self.mPadding
 
         if self.mRatioTable then
@@ -31,6 +35,16 @@ Com.HLayout = {
                 position.x = position.x + dimension.x * self.mRatioTable[index] + paddingX
             end
         end
+    end,
+    GetComponentPosition = function(self)
+        local position = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z)
+        local dimension = vec3(self.mDimension_3f.x, self.mDimension_3f.y, self.mDimension_3f.z)
+        local ComponentsPosition = {}
+        for index, value in ipairs(self.mComponents) do
+            ComponentsPosition[index] = vec3(position.x, position.y, position.z)
+            position.x = position.x + dimension.x * self.mRatioTable[index] + self.mPadding
+        end
+        return ComponentsPosition
     end
 }
 
@@ -38,6 +52,8 @@ Com.VLayout = {
     mComponents = nil,
     mRatioTable = nil,
     mPadding = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
 
     New = function(self, inPadding)
         local Obj = {
@@ -52,9 +68,11 @@ Com.VLayout = {
         self.mRatioTable = inRatioTable
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
-        local position = vec3(inPosition_3f.x ,inPosition_3f.y, inPosition_3f.z)
-        local dimension = vec3(inDimension_3f.x,inDimension_3f.y,inDimension_3f.z)
-        local paddingY = self.mPadding 
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        local paddingY = self.mPadding
         if self.mRatioTable then
             for index, value in ipairs(self.mComponents) do
                 value:Update(vec3(position.x, position.y, position.z),
@@ -63,6 +81,16 @@ Com.VLayout = {
                 position.y = position.y + dimension.y * self.mRatioTable[index] + paddingY
             end
         end
+    end,
+    GetComponentPosition = function(self)
+        local position = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z)
+        local dimension = vec3(self.mDimension_3f.x, self.mDimension_3f.y, self.mDimension_3f.z)
+        local ComponentsPosition = {}
+        for index, value in ipairs(self.mComponents) do
+            ComponentsPosition[index] = vec3(position.x, position.y, position.z)
+            position.y = position.y + dimension.y * self.mRatioTable[index] + self.mPadding
+        end
+        return ComponentsPosition
     end
 }
 
@@ -72,7 +100,7 @@ Com.VLayout = {
     Esko euta CentralComponent Object hunxa,
     tyo mComponentObject vaneko chae Jkr.ComponentObject ho, gaera hernu tyaa k xa vanera
     mainly, tei event ko laagi ho mouse maathi aauda focus garne na garne, left button thichda focus hune na hune
-    ani Z value anusaar kun chae Component(Jkr.ComponentObject) wala lai select garne jasto kura haru handle garxa 
+    ani Z value anusaar kun chae Component(Jkr.ComponentObject) wala lai select garne jasto kura haru handle garxa
 
     ani yo use esari garne ho
 
@@ -100,7 +128,7 @@ Com.VLayout = {
 Com.WindowLayout = {
     mHitArea_2f = nil,
     mComponentObject = nil, -- yo hamro wala components haina, Jkr.ComponentObject wala component ho, esko naam fernu parlaa jasto xa TODO,
-                            -- maintainence ko bela garnu parxa
+    -- maintainence ko bela garnu parxa
     mCentralComponent = nil,
     mPosition_3f = nil,
     mDimension_3f = nil,
@@ -120,7 +148,7 @@ Com.WindowLayout = {
     Start = function(self)
         Com.NewComponent()
         local i = com_i
-        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function ()
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
             local offset = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
             local extent = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
             if offset.x > 0 and offset.y > 0 then
@@ -131,7 +159,7 @@ Com.WindowLayout = {
     End = function(self)
         Com.NewComponent()
         local i = com_i
-        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function ()
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
             Jkr.reset_scissor()
         end)
     end,
@@ -153,7 +181,7 @@ Com.WindowLayout = {
                     self.mMoving = false
                 end
             end
-         )
+        )
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mCentralComponent:Update(inPosition_3f, inDimension_3f)

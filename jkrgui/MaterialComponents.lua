@@ -5,6 +5,8 @@ local CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
     "icons_material/radio_button_checked/baseline-2x.png")
 local UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
     "icons_material/radio_button_unchecked/baseline-2x.png")
+local DropDown = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/arrow_drop_down/baseline-2x.png")
+local DropUp = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/arrow_drop_up/baseline-2x.png")
 
 Com.CheckButtonList = {
     New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension, inMaxStringLength)
@@ -63,7 +65,6 @@ Com.CheckButtonList = {
         local MousePos = E.get_mouse_pos()
         for i = 1, inNoOfEntries, 1 do
             if E.is_left_button_pressed() then
-
                 if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
                     (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
                     MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
@@ -75,4 +76,140 @@ Com.CheckButtonList = {
         end
     end
 
+}
+--[[ yesma chai user le new function ( font, maximumentries kati halnu xa, kati max string length, z ko value) use greraw
+ combo box ko object bnauna sakxa
+ update grna ko (position of first cell, ani dimension of that cell, table of options jun chai hru select graunu xa, first cell ma agadi dekh kun option choose hunu prxa ki khali rakhnu prxaw, baksa ko agadi k description lekhne ko string)
+ even ma tyo object lai call gresi chaluna sakinxa
+ feature ko kura grda normal jsto xa bahira click grda bnda hune aru kura afai use grraw herda hunxa
+ -----------------------------------------------------------------------------------------------------
+ Top of MaterialsComponent.lua
+For loading image
+           local DropDown = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/arrow_drop_down/baseline-2x.png")
+           local DropUp = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/arrow_drop_up/baseline-2x.png")
+
+ In load
+         Combo = Com.ComboBox:New(Font,10,20,80)
+         Combo:Update(vec3(100,100,5),vec3(150,25,2),{"raja","ram","rule"}," ","choose")
+In event
+       Combo:Event()
+-----------------------------------------------------------------------------------------------------------------]]
+Com.ComboBox = {
+    New = function(self, inFontObject, inMaxNoOfEntries, inMaxNoStringLength, inDepth)
+        local Obj = {
+            mFontObject = inFontObject,
+            mButtons = {},
+            mCurrentComboContent = {},
+            mDepth = inDepth,
+            mIndex = nil,
+            mPosition_3f = {},
+            mDimension_3f = {},
+            Flag = false,
+            ChoosenChoice = nil,
+            isDropDown = true,
+            mHeadString = nil,
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mHeading = Com.TextLabelObject:New(" ", vec3(0, 0, inDepth), inFontObject)
+        Obj.AreaForDropButton = Com.AreaObject:New(vec3(0, 0, inDepth), vec3(0, 0, 0))
+        Obj.DropDownButton = Com.ImageLabelObject:NewExisting(DropDown, vec3(0, 0, 0), vec3(0, 0, 0))
+        Obj.DropDownButton:TintColor(vec4(0, 0, 0, 1))
+        Obj.DropUpButton = Com.ImageLabelObject:NewExisting(DropUp, vec3(0, 0, 0), vec3(0, 0, 0))
+        Obj.DropUpButton:TintColor(vec4(0, 0, 0, 1))
+        for i = 1, inMaxNoOfEntries, 1 do
+            Obj.mButtons[i] = Com.TextButtonObject:New(string.rep(" ", inMaxNoStringLength), inFontObject,
+                vec3(0, 0, inDepth), vec3(0, 0, 0))
+        end
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inOneCellDimension_3f, inComboContent, inDefaultString, inHeadString)
+        self.mCurrentComboContent = inComboContent
+        self.mHeadString = inHeadString
+        local inNoOfEntries = #inComboContent
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, self.mDepth)
+        self.ChoosenChoice = inDefaultString
+        local dimen_string = self.mFontObject:GetDimension(inHeadString)
+        self.mHeading:Update(vec3(inPosition_3f.x - dimen_string.x - 5,
+            inPosition_3f.y + inOneCellDimension_3f.y / 2 + dimen_string.y / 2, self.mDepth), vec3(0, 0, 0), inHeadString)
+        for i = 1, inNoOfEntries + 1, 1 do
+            if i == 1 then
+                self.mButtons[i]:Update(position, inOneCellDimension_3f, inDefaultString)
+            else
+                if self.Flag then
+                    self.mButtons[i]:Update(position, inOneCellDimension_3f, inComboContent[i - 1])
+                else
+                    self.mButtons[i]:Update(vec3(0, 0, self.mDepth), vec3(0, 0, 0), " ")
+                end
+            end
+            self.mPosition_3f[i] = vec3(position.x, position.y, position.z)
+            self.mDimension_3f[i] = inOneCellDimension_3f
+            position.y = position.y + inOneCellDimension_3f.y
+        end
+        self.AreaForDropButton:Update(
+            vec3(self.mPosition_3f[1].x + self.mDimension_3f[1].x, self.mPosition_3f[1].y, self.mDepth),
+            vec3(self.mDimension_3f[1].y + 5, self.mDimension_3f[1].y, self.mDimension_3f[1].z))
+        if self.isDropDown then
+            self.DropDownButton:Update(
+                vec3(self.mPosition_3f[1].x + self.mDimension_3f[1].x, self.mPosition_3f[1].y, self.mDepth - 5),
+                vec3(self.mDimension_3f[1].y + 5, self.mDimension_3f[1].y, self.mDimension_3f[1].z))
+            self.DropUpButton:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+        else
+            self.DropUpButton:Update(
+                vec3(self.mPosition_3f[1].x + self.mDimension_3f[1].x, self.mPosition_3f[1].y, self.mDepth - 5),
+                vec3(self.mDimension_3f[1].y + 5, self.mDimension_3f[1].y, self.mDimension_3f[1].z))
+            self.DropDownButton:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+        end
+    end,
+    Event = function(self)
+        local inNoOfEntries = #self.mCurrentComboContent
+        local MousePos = E.get_mouse_pos()
+
+        if E.is_left_button_pressed() then
+            for i = 2, inNoOfEntries + 1, 1 do
+                if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
+                    (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
+                    MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
+                    self.ChoosenChoice = self.mCurrentComboContent[i - 1]
+                    self:Update(self.mPosition_3f[1], self.mDimension_3f[1], self.mCurrentComboContent,
+                        self.ChoosenChoice, self.mHeadString)
+                end
+            end
+            if not (MousePos.x > self.mPosition_3f[1].x and MousePos.x <
+                    (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.y > self.mPosition_3f[1].y and
+                    MousePos.y < (self.mPosition_3f[inNoOfEntries + 1].y + self.mDimension_3f[1].y)) then
+                if MousePos.x > (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.x < (self.mPosition_3f[1].x + self.mDimension_3f[1].x + self.mDimension_3f[1].y + 5) and MousePos.y > self.mPosition_3f[1].y and
+                    MousePos.y < (self.mPosition_3f[1].y + self.mDimension_3f[1].y) then
+                    self.isDropDown = not self.isDropDown
+                    if self.isDropDown then
+                        self.Flag = false
+
+                        self:Update(self.mPosition_3f[1], self.mDimension_3f[1], self.mCurrentComboContent,
+                            self.ChoosenChoice, self.mHeadString)
+                    else
+                        self.Flag = true
+                        self:Update(self.mPosition_3f[1], self.mDimension_3f[1], self.mCurrentComboContent,
+                            self.ChoosenChoice, self.mHeadString)
+                    end
+                else
+                    self.Flag = false
+                    self.isDropDown = true
+                    self:Update(self.mPosition_3f[1], self.mDimension_3f[1], self.mCurrentComboContent,
+                        self.ChoosenChoice, self.mHeadString)
+                end
+            end
+        end
+
+        --  else
+
+        --[[for i = 2, inNoOfEntries + 1 , 1 do
+            self.mButtons[i]:Event()
+            print("pressed1")
+            if self.mButtons[i].mPressed then
+                print("Pressed2")
+                self:Update(self.mPosition_3f,self.mDimension_3f,self.mCurrentComboContent[i])
+            end
+
+        end]]
+    end
 }
