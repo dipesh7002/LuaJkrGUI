@@ -396,19 +396,3 @@ Com.ToggleButton = {
         end
     end
 }
-Com.ComboBox = {
-    New = function(self, inComboContent)
-        local Obj = {
-
-        }
-        setmetatable(Obj, self)
-        self.__index = self
-        return Obj
-    end,
-    Update = function(self, inPosition_3f, inDimension_3f)
-
-    end,
-    Event = function(self)
-
-    end
-}

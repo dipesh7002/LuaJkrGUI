@@ -66,6 +66,7 @@ Com.CheckButtonList = {
         local MousePos = E.get_mouse_pos()
         for i = 1, inNoOfEntries, 1 do
             if E.is_left_button_pressed() then
+
                 if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
                     (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
                     MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
