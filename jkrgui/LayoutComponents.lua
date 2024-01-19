@@ -23,8 +23,8 @@ Com.HLayout = {
     Update = function(self, inPosition_3f, inDimension_3f)
         local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
         local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
-        self.mPosition_3f = inPosition_3f
-        self.mDimension_3f = inDimension_3f
+
+
         local paddingX = self.mPadding
 
         if self.mRatioTable then

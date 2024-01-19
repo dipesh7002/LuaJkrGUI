@@ -36,14 +36,12 @@ Com.AreaObject = {
         ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(ShadowPos, inDimension_3f, nil, nil)
         local sc = Theme.Colors.Shadow
         ComTable[com_i].mFillColor = vec4(sc.x, sc.y, sc.z, sc.w)
-        ComTable[com_i].mComponentObject.mFocusOnHover_b = false
         -- com_i)
         Obj.mIds.x = com_i
         Obj.mShadowId = com_i
 
         Com.NewComponent()
         ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(OutlinePos, inDimension_3f, nil, nil)
-        ComTable[com_i].mComponentObject.mFocusOnHover_b = false
         local bc = Theme.Colors.Area.Border
         ComTable[com_i].mFillColor = vec4(bc.x, bc.y, bc.z, bc.w)
         -- com_i)
@@ -54,7 +52,6 @@ Com.AreaObject = {
         ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(AreaPos, AreaDimen, nil, nil)
         local nc = Theme.Colors.Area.Normal
         ComTable[com_i].mFillColor = vec4(nc.x, nc.y, nc.z, nc.w)
-        ComTable[com_i].mComponentObject.mFocusOnHover_b = false
         -- com_i)
         Obj.mIds.y = com_i
         Obj.mAreaId = com_i
@@ -80,8 +77,6 @@ Com.AreaObject = {
     Event = function(self)
         local i = self.mIds.x
         local mousePos = E.get_relative_mouse_pos()
-        local isFocusedForMovement = ComTable[self.mAreaId].mComponentObject.mFocus_b -- TopMost Area
-        local isfocusedForResize = ComTable[self.mShadowId].mComponentObject.mFocus_b -- TopMost Area
         if self.mIsMovable and isFocusedForMovement then
             local new_pos = vec3(self.mPosition_3f.x + mousePos.x, self.mPosition_3f.y + mousePos.y, self.mPosition_3f.z)
             self:Update(new_pos, self.mDimension_3f)
@@ -225,61 +220,6 @@ Com.TextButtonObject = {
         end
     end,
     Event = function(self)
-        if ComTable[self.mAreaId].mComponentObject.mFocus_b then
-            self:Press()
-            -- self.mTextObject:Update(ComTable[self.mAreaId].mPosition_3f)
-            self.mPressed = true
-        else
-            self:Update(self.mPosition_3f, self.mDimension_3f)
-            self.mPressed = false
-        end
-    end,
-    SetFunction = function(self, inFunction)
-        self.mFunction = inFunction
-    end
-}
-
-
-Com.ImageButtonObject = {
-    mPadding = 5,
-    mTextObject = nil,
-    mFunction = nil,
-    mPressed = false,
-    New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
-        -- "TextButtonObject")
-        local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
-        setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
-        setmetatable(Obj, self)
-        self.__index = self
-
-        Obj.mTextObject = {}
-        Obj.mPadding = {}
-        Obj.mFunction = {}
-        Obj.mPressed = {}
-        Obj.mPressed = false
-        Obj.mPadding = 5
-        local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + inDimension_3f.y - Obj.mPadding,
-            inPosition_3f.z - 3)
-        Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject)
-        return Obj
-    end,
-    Update = function(self, inPosition_3f, inDimension_3f, inString)
-        Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
-        local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + inDimension_3f.y - self.mPadding,
-            inPosition_3f.z - 3)
-        if inString then
-            self.mTextObject:Update(Position, nil, inString)
-        end
-    end,
-    Event = function(self)
-        if ComTable[self.mAreaId].mComponentObject.mFocus_b then
-            self:Press()
-            -- self.mTextObject:Update(ComTable[self.mAreaId].mPosition_3f)
-            self.mPressed = true
-        else
-            self:Update(self.mPosition_3f, self.mDimension_3f)
-            self.mPressed = false
-        end
     end,
     SetFunction = function(self, inFunction)
         self.mFunction = inFunction
