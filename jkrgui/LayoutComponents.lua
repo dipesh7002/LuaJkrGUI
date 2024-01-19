@@ -169,7 +169,7 @@ Com.WindowLayout = {
         ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
             function()
                 self.mComponentObject:Event()
-                if self.mComponentObject.mClicked_b or self.mMoving then
+                if self.mComponentObject.mClicked_b or (self.mMoving and E.is_left_button_pressed())  then
                     local mpos = E.get_relative_mouse_pos()
                     self.mPosition_3f.x = self.mPosition_3f.x + mpos.x
                     self.mPosition_3f.y = self.mPosition_3f.y + mpos.y
