@@ -217,41 +217,20 @@ Com.ComboBox = {
 
 Com.IconButton = {
     mImageButton = nil,
-    mFirst = nil,
-    mDepth = nil,
-
-    New = function(self, inPosition_3f, inDimension_3f)
+    New = function(self, inPosition_3f, inDimension_3f, inIconName)
         local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
         setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
         setmetatable(Obj, self)
         self.__index = self
-        Obj.mFirst = false
-        Obj.mImageButton2 = Com.ImageLabelObject:NewExisting(DropDown, vec3(0, 0, inPosition_3f.z),
-            vec3(0, 0, 0))
-        Obj.mImageButton1 = Com.ImageLabelObject:NewExisting(DropUp,
+        Obj.mImageButton = Com.ImageLabelObject:NewExisting(inIconName,
             vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z),
             inDimension_3f)
-        Obj.mImageButton1:TintColor(vec4(0, 0, 0, 1))
-        Obj.mHoverFunction = function()
-            Obj.mImageButton1:TintColor(vec4(1, 0, 0, 1))
-            Obj.mImageButton2:TintColor(vec4(0, 1, 0, 1))
-        end
-        Obj.mClickedFunction = function()
-            Obj.mFirst = not Obj.mFirst
-            if Obj.mFirst then
-                Obj.mImageButton2:Update(inPosition_3f, inDimension_3f)
-                Obj.mImageButton1:Update(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0))
-            else
-                Obj.mImageButton1:Update(vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z), inDimension_3f)
-                Obj.mImageButton2:Update(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0))
-            end
-        end
-
+        Obj.mImageButton:TintColor(vec4(0, 0, 0, 1))
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
-        Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
         self.mImageButton:Update(inPosition_3f, inDimension_3f)
+        Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
     end
 }
 Com.TextButton = {
@@ -292,29 +271,41 @@ Com.MaterialWindow = {
     SetCentralComponent = function(self, inComponent)
         local titleBar = Com.TextButtonObject:New(self.mTitleText, self.mFontObject, self.mPosition_3f,
             vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
-        local image1 = Com.ImageLabelObject:NewExisting(DropUp, vec3(0, 0, self.mPosition_3f.z - 5), vec3(0, 0, 0))
-        image1:TintColor(vec4(0, 0, 0, 1))
-        local image2 = Com.ImageLabelObject:NewExisting(DropDown, vec3(0, 0, self.mPosition_3f.z - 5), vec3(0, 0, 0))
-        image2:TintColor(vec4(0, 0, 0, 1))
-        local image3 = Com.ImageLabelObject:NewExisting(DropUp, vec3(0, 0, self.mPosition_3f.z - 5), vec3(0, 0, 0))
-        image3:TintColor(vec4(0, 0, 0, 1))
-        self.mComponentObject = Jkr.ComponentObject:New(
-            vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z - 5),
-            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        local close_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z ), vec3(0, 0, 0), DropDown)
+        local minmax_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z ), vec3(0, 0, 0), DropUp)
+        local minimize_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z ), vec3(0, 0, 0), DropUp)
+       local  Close_Button_ClickedFunction = function()
+            close_button.mImageButton:TintColor(vec4(1, 0, 0, 1))
+        end
+       local  Close_Button_HoveredFunction = function() end
+        close_button:SetFunctions(Close_Button_HoveredFunction, Close_Button_ClickedFunction)
+        local MinMax_ClickedFunction = function()
+            minmax_button.mImageButton:Tintcolor(vec4(0, 0, 1, 1))
+        end
+       local MinMax_HoveredFunction = function() end
+        minmax_button:SetFunctions(MinMax_HoveredFunction, MinMax_ClickedFunction)
+       local MiniMize_ClickedFunction = function()
+            minimize_button.mImageButton:TintColor(vec4(0, 1, 0, 1))
+        end
+        local MiniMize_HoveredFunction = function() end
+        minimize_button:SetFunctions(MiniMize_HoveredFunction, MiniMize_ClickedFunction)
         local horizontalcomponents = Com.HLayout:New(0)
-        horizontalcomponents:AddComponents({ self.mComponentObject, image1, image2, image3 }, { 0.7, 0.1, 0.1, 0.1 })
+        local blankspace = Com.StackLayout:New(0)
+        horizontalcomponents:AddComponents({ blankspace, minimize_button, minmax_button, close_button },
+            { 0.7, 0.1, 0.1, 0.1 })
         horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
             local dimen = vec3(inDimension_3f.y + 5, inDimension_3f.y, inDimension_3f.z)
             local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
             for i = 4, 2, -1 do
                 self.mComponents[i]:Update(position, dimen)
+                print(self.mComponents[i].mPosition_3f.x, i)
+
                 position.x = position.x - dimen.x
             end
-            self.mComponents[1]:Update(inPosition_3f,
-                vec3((position.x + dimen.x) - inPosition_3f.x, inDimension_3f.y, inDimension_3f.z))
         end
-        horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z - 5),
+        horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z),
             vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        print(close_button.mPosition_3f.x)
         local titlebar_buttons = Com.StackLayout:New(5)
         titlebar_buttons:AddComponents({ titleBar, horizontalcomponents })
         titlebar_buttons:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))

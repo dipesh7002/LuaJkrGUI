@@ -229,7 +229,7 @@ Com.ButtonProxy = {
             mDimension_3f = inDimension_3f,
             mHoverFunction = function() end,
             mClickedFunction = function() end,
-            mClickedOutfunction = function() end,
+            mHoverOutFunction = function () end,
         }
         setmetatable(Obj, self)
         self.__index = self
@@ -244,9 +244,7 @@ Com.ButtonProxy = {
                 if Obj.mComponentObject.mClicked_b then
                     Obj.mClickedFunction()
                 end
-                if Obj.mComponentObject.mClickedOut_b then
-                    Obj.mClickedOutfunction()
-                end
+                
             end
         )
         return Obj
