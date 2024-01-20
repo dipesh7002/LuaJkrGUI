@@ -66,7 +66,6 @@ Com.CheckButtonList = {
         local MousePos = E.get_mouse_pos()
         for i = 1, inNoOfEntries, 1 do
             if E.is_left_button_pressed() then
-
                 if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
                     (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
                     MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
@@ -293,9 +292,34 @@ Com.MaterialWindow = {
     SetCentralComponent = function(self, inComponent)
         local titleBar = Com.TextButtonObject:New(self.mTitleText, self.mFontObject, self.mPosition_3f,
             vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
-        local verticalLayout = Com.VLayout:New(0) 
-        verticalLayout:AddComponents({ titleBar, inComponent })  
+        local image1 = Com.ImageLabelObject:NewExisting(DropUp, vec3(0, 0, self.mPosition_3f.z - 5), vec3(0, 0, 0))
+        image1:TintColor(vec4(0, 0, 0, 1))
+        local image2 = Com.ImageLabelObject:NewExisting(DropDown, vec3(0, 0, self.mPosition_3f.z - 5), vec3(0, 0, 0))
+        image2:TintColor(vec4(0, 0, 0, 1))
+        local image3 = Com.ImageLabelObject:NewExisting(DropUp, vec3(0, 0, self.mPosition_3f.z - 5), vec3(0, 0, 0))
+        image3:TintColor(vec4(0, 0, 0, 1))
+        self.mComponentObject = Jkr.ComponentObject:New(
+            vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z - 5),
+            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        local horizontalcomponents = Com.HLayout:New(0)
+        horizontalcomponents:AddComponents({ self.mComponentObject, image1, image2, image3 }, { 0.7, 0.1, 0.1, 0.1 })
+        horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
+            local dimen = vec3(inDimension_3f.y + 5, inDimension_3f.y, inDimension_3f.z)
+            local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
+            for i = 4, 2, -1 do
+                self.mComponents[i]:Update(position, dimen)
+                position.x = position.x - dimen.x
+            end
+            self.mComponents[1]:Update(inPosition_3f,
+                vec3((position.x + dimen.x) - inPosition_3f.x, inDimension_3f.y, inDimension_3f.z))
+        end
+        horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z - 5),
+            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        local titlebar_buttons = Com.StackLayout:New(5)
+        titlebar_buttons:AddComponents({ titleBar, horizontalcomponents })
+        titlebar_buttons:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        local verticalLayout = Com.VLayout:New(0)
+        verticalLayout:AddComponents({ titlebar_buttons, inComponent }, { 0.2, 0.8 })
         Com.WindowLayout.SetCentralComponent(self, verticalLayout)
-
-    end 
+    end
 }

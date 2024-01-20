@@ -93,6 +93,32 @@ Com.VLayout = {
         return ComponentsPosition
     end
 }
+Com.StackLayout = {
+    mComponents = nil,
+    New = function(self, inChangingZvalue)
+        local Obj = {
+            mChangingZvalue = inChangingZvalue
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        return Obj
+    end,
+    AddComponents = function(self, inComponentListTable)
+        self.mComponents = inComponentListTable
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        for index, value in ipairs(self.mComponents) do
+            value:Update(vec3(position.x, position.y, position.z),
+                vec3(dimension.x, dimension.y , dimension.z),
+                self.mComponents[index].mText)
+            position.z = position.z - self.mChangingZvalue
+        end
+    end
+}
 
 
 --[[
@@ -169,7 +195,7 @@ Com.WindowLayout = {
         ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
             function()
                 self.mComponentObject:Event()
-                if self.mComponentObject.mClicked_b or (self.mMoving and E.is_left_button_pressed())  then
+                if self.mComponentObject.mClicked_b or (self.mMoving and E.is_left_button_pressed()) then
                     local mpos = E.get_relative_mouse_pos()
                     self.mPosition_3f.x = self.mPosition_3f.x + mpos.x
                     self.mPosition_3f.y = self.mPosition_3f.y + mpos.y
