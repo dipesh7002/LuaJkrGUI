@@ -239,6 +239,8 @@ Com.ButtonProxy = {
                 Obj.mComponentObject:Event()
                 if Obj.mComponentObject.mHovered_b then
                     Obj.mHoverFunction()
+                else
+                    Obj.mHoverOutFunction()
                 end
 
                 if Obj.mComponentObject.mClicked_b then
@@ -249,8 +251,9 @@ Com.ButtonProxy = {
         )
         return Obj
     end,
-    SetFunctions = function(self, inHoverFunction, inClickedFunction)
+    SetFunctions = function(self, inHoverFunction, inHoverOutFunction, inClickedFunction)
         self.mHoverFunction = inHoverFunction
+        self.mHoverOutFunction = inHoverOutFunction
         self.mClickedFunction = inClickedFunction
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
