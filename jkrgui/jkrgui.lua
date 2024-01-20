@@ -228,11 +228,20 @@ Jkr.ComponentObject = {
 
         -- This is function that has to run each frame, OR on demand
         Update = function(self, inPosition_3f, inDimension_3f)
-                self.mPosition_3f = inPosition_3f
-                self.mDimension_3f = inDimension_3f
-                local pos = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
-                local dim = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
-                E.update_bounded_rect(Int(self.mBoundedRectId_i), pos, dim, Int(self.mPosition_3f.z))
+                if(inPosition_3f.z ~= self.mPosition_3f.z ) then
+                        E.update_bounded_rect(Int(self.mBoundedRectId_i), vec2(0, 0), vec2(0, 0), Int(self.mPosition_3f.z))
+                        self.mPosition_3f = inPosition_3f
+                        self.mDimension_3f = inDimension_3f
+                        local pos = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
+                        local dim = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
+                        self.mBoundedRectId_i = E.set_bounded_rect(pos, dim, Int(self.mPosition_3f.z))
+                else 
+                        self.mPosition_3f = inPosition_3f
+                        self.mDimension_3f = inDimension_3f
+                        local pos = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
+                        local dim = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
+                        E.update_bounded_rect(Int(self.mBoundedRectId_i), pos, dim, Int(self.mPosition_3f.z))
+                end
         end,
 
         -- Mouse le maathi gayo vane focus hune nahune

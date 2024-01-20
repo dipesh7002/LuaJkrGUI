@@ -271,41 +271,47 @@ Com.MaterialWindow = {
     SetCentralComponent = function(self, inComponent)
         local titleBar = Com.TextButtonObject:New(self.mTitleText, self.mFontObject, self.mPosition_3f,
             vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
-        local close_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z ), vec3(0, 0, 0), DropDown)
-        local minmax_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z ), vec3(0, 0, 0), DropUp)
-        local minimize_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z ), vec3(0, 0, 0), DropUp)
-       local  Close_Button_ClickedFunction = function()
-            close_button.mImageButton:TintColor(vec4(1, 0, 0, 1))
-        end
-       local  Close_Button_HoveredFunction = function() end
-        close_button:SetFunctions(Close_Button_HoveredFunction, Close_Button_ClickedFunction)
-        local MinMax_ClickedFunction = function()
-            minmax_button.mImageButton:Tintcolor(vec4(0, 0, 1, 1))
-        end
-       local MinMax_HoveredFunction = function() end
-        minmax_button:SetFunctions(MinMax_HoveredFunction, MinMax_ClickedFunction)
-       local MiniMize_ClickedFunction = function()
-            minimize_button.mImageButton:TintColor(vec4(0, 1, 0, 1))
-        end
-        local MiniMize_HoveredFunction = function() end
-        minimize_button:SetFunctions(MiniMize_HoveredFunction, MiniMize_ClickedFunction)
+        local close_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z), vec3(0, 0, 0), DropDown)
+        local minmax_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z), vec3(0, 0, 0), DropUp)
+        local minimize_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z), vec3(0, 0, 0), DropUp)
+
+        close_button:SetFunctions(function() end,
+            function()
+                close_button.mImageButton:TintColor(vec4(1, 0, 0, 1))
+            end
+        )
+
+        minmax_button:SetFunctions(function() end,
+            function()
+                print("pressed")
+               -- minmax_button.mImageButton:Tintcolor(vec4(0, 1, 0, 1))
+            end
+        )
+
+        minimize_button:SetFunctions(function() end,
+            function()
+                minimize_button.mImageButton:TintColor(vec4(0, 1, 0, 1))
+            end
+        )
+
         local horizontalcomponents = Com.HLayout:New(0)
         local blankspace = Com.StackLayout:New(0)
         horizontalcomponents:AddComponents({ blankspace, minimize_button, minmax_button, close_button },
             { 0.7, 0.1, 0.1, 0.1 })
-        horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
-            local dimen = vec3(inDimension_3f.y + 5, inDimension_3f.y, inDimension_3f.z)
-            local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
-            for i = 4, 2, -1 do
-                self.mComponents[i]:Update(position, dimen)
-                print(self.mComponents[i].mPosition_3f.x, i)
 
+        local Window = self
+        horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
+            local dimen = vec3(Window.mHitArea_2f.y, Window.mHitArea_2f.y, inDimension_3f.z)
+            local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
+            for i = #self.mComponents, 2, -1 do
+                self.mComponents[i]:Update(position, dimen)
                 position.x = position.x - dimen.x
             end
         end
         horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z),
             vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
-        print(close_button.mPosition_3f.x)
+
+
         local titlebar_buttons = Com.StackLayout:New(5)
         titlebar_buttons:AddComponents({ titleBar, horizontalcomponents })
         titlebar_buttons:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))

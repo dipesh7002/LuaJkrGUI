@@ -6,20 +6,12 @@ Com.AreaObject = {
     mPosition_3f = vec3(0, 0, 0),
     mDimension_3f = vec3(0, 0, 0),
     mAreaId = nil,
-    mOutlineId = nil,
-    mShadowId = nil,
-    mIsResizable = false,
-    mIsMovable = false,
     New = function(self, inPosition_3f, inDimension_3f)
         local Obj = {
             mIds = vec2(0, 0),
             mPosition_3f = vec3(0, 0, 0),
             mDimension_3f = vec3(0, 0, 0),
             mAreaId = 0,
-            mOutlineId = 0,
-            mShadowId = 0,
-            mIsResizable = false,
-            mIsMovable = false,
         }
         -- "AreaObject Construction")
         setmetatable(Obj, self)
@@ -27,77 +19,24 @@ Com.AreaObject = {
         Obj.mPosition_3f = inPosition_3f
         Obj.mDimension_3f = inDimension_3f
 
-        local ShadowPos = vec3(inPosition_3f.x + 3, inPosition_3f.y + 3, inPosition_3f.z)
-        local OutlinePos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 1)
-        local AreaPos = vec3(inPosition_3f.x + 1, inPosition_3f.y + 1, inPosition_3f.z - 2)
-        local AreaDimen = vec3(inDimension_3f.x - 2, inDimension_3f.y - 2, inDimension_3f.z)
-
-        Com.NewComponent()
-        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(ShadowPos, inDimension_3f, nil, nil)
-        local sc = Theme.Colors.Shadow
-        ComTable[com_i].mFillColor = vec4(sc.x, sc.y, sc.z, sc.w)
-        -- com_i)
-        Obj.mIds.x = com_i
-        Obj.mShadowId = com_i
-
-        Com.NewComponent()
-        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(OutlinePos, inDimension_3f, nil, nil)
-        local bc = Theme.Colors.Area.Border
-        ComTable[com_i].mFillColor = vec4(bc.x, bc.y, bc.z, bc.w)
-        -- com_i)
-        Obj.mIds.x = com_i
-        Obj.mOutlineId = com_i
+        local AreaPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
 
         Com.NewComponent()
         ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(AreaPos, AreaDimen, nil, nil)
         local nc = Theme.Colors.Area.Normal
         ComTable[com_i].mFillColor = vec4(nc.x, nc.y, nc.z, nc.w)
-        -- com_i)
         Obj.mIds.y = com_i
         Obj.mAreaId = com_i
-        -- "No Of Components", com_i)
-        -- "AreaObject Construction Finished")
         return Obj
-    end,
-    TurnOffShadow = function(self)
-        ComTable[self.mShadowId].mFillColor.w = 0
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
         local i = self.mIds.x
-        local ShadowPos = vec3(inPosition_3f.x + 3, inPosition_3f.y + 3, inPosition_3f.z)
-        local OutlinePos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 1)
-        local AreaPos = vec3(inPosition_3f.x + 1, inPosition_3f.y + 1, inPosition_3f.z - 2)
-        local AreaDimen = vec3(inDimension_3f.x - 2, inDimension_3f.y - 2, inDimension_3f.z)
-        ComTable[self.mShadowId]:Update(ShadowPos, inDimension_3f)
-        ComTable[self.mOutlineId]:Update(OutlinePos, inDimension_3f)
+        local AreaPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
         ComTable[self.mAreaId]:Update(AreaPos, AreaDimen)
-    end,
-    Event = function(self)
-        local i = self.mIds.x
-        local mousePos = E.get_relative_mouse_pos()
-        if self.mIsMovable and isFocusedForMovement then
-            local new_pos = vec3(self.mPosition_3f.x + mousePos.x, self.mPosition_3f.y + mousePos.y, self.mPosition_3f.z)
-            self:Update(new_pos, self.mDimension_3f)
-        elseif self.mIsResizable and isfocusedForResize then
-            local new_dimen = vec3(self.mDimension_3f.x + mousePos.x, self.mDimension_3f.y + mousePos.y,
-                self.mDimension_3f.z)
-            self:Update(self.mPosition_3f, new_dimen)
-        end
-    end,
-    Press = function(self)
-        local p = self.mPosition_3f
-        local d = self.mDimension_3f
-        local ShadowPos = vec3(p.x + 3, p.y + 3, p.z)
-        local OutlinePos = vec3(p.x, p.y, p.z - 1)
-        local AreaPos = vec3(p.x + 1, p.y + 1, p.z - 2)
-        local AreaDimen = vec3(d.x - 2, d.y - 2, d.z)
-        AreaPos = ShadowPos
-        OutlinePos = ShadowPos
-        ComTable[self.mShadowId]:Update(ShadowPos, d)
-        ComTable[self.mOutlineId]:Update(ShadowPos, d)
-        ComTable[self.mAreaId]:Update(ShadowPos, AreaDimen)
     end
 }
 

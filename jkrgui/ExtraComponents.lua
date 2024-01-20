@@ -186,7 +186,6 @@ Com.FileMenuBarObject = {
         local mainareapos = vec3(0, 0, inDepth)
         local mainareadimen = vec3(WindowDimension.x, inHeight, 1)
         Obj.mMainArea = Com.AreaObject:New(mainareapos, mainareadimen)
-        Obj.mMainArea:TurnOffShadow()
         Obj.mDepth = inDepth
         Obj.mHeight = inHeight
         Obj.mButtons = {}
@@ -196,7 +195,6 @@ Com.FileMenuBarObject = {
             local pos = vec3(50 * (i - 1), 0, inDepth - 3)
             local dimen = vec3(50, inHeight, 1)
             Obj.mButtons[#Obj.mButtons + 1] = Com.TextButtonObject:New(inFileMenu[i].name, inFontObject, pos, dimen)
-            Com.AreaObject.TurnOffShadow(Obj.mButtons[#Obj.mButtons])
             i = i + 1
         end
         return Obj
@@ -239,7 +237,6 @@ Com.ContextMenu = {
             local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1), inPosition_3f.z - 3)
             Obj.mButtons[i] = Com.TextButtonObject:New(string.rep(" ", inMaxStringLength), inFontObject, pos,
                 button_dimension)
-            Obj.mButtons[i]:TurnOffShadow()
             i = i + 1
         end
         return Obj
