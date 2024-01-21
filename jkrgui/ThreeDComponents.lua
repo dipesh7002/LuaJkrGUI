@@ -7,13 +7,14 @@ Com.Load3DComponents = function ()
 end
 
 --[[
-    Object3D is the base class for all the objects, that has a position, rotation and dimension
+    Object3D is the base class for all the objects 
 ]]
 
 Com.Object3D = {
     mPosition_3f = nil,
     mDimension_3f = nil,
     mRotation_3f = nil,
+    mModelMatrix = nil,
     New = function(self, inPosition_3f, inDimension_3f, inRotation_3f)
         local Obj = {}
         setmetatable(Obj, self)
@@ -25,6 +26,10 @@ Com.Object3D = {
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
         self.mRotation = inRotation_3f
+        self.mModelMatrix = GetIdentityMatrix()
+        self.mModelMatrix = Jmath3D.scale(self.mModelMatrix, inDimension_3f)
+        self.mModelMatrix = Jmath3D.rotate(self.mModelMatrix, Jmath3D.magnitude(inRotation_3f),  Jmath3D.normalize(inRotation_3f) )
+        self.mModelMatrix = Jmath3D.translate(self.mModelMatrix, inPosition_3f)
     end
 }
 
@@ -39,11 +44,11 @@ Com.Camera3D = {
     mAspect = nil,
     mIsOrtho = false,
     New = function(self, inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ, isOrtho)
-        local Obj = Com.Object3D:New()
+        local Obj = Com.Object3D:New(inPosition_3f, vec3(0), vec3(0) )
         setmetatable(self, Com.Object3D)
         setmetatable(Obj, self)
         self.__index = self
-        Obj.mIsOrtho = false
+        Obj.mIsOrtho = isOrtho
         Obj:Update(inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ)
         return Obj
     end,
@@ -57,6 +62,8 @@ Com.Camera3D = {
         self.mViewMatrix_4x4 = Jmath3D.lookat(self.mEyePosition_3f, self.mCenterOfInterest_3f, self.mUpPosition_3f)
         if not self.mIsOrtho then
             self.mProjMatrix_4x4 = Jmath3D.perspective(inFieldOfView, inAspect, inNearZ, inFarZ)
+        else
+            -- TODO Orthographic Projection
         end
     end
 }
@@ -80,5 +87,15 @@ Com.Painter3D = {
     end,
     Bind = function(self, inBindpoint)
         Three:painter_bind_for_draw(self.mPainterId, inBindpoint)
+    end
+}
+
+Com.Model3DglTF = {
+    mModelId = nil,
+    New = function(self, inFilename, inPosition_3f, inDimension_3f, inRotation_3f)
+        local Obj = Com.Object3D:New(inPosition_3f, inDimension_3f, inRotation_3f)
+        setmetatable(Obj, self)
+        Obj.mModelId = Three:add_model(inFilename)
+        return Obj
     end
 }
