@@ -37,3 +37,15 @@ imageStore(storageImage, to_draw_at, final_color);
 Jkr.GLSL.Clear = [[
 imageStore(storageImage, to_draw_at, vec4(0, 0, 0, 0));
 ]]
+
+Jkr.GLSL.Push3D = [[
+
+]]
+
+Jkr.GLSL.GlobalUBs = [[
+
+]]
+
+
+Jkr.GLSL.Constant3D = function ()
+end

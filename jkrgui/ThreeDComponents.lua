@@ -1,5 +1,6 @@
 require "jkrgui.jkrgui"
 local Three = {}
+local BindingGlobalUB = 1
 
 Com.Load3DComponents = function ()
     Three = Jkr3d.three(Jkr3d.SizeOfUBDefault, Jkr3d.SizeOfSSBO_Default)
@@ -37,12 +38,13 @@ Com.Camera3D = {
     mProjMatrix_4x4 = nil,
     mAspect = nil,
     mIsOrtho = false,
-    New = function(self)
+    New = function(self, inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ)
         local Obj = Com.Objec3D:New()
         setmetatable(self, Com.Object3D)
         setmetatable(Obj, self)
         self.__index = self
         Obj.mIsOrtho = false
+        Obj:Update(inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ)
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ)
@@ -62,3 +64,21 @@ Com.Camera3D = {
 Com.SetCamera3D = function (inCamera)
     Three:write_to_global_ub_default(inCamera.mViewMatrix_4x4, inCamera.mProjMatrix_4x4, vec4(0, 0, 0))
 end
+
+
+Com.Painter3D = {
+    mPainterId = nil,
+    New = function (self, inCacheFileName, inShaderTable)
+        local Obj = {}
+        setmetatable(Obj, self)
+        Obj.mPainterId = Three:add_painter(inCacheFileName, inShaderTable.v, inShaderTable.f, inShaderTable.c)
+        self.__index = self
+        return Obj
+    end,
+    Register = function (self)
+        Three:register_global_ub_to_painter(self.mPainterId, 0, BindingGlobalUB, 0)
+    end,
+    Bind = function(self, inBindpoint)
+        Three:painter_bind_for_draw(self.mPainterId, inBindpoint)
+    end
+}
