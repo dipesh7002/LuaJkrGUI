@@ -90,6 +90,7 @@ Int = math.floor
 ]]
 Jkr = r;
 Jkr3d = r3d;
+Jmath3D = jmath3D
 
 --[[
        This is the entity that can give information about mouse keyboard etc,

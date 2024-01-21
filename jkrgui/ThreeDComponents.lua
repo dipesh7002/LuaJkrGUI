@@ -1,5 +1,13 @@
 require "jkrgui.jkrgui"
-Jmath3D = jmath3D
+local Three = {}
+
+Com.Load3DComponents = function ()
+    Three = Jkr3d.three(Jkr3d.SizeOfUBDefault, Jkr3d.SizeOfSSBO_Default)
+end
+
+--[[
+    Object3D is the base class for all the objects, that has a position, rotation and dimension
+]]
 
 Com.Object3D = {
     mPosition_3f = nil,
@@ -50,3 +58,7 @@ Com.Camera3D = {
         end
     end
 }
+
+Com.SetCamera3D = function (inCamera)
+    Three:write_to_global_ub_default(inCamera.mViewMatrix_4x4, inCamera.mProjMatrix_4x4, vec4(0, 0, 0))
+end
