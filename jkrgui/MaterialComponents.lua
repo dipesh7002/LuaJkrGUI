@@ -318,6 +318,8 @@ Com.MaterialWindow = {
 
         local Window = self
         horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
+            print("Update Called Horo")
+            print(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
             local dimen = vec3(Window.mHitArea_2f.y, Window.mHitArea_2f.y, inDimension_3f.z)
             local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
             for i = #self.mComponents, 2, -1 do
@@ -325,6 +327,7 @@ Com.MaterialWindow = {
                 position.x = position.x - dimen.x
             end
         end
+
         horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z),
             vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
 

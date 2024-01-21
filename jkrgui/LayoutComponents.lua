@@ -209,6 +209,8 @@ Com.WindowLayout = {
         )
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
         self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
     end
 }
