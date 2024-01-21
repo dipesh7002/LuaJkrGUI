@@ -291,7 +291,6 @@ In event
 
             minmax_button:SetFunctions(function()
             end, function()
-                print("pressed")
                 minmax_button.mImageButton:TintColor(vec4(0, 0, 1, 1))
             end)
 
@@ -324,8 +323,6 @@ In event
 
             local Window = self
             horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
-                print("Update Called Horo")
-                print(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
                 local dimen = vec3(Window.mHitArea_2f.y, Window.mHitArea_2f.y, inDimension_3f.z)
                 local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
                 for i = #self.mComponents, 2, -1 do

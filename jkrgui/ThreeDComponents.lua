@@ -3,7 +3,7 @@ local Three = {}
 local BindingGlobalUB = 1
 
 Com.Load3DComponents = function ()
-    Three = Jkr3d.three(Jkr3d.SizeOfUBDefault, Jkr3d.SizeOfSSBO_Default)
+    Three = Jkr3d.three(Jkr3d.SizeOfUB_Default, Jkr3d.SizeOfSSBO_Default)
 end
 
 --[[
@@ -38,8 +38,8 @@ Com.Camera3D = {
     mProjMatrix_4x4 = nil,
     mAspect = nil,
     mIsOrtho = false,
-    New = function(self, inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ)
-        local Obj = Com.Objec3D:New()
+    New = function(self, inPosition_3f, inDimension_3f, inCenterOfInterest_3f, inUpPosition_3f, inFieldOfView, inAspect, inNearZ, inFarZ, isOrtho)
+        local Obj = Com.Object3D:New()
         setmetatable(self, Com.Object3D)
         setmetatable(Obj, self)
         self.__index = self
@@ -68,10 +68,10 @@ end
 
 Com.Painter3D = {
     mPainterId = nil,
-    New = function (self, inCacheFileName, inShaderTable)
+    New = function (self, inCacheFileName, inShaderTable, inForceStore)
         local Obj = {}
         setmetatable(Obj, self)
-        Obj.mPainterId = Three:add_painter(inCacheFileName, inShaderTable.v, inShaderTable.f, inShaderTable.c)
+        Obj.mPainterId = Three:add_painter(inCacheFileName, inShaderTable.v, inShaderTable.f, inShaderTable.c, inForceStore)
         self.__index = self
         return Obj
     end,
