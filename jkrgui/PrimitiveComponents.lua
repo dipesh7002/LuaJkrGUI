@@ -187,7 +187,7 @@ Com.ImageLabelObject = {
         ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage) 
     end
 }
-
+  
 Com.TextButtonObject = {
     mPadding = 5,
     mTextObject = nil,
@@ -224,4 +224,5 @@ Com.TextButtonObject = {
     SetFunction = function(self, inFunction)
         self.mFunction = inFunction
     end
-}
+} 
+

@@ -52,9 +52,9 @@ Com.VLayout = {
         self.mRatioTable = inRatioTable
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
-        local position = vec3(inPosition_3f.x ,inPosition_3f.y, inPosition_3f.z)
-        local dimension = vec3(inDimension_3f.x,inDimension_3f.y,inDimension_3f.z)
-        local paddingY = self.mPadding 
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        local paddingY = self.mPadding
         if self.mRatioTable then
             for index, value in ipairs(self.mComponents) do
                 value:Update(vec3(position.x, position.y, position.z),
@@ -67,12 +67,13 @@ Com.VLayout = {
 }
 
 
+
 --[[
     Yo Chae WindowLayout ho,
     Esko euta CentralComponent Object hunxa,
     tyo mComponentObject vaneko chae Jkr.ComponentObject ho, gaera hernu tyaa k xa vanera
     mainly, tei event ko laagi ho mouse maathi aauda focus garne na garne, left button thichda focus hune na hune
-    ani Z value anusaar kun chae Component(Jkr.ComponentObject) wala lai select garne jasto kura haru handle garxa 
+    ani Z value anusaar kun chae Component(Jkr.ComponentObject) wala lai select garne jasto kura haru handle garxa
 
     ani yo use esari garne ho
 
@@ -97,10 +98,34 @@ Com.VLayout = {
                     Window:End()
     ---------------------------------------------------------------------------------------------------------------------------------------
 ]]
+
+Com.StackLayout = {
+    mComponents = nil,
+    mText = nil,
+    New = function(self, inText)
+        local Obj = {
+
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mText = inText
+
+        return Obj
+    end,
+    AddComponents = function(self, inComponentListTable)
+        self.mComponents = inComponentListTable
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        for index, value in ipairs(self.mComponents) do
+            value:Update(vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 3 * (index-1)), inDimension_3f, self.mText)
+        end
+    end
+}
+
 Com.WindowLayout = {
     mHitArea_2f = nil,
     mComponentObject = nil, -- yo hamro wala components haina, Jkr.ComponentObject wala component ho, esko naam fernu parlaa jasto xa TODO,
-                            -- maintainence ko bela garnu parxa
+    -- maintainence ko bela garnu parxa
     mCentralComponent = nil,
     mPosition_3f = nil,
     mDimension_3f = nil,
@@ -120,7 +145,7 @@ Com.WindowLayout = {
     Start = function(self)
         Com.NewComponent()
         local i = com_i
-        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function ()
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
             local offset = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
             local extent = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
             if offset.x > 0 and offset.y > 0 then
@@ -131,7 +156,7 @@ Com.WindowLayout = {
     End = function(self)
         Com.NewComponent()
         local i = com_i
-        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function ()
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
             Jkr.reset_scissor()
         end)
     end,
@@ -153,7 +178,7 @@ Com.WindowLayout = {
                     self.mMoving = false
                 end
             end
-         )
+        )
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mCentralComponent:Update(inPosition_3f, inDimension_3f)

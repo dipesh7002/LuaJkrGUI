@@ -42,7 +42,7 @@ Generator = generator
 --[[
         ENUM VANEKO K HO VANNE KURO
         enum class state = {
-                running, 
+                running,
                 stopped,
                 started
         };
@@ -105,7 +105,7 @@ local line_bound = false
         This is the shape renderer, we can do S.something
 ]]
 
-S = Jkr.sh        -- Shape Renderer
+S = Jkr.sh -- Shape Renderer
 --[[
         We can add shapes with S.Add()
 ]]
@@ -153,13 +153,13 @@ Key = key
 require "jkrgui.Config" -- #include "Config" vane jastai C ma
 
 --[[
-        Depth value ranges from 0 to 100, 
+        Depth value ranges from 0 to 100,
         0 means nearest to the camera
         100 means farthest from the camera
         Depth is basically a  reference taken.
 ]]
 Depth = 75
-Time = 0 -- Increments each frame
+Time = 0                                -- Increments each frame
 WindowDimension = GetWindowDimensions() -- Can get Window dimensions just by doing WindowDimension.x, WindowDimension.y
 
 -- To be called at Update Callback
@@ -167,8 +167,6 @@ function FrameUpdate()
         Time = Time + 1
         WindowDimension = GetWindowDimensions()
 end
-
-
 
 --[[
         This is a fontObject, which holds a certain font of certain size
@@ -185,7 +183,8 @@ Jkr.FontObject = {
                         mSize = 0
                 }
                 setmetatable(Object, self)
-                self.__index = self                     -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
+                self.__index =
+                self                -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
                 Object.mPath = inPath
                 Object.mSize = inSize
                 Object.mId = T.AddFontFace(Object.mPath, Object.mSize)
@@ -265,16 +264,16 @@ Jkr.Components.Util = {}
 
 Jkr.Components.Abstract.ImageObject = {
         mId = nil,
-        New = function (self, inWidth, inHeight, inFileName)
-               local Obj = {}
-               setmetatable(Obj, self)
-               self.__index = self
-               if inFileName then
+        New = function(self, inWidth, inHeight, inFileName)
+                local Obj = {}
+                setmetatable(Obj, self)
+                self.__index = self
+                if inFileName then
                         Obj.mId = S.AddImage(inFileName)
-               else
+                else
                         Obj.mId = S.AddImage(Int(inWidth), Int(inHeight))
-               end 
-               return Obj
+                end
+                return Obj
         end
 }
 
@@ -296,7 +295,7 @@ Jkr.Components.Static.ShapeObject = {
                 -- Obj.mComponentObject = Jkr.ComponentObject:New(inPosition_3f, inDimension_3f)
                 local Dimension = vec2(inDimension_3f.x, inDimension_3f.y)
                 local rect_gen = Generator(Shapes.rectangle, Dimension)
-                Obj.mShapeId =  S.Add(rect_gen, inPosition_3f)
+                Obj.mShapeId = S.Add(rect_gen, inPosition_3f)
 
                 if inImageObject then
                         Obj.mImageId = inImageObject.mId
@@ -307,10 +306,10 @@ Jkr.Components.Static.ShapeObject = {
                 Obj.mFillColor = vec4(1, 1, 1, 1)
                 return Obj
         end,
-        Update = function (self, inPosition_3f, inDimension_3f)
-               local Dimension = vec2(inDimension_3f.x, inDimension_3f.y)
-               local rect_gen = Generator(Shapes.rectangle, Dimension)
-               S.Update(Int(self.mShapeId), rect_gen, inPosition_3f) 
+        Update = function(self, inPosition_3f, inDimension_3f)
+                local Dimension = vec2(inDimension_3f.x, inDimension_3f.y)
+                local rect_gen = Generator(Shapes.rectangle, Dimension)
+                S.Update(Int(self.mShapeId), rect_gen, inPosition_3f)
         end,
         Event = function(self)
                 self.mComponentObject:Event()
@@ -323,7 +322,8 @@ Jkr.Components.Static.ShapeObject = {
                 else
                         S.BindFillMode(FillType.fill)
                 end
-                S.Draw(self.mFillColor, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mShapeId), Int(self.mShapeId), GetIdentityMatrix())
+                S.Draw(self.mFillColor, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mShapeId),
+                        Int(self.mShapeId), GetIdentityMatrix())
         end
 }
 
@@ -332,16 +332,16 @@ Jkr.Components.Static.TextObject = {
         mScissorDimension_2f = nil,
         mString = nil,
         mFont = nil, -- Font Object
-        mId = nil,  
+        mId = nil,
         mDimension_2f = nil,
         mColor = Theme.Colors.Text.Normal,
-        New = function (self, inText, inPosition_3f, inFontObject)
+        New = function(self, inText, inPosition_3f, inFontObject)
                 local Obj = {
                         mScissorPosition_2f = nil,
                         mScissorDimension_2f = nil,
                         mString = nil,
                         mFont = nil, -- Font Object
-                        mId = nil,  
+                        mId = nil,
                         mDimension_2f = nil,
                         mColor = Theme.Colors.Text.Normal,
                         mAlt = AlternativeTextRenderer
@@ -359,7 +359,8 @@ Jkr.Components.Static.TextObject = {
                         Obj.mId = T.Add(Obj.mString, vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Depth))
                         Obj.mDimension_2f = inFontObject:GetDimension(Obj.mString)
                 else
-                        Obj.mId = r.balt.add(inFontObject.mId, Obj.mString, vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Depth))
+                        Obj.mId = r.balt.add(inFontObject.mId, Obj.mString,
+                                vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Depth))
                 end
 
                 Obj.mFont = inFontObject
@@ -369,20 +370,21 @@ Jkr.Components.Static.TextObject = {
         GetLength = function(self)
                 return self.mId.y
         end,
-        Event = function (self)
+        Event = function(self)
         end,
-        Draw = function (self)
-
+        Draw = function(self)
                 if not self.mAlt then
                         T.Bind()
-                        T.Draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mId.x), Int(self.mId.y), GetIdentityMatrix())
+                        T.Draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mId.x),
+                                Int(self.mId.y), GetIdentityMatrix())
                 else
                         S.Bind()
                         S.BindFillMode(FillType.image)
-                        r.balt.draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y), self.mId, GetIdentityMatrix())
+                        r.balt.draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y), self.mId,
+                                GetIdentityMatrix())
                 end
         end,
-        Update = function (self, inPosition_3f)
+        Update = function(self, inPosition_3f)
                 self.mPosition_3f = inPosition_3f
                 if not self.mAlt then
                         local str = string.rep(" ", self.mId.y)
@@ -393,7 +395,7 @@ Jkr.Components.Static.TextObject = {
                 end
         end,
         -- TODO Remove this function
-        SetScissor = function (self)
+        SetScissor = function(self)
                 if self.mScissorPosition_2f and self.mScissorDimension_2f then
                         Jkr.set_scissor(self.mScissorPosition_2f, self.mScissorDimension_2f)
                 end
@@ -403,52 +405,52 @@ Jkr.Components.Static.TextObject = {
 Jkr.Components.Abstract.PainterImageObject = {
         mImage = nil,
         New = function(self, inWidth, inHeight)
-               local Obj = {} 
-               setmetatable(Obj, self)
-               self.__index = self
-               Obj.mImage = Jkr.painter_image(Int(inWidth), Int(inHeight))
-               return Obj
+                local Obj = {}
+                setmetatable(Obj, self)
+                self.__index = self
+                Obj.mImage = Jkr.painter_image(Int(inWidth), Int(inHeight))
+                return Obj
         end
 }
 
 Jkr.Components.Util.ImagePainter = {
-    mPainter = nil,
-    mPainterRegisteredImageObject = nil,
-    New = function(self, inFileName, inStore_b, inGLSL, inX, inY, inZ)
-        local Obj = {}
-        setmetatable(Obj, self)
-        self.__index = self
-        Obj.mPainter = Jkr.image_painter(inFileName, inGLSL, vec3(inX, inY, inZ))
+        mPainter = nil,
+        mPainterRegisteredImageObject = nil,
+        New = function(self, inFileName, inStore_b, inGLSL, inX, inY, inZ)
+                local Obj = {}
+                setmetatable(Obj, self)
+                self.__index = self
+                Obj.mPainter = Jkr.image_painter(inFileName, inGLSL, vec3(inX, inY, inZ))
 
-        if inStore_b then
-            Obj.mPainter:store()
-        else
-            Obj.mPainter:load()
+                if inStore_b then
+                        Obj.mPainter:store()
+                else
+                        Obj.mPainter:load()
+                end
+                return Obj
+        end,
+        RegisterImage = function(self, inPainterImageObject)
+                print("Image Registered")
+                self.mPainter:register_image(inPainterImageObject.mImage)
+                self.mPainterRegisteredImageObject = inPainterImageObject
+        end,
+        BindImage = function(self)
+                self.mPainter:bind_image()
+        end,
+        BindPainter = function(self)
+                self.mPainter:bind()
+        end,
+        Paint = function(self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inPainterWithRegisteredImage)
+                self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
+                S.CopyImage(Int(inImageObject.mId), inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
+        end,
+        PaintImages = function(self, inPosDimen_4f, inColor_4f, inParam_4f, ...)
+                self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
+                local args = table.pack(...)
+                for i, v in ipairs(args) do
+                        S.CopyImage(Int(v.mId), self.mPainter)
+                end
         end
-        return Obj
-    end,
-    RegisterImage = function(self, inPainterImageObject)
-        print("Image Registered")
-        self.mPainter:register_image(inPainterImageObject.mImage)
-        self.mPainterRegisteredImageObject = inPainterImageObject
-    end,
-    BindImage = function(self)
-        self.mPainter:bind_image()
-    end,
-    BindPainter = function(self)
-        self.mPainter:bind()
-    end,
-    Paint = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inPainterWithRegisteredImage)
-        self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
-        S.CopyImage(Int(inImageObject.mId), inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
-    end,
-    PaintImages = function(self, inPosDimen_4f, inColor_4f, inParam_4f, ...)
-        self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
-        local args = table.pack(...)
-        for i, v in ipairs(args) do
-            S.CopyImage(Int(v.mId), self.mPainter)
-        end
-    end
 }
 
 Jkr.Components.Abstract.Drawable = {
@@ -461,7 +463,7 @@ Jkr.Components.Abstract.Drawable = {
                 return Obj
         end,
         Draw = function(self)
-               self.mDrawFunction(); 
+                self.mDrawFunction();
         end
 }
 
@@ -475,7 +477,7 @@ Jkr.Components.Abstract.Eventable = {
                 return Obj
         end,
         Event = function(self)
-               self.mEventFunction(); 
+                self.mEventFunction();
         end
 }
 

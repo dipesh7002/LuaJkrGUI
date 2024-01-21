@@ -8,6 +8,9 @@ local CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
     "icons_material/radio_button_checked/baseline-2x.png")
 local UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
     "icons_material/radio_button_unchecked/baseline-2x.png")
+local MinimizeImage = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/minimize/baseline-4x.png")
+local MaximizeImage = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/maximize/baseline-4x.png")
+local CloseImage = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/close/baseline-4x.png")
 
 Com.CheckButtonList = {
     New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension, inMaxStringLength)
@@ -79,12 +82,68 @@ Com.CheckButtonList = {
 
 }
 
+
+
+-- Com.ButtonLayout = {
+--     mPosition_3f = nil,
+--     mDimension_3f = nil,
+--     mString = nil,
+--     mComponentObject = nil,
+--     mCentralComponent = nil,
+--     mPressed = false,
+
+--     New = function(self, inPosition_3f, inDimension_3f, inString)
+--         local Obj = {}
+--         setmetatable(Obj, self)
+--         self.__index = self
+--         Obj.mPosition_3f = inPosition_3f
+--         Obj.mDimension_3f = inDimension_3f
+--         Obj.mComponentObject = Jkr.ComponentObject:New(inPosition_3f, inDimension_3f)
+--         if inString then
+--         Obj.mString = Com.TextLabelObject:New(inString,
+--             vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z),
+--             MaterialFont)
+--         end
+--         Obj.mComponentObject.mFocusOnHover_b = false
+--         return Obj
+--     end,
+--     SetCentralComponent = function(self, inComponent)
+--         if inComponent.mId then
+--             self.mCentralComponent = inComponent
+--             self.mDraw = Com.ImageLabelObject:NewExisting(inComponent, self.mPosition_3f, self.mDimension_3f)
+--             self.mDraw:TintColor(vec4(1, 0, 0, 1))
+--             print("1st ma puge ma mg")
+--         else
+--             self.mCentralComponent = inComponent
+--             self.mCentralComponent:Update(self.mPosition_3f, self.mDimension_3f)
+--             print("2nd ma puge ma mg")
+
+--         end
+--         ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+--             function()
+--                 self.mComponentObject:Event()
+--                 if self.mComponentObject.mFocus_b and E.is_left_button_pressed() then
+--                     self.mPressed = true
+--                 end
+--             end
+--         )
+--     end,
+--     Update = function(self, inPosition_3f, inDimension_3f)
+--         self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
+--     end
+
+-- }
+
+
+
 Com.MaterialWindow = {
-    mTitleBar = nil,
+    mTitleBarStack = nil,
     mVerticalLayout = nil,
     mTitleText = nil,
+  
     New = function(self, inPosition_3f, inDimension_3f, inHitArea_2f, inTitleText)
         local Obj = Com.WindowLayout:New(inPosition_3f, inDimension_3f, inHitArea_2f)
+      
         setmetatable(self, Com.WindowLayout) -- Inherits WindowLayout
         setmetatable(Obj, self)
         self.__index = self
@@ -93,14 +152,28 @@ Com.MaterialWindow = {
         return Obj
     end,
     SetCentralComponent = function(self, inComponent)
-        self.mTitleBar = Com.TextButtonObject:New(self.mTitleText, MaterialFont, self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        local ImageMinimize = Com.ImageLabelObject:NewExisting(MinimizeImage, vec3(0, 0, 1), vec3(0, 0, 1))
+        ImageMinimize:TintColor(vec4(1, 0, 0, 1))
+        local ImageMaximize = Com.ImageLabelObject:NewExisting(MaximizeImage, vec3(0, 0, 1), vec3(0, 0, 1))
+        ImageMaximize:TintColor(vec4(0, 1, 0, 1))
 
-        self.mVerticalLayout:AddComponents({ self.mTitleBar, inComponent })
+        local ImageClose = Com.ImageLabelObject:NewExisting(CloseImage, vec3(0, 0, 1), vec3(0, 0, 1))
+        ImageClose:TintColor(vec4(0, 0, 1, 1))
+
+        local tb = Com.TextButtonObject:New(self.mTitleText, MaterialFont, self.mPosition_3f,
+            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        local titleBarHlayout = Com.HLayout:New(0)
+        local dummyStack = Com.StackLayout:New()
+
+        titleBarHlayout:AddComponents({ dummyStack, ImageMinimize, ImageMaximize, ImageClose }, { 0.7, 0.1, 0.1 })
+        self.mTitleBarStack = Com.StackLayout:New(self.mText)
+        self.mTitleBarStack:AddComponents({tb, titleBarHlayout})
+        self.mVerticalLayout = Com.VLayout:New(0)
+        self.mVerticalLayout:AddComponents({self.mTitleBarStack, inComponent }, { 0.2, 0.8 })
         local titleText = self.mTitleText
         local windowobj = self
-        
+
         local OverridenVLayoutUpdate = function(self, inPosition_3f, inDimension_3f)
-            print("kldjafl")
             self.mComponents[1]:Update(inPosition_3f, vec3(inDimension_3f.x, windowobj.mHitArea_2f.y, 1), titleText)
             self.mComponents[2]:Update(vec3(inPosition_3f.x, inPosition_3f.y + windowobj.mHitArea_2f.y, inPosition_3f.z),
                 vec3(inDimension_3f.x, inDimension_3f.y - windowobj.mHitArea_2f.y, 1))
@@ -108,5 +181,6 @@ Com.MaterialWindow = {
         self.mVerticalLayout.Update = nil
         self.mVerticalLayout.Update = OverridenVLayoutUpdate
         Com.WindowLayout.SetCentralComponent(self, self.mVerticalLayout)
-    end 
+    end
 }
+  
