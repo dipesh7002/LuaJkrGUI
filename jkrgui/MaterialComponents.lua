@@ -325,5 +325,4 @@ In event
             Com.WindowLayout.SetCentralComponent(self, verticalLayout)
         end
     }
-
 end
