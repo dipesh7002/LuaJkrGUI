@@ -6,6 +6,10 @@ Com.Load3DComponents = function ()
     Three = Jkr3d.three(Jkr3d.SizeOfUB_Default, Jkr3d.SizeOfSSBO_Default)
 end
 
+Com.Bind3DComponents = function(inBindPoint)
+    Three:bind(inBindPoint)
+end
+
 --[[
     Object3D is the base class for all the objects 
 ]]
@@ -69,7 +73,7 @@ Com.Camera3D = {
 }
 
 Com.SetCamera3D = function (inCamera)
-    Three:write_to_global_ub_default(inCamera.mViewMatrix_4x4, inCamera.mProjMatrix_4x4, vec4(0, 0, 0))
+    Three:write_to_global_ub_default(inCamera.mViewMatrix_4x4, inCamera.mProjMatrix_4x4, vec4(0))
 end
 
 
@@ -94,8 +98,14 @@ Com.Model3DglTF = {
     mModelId = nil,
     New = function(self, inFilename, inPosition_3f, inDimension_3f, inRotation_3f)
         local Obj = Com.Object3D:New(inPosition_3f, inDimension_3f, inRotation_3f)
+        setmetatable(self, Com.Object3D)
         setmetatable(Obj, self)
+        self.__index = self
         Obj.mModelId = Three:add_model(inFilename)
         return Obj
+    end,
+    Draw = function (self, inPainter, inBindpoint)
+        inPainter:Bind(inBindpoint) 
+        Three:painter_draw(inPainter.mPainterId, self.mModelId, inBindpoint, self.mModelMatrix, vec4(1), vec4(1)) --these are push constant stuffs, will be used when this matures further
     end
 }

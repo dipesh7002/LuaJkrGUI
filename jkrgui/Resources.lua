@@ -44,8 +44,8 @@ Jkr.GLSL.PushLayout = [[
 
     layout(push_constant, std430) uniform pc {
         mat4 mvp;
-        vec3 rough;
-        vec3 rgb;
+        vec4 rough;
+        vec4 rgb;
     } push;
 
 ]]
@@ -82,7 +82,7 @@ Jkr.GLSL.Constant3D = function ()
 
     ]]
 
-    local CShader = Jkr.GLSL.PushLayout .. Jkr.GLSL.UBLayout .. [[
+    local CShader = [[
         void GlslMain() 
         {
 
