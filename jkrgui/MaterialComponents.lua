@@ -3,7 +3,7 @@ require "jkrgui.ExtraComponents"
 require "jkrgui.LayoutComponents"
 
 --[[
-    You have to call LoadMaterials() in the Load Callback from now, 
+    You have to call LoadMaterials() in the Load Callback from now,
     this is to prevent automatic loading of icons, so that we can maintain
     consistency and there is no execution of code by requiring this file
 ]]
@@ -64,8 +64,8 @@ function LoadMaterials()
             end
             for i = 1, inNoOfEntries, 1 do
                 self.mTableObjectForDescription[i]:Update(vec3(
-                    self.mPosition_3f[i].x + inDimension_3f.x + self.mPadding, self.mPosition_3f[i].y,
-                    self.mPosition_3f[i].z), vec3(self.mLengthCellDimension, inDimension_3f.y, inDimension_3f.z),
+                        self.mPosition_3f[i].x + inDimension_3f.x + self.mPadding, self.mPosition_3f[i].y,
+                        self.mPosition_3f[i].z), vec3(self.mLengthCellDimension, inDimension_3f.y, inDimension_3f.z),
                     inStringTable[i].name)
             end
         end,
@@ -140,7 +140,7 @@ In event
             self.ChoosenChoice = inDefaultString
             local dimen_string = self.mFontObject:GetDimension(inHeadString)
             self.mHeading:Update(vec3(inPosition_3f.x - dimen_string.x - 5,
-                inPosition_3f.y + inOneCellDimension_3f.y / 2 + dimen_string.y / 2, self.mDepth), vec3(0, 0, 0),
+                    inPosition_3f.y + inOneCellDimension_3f.y / 2 + dimen_string.y / 2, self.mDepth), vec3(0, 0, 0),
                 inHeadString)
             for i = 1, inNoOfEntries + 1, 1 do
                 if i == 1 then
@@ -166,7 +166,7 @@ In event
                 self.DropUpButton:Update(vec3(0, 0, 0), vec3(0, 0, 0))
             else
                 self.DropUpButton:Update(vec3(self.mPosition_3f[1].x + self.mDimension_3f[1].x, self.mPosition_3f[1].y,
-                    self.mDepth - 5),
+                        self.mDepth - 5),
                     vec3(self.mDimension_3f[1].y + 5, self.mDimension_3f[1].y, self.mDimension_3f[1].z))
                 self.DropDownButton:Update(vec3(0, 0, 0), vec3(0, 0, 0))
             end
@@ -186,8 +186,8 @@ In event
                     end
                 end
                 if not (MousePos.x > self.mPosition_3f[1].x and MousePos.x <
-                    (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.y > self.mPosition_3f[1].y and
-                    MousePos.y < (self.mPosition_3f[inNoOfEntries + 1].y + self.mDimension_3f[1].y)) then
+                        (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.y > self.mPosition_3f[1].y and
+                        MousePos.y < (self.mPosition_3f[inNoOfEntries + 1].y + self.mDimension_3f[1].y)) then
                     if MousePos.x > (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.x <
                         (self.mPosition_3f[1].x + self.mDimension_3f[1].x + self.mDimension_3f[1].y + 5) and MousePos.y >
                         self.mPosition_3f[1].y and MousePos.y < (self.mPosition_3f[1].y + self.mDimension_3f[1].y) then
@@ -302,8 +302,8 @@ In event
 
             local horizontalcomponents = Com.HLayout:New(0)
             local blankspace = Com.StackLayout:New(0)
-            horizontalcomponents:AddComponents({blankspace, minimize_button, minmax_button, close_button},
-                {0.7, 0.1, 0.1, 0.1})
+            horizontalcomponents:AddComponents({ blankspace, minimize_button, minmax_button, close_button },
+                { 0.7, 0.1, 0.1, 0.1 })
 
             local Window = self
             horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
@@ -317,32 +317,33 @@ In event
             horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z),
                 vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
 
-        local horizontalcomponents = Com.HLayout:New(0)
-        local blankspace = Com.StackLayout:New(0)
-        horizontalcomponents:AddComponents({ blankspace, minimize_button, minmax_button, close_button },
-            { 0.7, 0.1, 0.1, 0.1 })
+            local horizontalcomponents = Com.HLayout:New(0)
+            local blankspace = Com.StackLayout:New(0)
+            horizontalcomponents:AddComponents({ blankspace, minimize_button, minmax_button, close_button },
+                { 0.7, 0.1, 0.1, 0.1 })
 
-        local Window = self
-        horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
-            print("Update Called Horo")
-            print(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
-            local dimen = vec3(Window.mHitArea_2f.y, Window.mHitArea_2f.y, inDimension_3f.z)
-            local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
-            for i = #self.mComponents, 2, -1 do
-                self.mComponents[i]:Update(position, dimen)
-                position.x = position.x - dimen.x
+            local Window = self
+            horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
+                print("Update Called Horo")
+                print(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+                local dimen = vec3(Window.mHitArea_2f.y, Window.mHitArea_2f.y, inDimension_3f.z)
+                local position = vec3(inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f.y, inPosition_3f.z)
+                for i = #self.mComponents, 2, -1 do
+                    self.mComponents[i]:Update(position, dimen)
+                    position.x = position.x - dimen.x
+                end
             end
-        end
 
-        horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z),
-            vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+            horizontalcomponents:Update(vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z),
+                vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
 
 
-        local titlebar_buttons = Com.StackLayout:New(5)
-        titlebar_buttons:AddComponents({ titleBar, horizontalcomponents })
-        titlebar_buttons:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
-        local verticalLayout = Com.VLayout:New(0)
-        verticalLayout:AddComponents({ titlebar_buttons, inComponent }, { 0.2, 0.8 })
-        Com.WindowLayout.SetCentralComponent(self, verticalLayout)
-    end,
-}
+            local titlebar_buttons = Com.StackLayout:New(5)
+            titlebar_buttons:AddComponents({ titleBar, horizontalcomponents })
+            titlebar_buttons:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+            local verticalLayout = Com.VLayout:New(0)
+            verticalLayout:AddComponents({ titlebar_buttons, inComponent }, { 0.2, 0.8 })
+            Com.WindowLayout.SetCentralComponent(self, verticalLayout)
+        end,
+    }
+end
