@@ -74,6 +74,7 @@ Com.TextMultiLineObject = {
     WrapWithinDimensions = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f)
         local i = inStartingIndex
         local dimens = self.mFontObject:GetDimension(inString)
+        print(inString)
         if dimens.x > inDimension_3f.x then
             local sub = self.mFontObject:GetSubstringWithinDimension(inString, inDimension_3f.x)
             self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, sub.s)
@@ -104,6 +105,5 @@ Com.TextMultiLineObject = {
         for Line in self.mStringBuffer:gmatch("(.-)\n") do
             i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f)
         end
-
     end
 }

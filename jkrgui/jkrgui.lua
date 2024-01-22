@@ -197,12 +197,12 @@ Jkr.FontObject = {
         end,
         GetSubstringWithinDimension = function (self, inString, inDimensionX)
                 local i = 0
-                local substr1 = utf8.sub(inString, 1, utf8.len(inString) - i)
+                local substr1 = utf8.sub(inString, 1, -2)
                 while self:GetDimension(substr1).x >= inDimensionX do
-                       substr1 = utf8.sub(inString, 1, utf8.len(inString) - i)
+                       substr1 = utf8.sub(substr1, 1, -2)
                        i = i + 1 
                 end
-                return {s = substr1, n =  utf8.len(inString) - i + 2}
+                return {s = substr1, n =  utf8.len(inString) - i}
         end
 }
 
