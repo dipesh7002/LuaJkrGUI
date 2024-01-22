@@ -395,8 +395,11 @@ Jkr.Components.Static.TextObject = {
                                 GetIdentityMatrix())
                 end
         end,
-        Update = function(self, inPosition_3f)
+        Update = function(self, inPosition_3f, inDimension_3f, inString)
                 self.mPosition_3f = inPosition_3f
+                if(inString) then
+                        self.mString = inString
+                end
                 if not self.mAlt then
                         local str = string.rep(" ", self.mId.y)
                         T.Update(Int(self.mId.x), str, self.mPosition_3f)

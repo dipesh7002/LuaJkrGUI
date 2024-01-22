@@ -339,6 +339,13 @@ In event
             titlebar_buttons:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
             local verticalLayout = Com.VLayout:New(0)
             verticalLayout:AddComponents({ titlebar_buttons, inComponent }, { 0.2, 0.8 })
+            local ThisWindow = self
+            verticalLayout.Update = function (self, inPosition_3f, inDimension_3f)
+                    local pos = vec3(inPosition_3f.x, inPosition_3f.y + ThisWindow.mHitArea_2f.y, inPosition_3f.z)
+                    local hitdimen = vec3(ThisWindow.mHitArea_2f.x, ThisWindow.mHitArea_2f.y, 1)
+                    self.mComponents[1]:Update(inPosition_3f, hitdimen)
+                    self.mComponents[2]:Update(pos, inDimension_3f)   
+            end
             Com.WindowLayout.SetCentralComponent(self, verticalLayout)
         end,
     }
