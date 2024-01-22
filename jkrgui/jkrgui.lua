@@ -194,6 +194,15 @@ Jkr.FontObject = {
         -- returns vec2
         GetDimension = function(self, inString)
                 return T.GetTextDimension(inString, Int(self.mId))
+        end,
+        GetSubstringWithinDimension = function (self, inString, inDimensionX)
+                local i = 0
+                local substr1 = utf8.sub(inString, 1, utf8.len(inString) - i)
+                while self:GetDimension(substr1).x >= inDimensionX do
+                       substr1 = utf8.sub(inString, 1, utf8.len(inString) - i)
+                       i = i + 1 
+                end
+                return {s = substr1, n =  utf8.len(inString) - i + 2}
         end
 }
 
