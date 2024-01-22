@@ -185,7 +185,11 @@ Jkr.FontObject = {
                 }
                 setmetatable(Object, self)
                 self.__index =
+<<<<<<< HEAD
                     self -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
+=======
+                self                -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
+>>>>>>> cc35b79335274f922b9eae6ee707b769b96e7988
                 Object.mPath = inPath
                 Object.mSize = inSize
                 Object.mId = T.AddFontFace(Object.mPath, Object.mSize)
