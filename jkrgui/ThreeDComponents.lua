@@ -32,7 +32,10 @@ Com.Object3D = {
         self.mRotation = inRotation_3f
         self.mModelMatrix = GetIdentityMatrix()
         self.mModelMatrix = Jmath3D.scale(self.mModelMatrix, inDimension_3f)
-        self.mModelMatrix = Jmath3D.rotate(self.mModelMatrix, Jmath3D.magnitude(inRotation_3f),  Jmath3D.normalize(inRotation_3f) )
+        if(inRotation_3f.x == 0 and inRotation_3f.y == 0 and inRotation_3f.z == 0) then
+        else
+            self.mModelMatrix  = Jmath3D.rotate(self.mModelMatrix, Jmath3D.magnitude(inRotation_3f), Jmath3D.normalize(inRotation_3f))
+        end
         self.mModelMatrix = Jmath3D.translate(self.mModelMatrix, inPosition_3f)
     end
 }
@@ -64,6 +67,7 @@ Com.Camera3D = {
         self.mUpPosition_3f = inUpPosition_3f
         self.mAspect = inAspect
         self.mViewMatrix_4x4 = Jmath3D.lookat(self.mEyePosition_3f, self.mCenterOfInterest_3f, self.mUpPosition_3f)
+        print("Perspective")
         if not self.mIsOrtho then
             self.mProjMatrix_4x4 = Jmath3D.perspective(inFieldOfView, inAspect, inNearZ, inFarZ)
         else
