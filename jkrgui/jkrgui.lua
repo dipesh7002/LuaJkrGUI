@@ -453,7 +453,6 @@ Jkr.Components.Util.ImagePainter = {
                 return Obj
         end,
         RegisterImage = function(self, inPainterImageObject)
-                print("Image Registered")
                 self.mPainter:register_image(inPainterImageObject.mImage)
                 self.mPainterRegisteredImageObject = inPainterImageObject
         end,
