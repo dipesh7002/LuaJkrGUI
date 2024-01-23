@@ -93,6 +93,7 @@ Com.VLayout = {
         return ComponentsPosition
     end
 }
+
 Com.StackLayout = {
     mComponents = nil,
     New = function(self, inChangingZvalue)
@@ -113,7 +114,7 @@ Com.StackLayout = {
         self.mDimension_3f = inDimension_3f
         for index, value in ipairs(self.mComponents) do
             value:Update(vec3(position.x, position.y, position.z),
-                vec3(dimension.x, dimension.y , dimension.z),
+                vec3(dimension.x, dimension.y, dimension.z),
                 self.mComponents[index].mText)
             position.z = position.z - self.mChangingZvalue
         end
@@ -231,7 +232,7 @@ Com.ButtonProxy = {
             mDimension_3f = inDimension_3f,
             mHoverFunction = function() end,
             mClickedFunction = function() end,
-            mHoverOutFunction = function () end,
+            mHoverOutFunction = function() end,
         }
         setmetatable(Obj, self)
         self.__index = self
@@ -248,7 +249,6 @@ Com.ButtonProxy = {
                 if Obj.mComponentObject.mClicked_b then
                     Obj.mClickedFunction()
                 end
-                
             end
         )
         return Obj
