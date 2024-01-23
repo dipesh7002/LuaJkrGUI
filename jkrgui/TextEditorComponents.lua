@@ -94,11 +94,12 @@ Com.TextMultiLineObject = {
 	GetCharacterPosition = function(self, inPosition_3f, inLineNo, inCharacterIndex)
 		local str = ComTable[self.mLineStringBuffers[inLineNo].mTextObjectId].mString
 		local substr = " "
-		if str then
-			print(inLineNo, str, inCharacterIndex)
+		local dimens = vec2(0, 0)
+		if str and inCharacterIndex <= utf8.len(str) then
+			print(inLineNo, str, inCharacterIndex, utf8.len(str))
 			substr = utf8.sub(str, 1, inCharacterIndex - 1)
+			dimens = self.mFontObject:GetDimension(substr)
 		end
-		local dimens = self.mFontObject:GetDimension(substr)
 		return vec3(inPosition_3f.x + dimens.x,
 			inPosition_3f.y + (inLineNo - 1) * self.mVerticalDrawSpacing,
 			inPosition_3f.z)
@@ -106,7 +107,7 @@ Com.TextMultiLineObject = {
 	GetCharacterIndex = function(self, inAbsoluteCharIndex)
 		local lineIndex = 1
 		local traversedChars = 0
-		local len = o
+		local len = 0
 		while traversedChars <= inAbsoluteCharIndex do
 			local str = ComTable
 			    [self.mLineStringBuffers[lineIndex].mTextObjectId].mString
@@ -126,6 +127,7 @@ Com.TextMultiLineObject = {
 			lineIndex = lineIndex + 1
 		end
 		local charIndex = inAbsoluteCharIndex - (traversedChars - len)
+		lineIndex = lineIndex - 1
 		print(string.format(
 			[[
 			From GetCharacterIndex:
@@ -237,7 +239,7 @@ Com.TextMultiLineEditObject = {
 	Insert = function(self, inCharacter)
 		local charIndexInMainBuffer = self.mTextMultiLineObject:InsertAt(self.mCursorPos_2u.x,
 			self.mCursorPos_2u.y, inCharacter)
-		return charIndexInMainBuffer + utf8.len(inCharacter)
+		return charIndexInMainBuffer + utf8.len(inCharacter) + 1
 	end,
 	BackDelete = function(self)
 
@@ -261,6 +263,7 @@ Com.TextMultiLineEditObject = {
 		self.mTextMultiLineObject:Update(inPosition_3f, inDimension_3f, inText)
 		local pos = self.mTextMultiLineObject:GetCharacterIndex(self.mCursorPosAbsolute)
 		self.mCursorPos_2u = uvec2(pos.line, pos.charIndex)
+		print(self.mCursorPos_2u.x, self.mCursorPos_2u.y)
 		self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self.mCursorWidth)
 		self.mPosition_3f = inPosition_3f
 	end
