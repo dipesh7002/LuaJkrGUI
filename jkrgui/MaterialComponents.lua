@@ -378,6 +378,7 @@ Com.SnipperWidget = {
                 end
             end
         )
+        
         iconDown:SetFunctions(
             function()
 
