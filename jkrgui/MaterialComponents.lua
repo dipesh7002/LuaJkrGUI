@@ -341,7 +341,7 @@ Com.MaterialWindow = {
     end,
 }
 
-Com.SnipperWidget = {
+Com.SpinnerWidget = {
     New = function(self, inPosition_3f, inDimension_3f, inFont, inLowerLimit, inHigherLimit)
         local Obj = {
             mPosition_3f = inPosition_3f,
@@ -378,7 +378,7 @@ Com.SnipperWidget = {
                 end
             end
         )
-        
+
         iconDown:SetFunctions(
             function()
 
