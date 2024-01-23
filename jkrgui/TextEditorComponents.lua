@@ -70,7 +70,19 @@ Com.TextMultiLineObject = {
     InsertAt = function (self, inLineNo, inCharacterIndex, inCharacter)
         local str = self.mStringBuffer
         local pos = self.mLineStringBuffers[inLineNo].mPositionInMultiline
-        self.mStringBuffer = utf8.sub(str, 1, pos + inCharacterIndex) .. inCharacter .. utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
+        local lhs = utf8.sub(str, 1, pos + inCharacterIndex - 1)
+        local toinsert = inCharacter
+        local rhs = utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
+        print("lhs --------------------------------------------------------------")
+        print(lhs)
+        print("toinsert --------------------------------------------------------------")
+        print(toinsert)
+        print("rhs --------------------------------------------------------------")
+        print(rhs)
+        print("Final =====================================")
+        local final = lhs .. toinsert .. rhs
+        print(final)
+        self.mStringBuffer = final
     end,
     BackDeleteAt = function (self, inLineNo, inCharacterIndex)
         
@@ -84,7 +96,7 @@ Com.TextMultiLineObject = {
         local str = ComTable[self.mLineStringBuffers[inLineNo].mTextObjectId].mString
         local substr = " "
         if str then
-            substr = utf8.sub(str, 1, inCharacterIndex)
+            substr = utf8.sub(str, 1, inCharacterIndex - 1)
         end
         local dimens = self.mFontObject:GetDimension(substr)
         return vec3(inPosition_3f.x + dimens.x, inPosition_3f.y + (inLineNo - 1) * self.mVerticalDrawSpacing, inPosition_3f.z)
@@ -98,7 +110,7 @@ Com.TextMultiLineObject = {
             self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, sub.s, lineposmultiline)
             inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
             i = self:WrapWithinDimensions(utf8.sub(inString, sub.n, utf8.len(inString)), i + 1, inLinePosition_3f,
-                inDimension_3f, inLinePosInMultiline + sub.n)
+                inDimension_3f, inLinePosInMultiline + sub.n - 1)
         else
             self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, inString, lineposmultiline)
             inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
@@ -122,8 +134,7 @@ Com.TextMultiLineObject = {
         local i = 1
         local linepos = 1
         for Line in self.mStringBuffer:gmatch("(.-)\n") do
-            i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f, linepos)
-            print(i)
+            i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f, linepos - 1)
             linepos = linepos + utf8.len(Line)
         end
     end
@@ -139,7 +150,6 @@ Com.TextMultiLineEditObject = {
         local Obj = {} 
         setmetatable(Obj, self)
         self.__index = self
-
         Obj.mTextMultiLineObject = Com.TextMultiLineObject:New(inPosition_3f, inDimension_3f, inFontObject, inMaxNoOfLines, inMaxChars, inVerticalDrawSpacing, inShouldWrap)
         Obj.mCursor = Com.TextCursorObject:New(inPosition_3f, vec3(0, 0, 1), vec4(1, 0, 0, 1))
         if inCursorWidth then
@@ -167,7 +177,6 @@ Com.TextMultiLineEditObject = {
     end,
     Update = function (self, inPosition_3f, inDimension_3f, inText)
         self.mTextMultiLineObject:Update(inPosition_3f, inDimension_3f, inText)
-        print(inText)
         self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self.mCursorWidth)
     end
 }
