@@ -66,9 +66,9 @@ Com.TextMultiLineObject = {
 		end
 		for i = 1, inMaxNoOfLines, 1 do
 			Obj.mLineStringBuffers[#Obj.mLineStringBuffers + 1] = Com.TextLineObject
-			:New(linePositionY,
-				inDimension_3f,
-				inMaxChars, inFontObject)
+			    :New(linePositionY,
+				    inDimension_3f,
+				    inMaxChars, inFontObject)
 			linePositionY.y = linePositionY.y + inVerticalDrawSpacing
 		end
 		return Obj
@@ -80,9 +80,8 @@ Com.TextMultiLineObject = {
 		local toinsert = inCharacter
 		local rhs = utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
 		local final = lhs .. toinsert .. rhs
-		print(final)
 		self.mStringBuffer = final
-		return pos + inCharacterIndex
+		return pos + inCharacterIndex - 1
 	end,
 	BackDeleteAt = function(self, inLineNo, inCharacterIndex)
 
@@ -96,6 +95,7 @@ Com.TextMultiLineObject = {
 		local str = ComTable[self.mLineStringBuffers[inLineNo].mTextObjectId].mString
 		local substr = " "
 		if str then
+			print(inLineNo, str, inCharacterIndex)
 			substr = utf8.sub(str, 1, inCharacterIndex - 1)
 		end
 		local dimens = self.mFontObject:GetDimension(substr)
@@ -103,16 +103,58 @@ Com.TextMultiLineObject = {
 			inPosition_3f.y + (inLineNo - 1) * self.mVerticalDrawSpacing,
 			inPosition_3f.z)
 	end,
-	GetCharacterPositionFromMainBuffer = function(self, inCharacterIndex)
+	GetCharacterIndex = function(self, inAbsoluteCharIndex)
+		local lineIndex = 1
+		local traversedChars = 0
+		local len = o
+		while traversedChars <= inAbsoluteCharIndex do
+			local str = ComTable
+			    [self.mLineStringBuffers[lineIndex].mTextObjectId].mString
+			len = utf8.len(str)
+			if len >= inAbsoluteCharIndex and lineIndex == 1 then
+				print(string.format(
+					[[
+					From GetCharacterIndex:
+						Index: (%d, %d)
+						AbsIndex : %d
+						len : %d	
+					]]
+				, lineIndex, inAbsoluteCharIndex, inAbsoluteCharIndex, len))
+				return {line = lineIndex, charIndex = inAbsoluteCharIndex}
+			end
+			traversedChars = traversedChars + len
+			lineIndex = lineIndex + 1
+		end
+		local charIndex = inAbsoluteCharIndex - (traversedChars - len)
+		print(string.format(
+			[[
+			From GetCharacterIndex:
+				Index: (%d, %d)
+				AbsIndex : %d,
+				TraversedChars: %d,
+			]]
+		, lineIndex, charIndex, inAbsoluteCharIndex, inAbsoluteCharIndex, traversedChars))
+		return { line = lineIndex, charIndex = charIndex }
+	end,
+	GetCharacterAbsoluteIndex = function(self, inLineNo, inCharacterIndex)
 		local lineNo = 1
-		local traversedChars = 1
-		while traversedChars <= inCharacterIndex do
-			local str = ComTable[self.mLineStringBuffers[lineNo].mTextObjectId].mString
+		local traversedChars = 0
+		while lineNo < inLineNo do
+			local str = ComTable
+			    [self.mLineStringBuffers[lineNo].mTextObjectId].mString
 			local len = utf8.len(str)
 			traversedChars = traversedChars + len
+			lineNo = lineNo + 1
 		end
-		local charIndex = traversedChars - inCharacterIndex
-		return { line = lineNo, charIndex = charIndex }
+		print(string.format(
+			[[
+			From GetCharacterAbsoluteIndex:
+				Index: (%d, %d)
+				AbsIndex : %d
+			]]
+		, lineNo, inCharacterIndex, traversedChars + inCharacterIndex))
+		-- print("Index:(",  inLineNo, inCharacterIndex, ") Abs Index:(", traversedChars + inCharacterIndex, ")")
+		return traversedChars + inCharacterIndex
 	end,
 	WrapWithinDimensions = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f,
 			  inLinePosInMultiline)
@@ -165,12 +207,14 @@ Com.TextMultiLineObject = {
 	end
 }
 
--- could've inherited
 Com.TextMultiLineEditObject = {
 	mTextMultiLineObject = nil,
 	mCursor = nil,
+	mCursorPosAbsolute = nil,
 	mCursorPos_2u = nil,
 	mCursorWidth = nil,
+	mPosition_3f = nil,
+	mDimension_3f = nil,
 	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxNoOfLines, inMaxChars,
 		inVerticalDrawSpacing, inShouldWrap, inCursorWidth)
 		local Obj = {}
@@ -180,6 +224,7 @@ Com.TextMultiLineEditObject = {
 			inFontObject,
 			inMaxNoOfLines, inMaxChars, inVerticalDrawSpacing, inShouldWrap)
 		Obj.mCursor = Com.TextCursorObject:New(inPosition_3f, vec3(0, 0, 1), vec4(1, 0, 0, 1))
+		Obj.mPosition_3f = inPosition_3f
 		if inCursorWidth then
 			Obj.mCursorWidth = inCursorWidth
 		else
@@ -192,11 +237,9 @@ Com.TextMultiLineEditObject = {
 	Insert = function(self, inCharacter)
 		local charIndexInMainBuffer = self.mTextMultiLineObject:InsertAt(self.mCursorPos_2u.x,
 			self.mCursorPos_2u.y, inCharacter)
-		local newCursorPos = self.mTextMultiLineObject:GetCharacterPositionFromMainBuffer(
-			charIndexInMainBuffer)
-		self.mCursorPos_2u = uvec2(newCursorPos.line, newCursorPos.charIndex)
+		return charIndexInMainBuffer + utf8.len(inCharacter)
 	end,
-	Delete = function(self)
+	BackDelete = function(self)
 
 	end,
 	SetCursor = function(self, inPosition_3f, inLine, inCharacterIndex, inCursorWidth)
@@ -208,10 +251,17 @@ Com.TextMultiLineEditObject = {
 	end,
 	PutCursorAt = function(self, inLine, inCharacterIndex)
 		self.mCursorPos_2u = uvec2(inLine, inCharacterIndex)
+		local absindex = self.mTextMultiLineObject:GetCharacterAbsoluteIndex(inLine, inCharacterIndex)
+		self.mCursorPosAbsolute = absindex
+	end,
+	PutCursorAtAbsolute = function(self, inCharacterIndex)
+		self.mCursorPosAbsolute = inCharacterIndex
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inText)
 		self.mTextMultiLineObject:Update(inPosition_3f, inDimension_3f, inText)
-		self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self
-		.mCursorWidth)
+		local pos = self.mTextMultiLineObject:GetCharacterIndex(self.mCursorPosAbsolute)
+		self.mCursorPos_2u = uvec2(pos.line, pos.charIndex)
+		self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self.mCursorWidth)
+		self.mPosition_3f = inPosition_3f
 	end
 }
