@@ -67,13 +67,12 @@ Com.TextMultiLineObject = {
         end
         return Obj
     end,
-    InsertAt = function (self, inPosition_3f, inDimension_3f, inLineNo, inCharacterIndex, inCharacter)
+    InsertAt = function (self, inLineNo, inCharacterIndex, inCharacter)
         local str = self.mStringBuffer
         local pos = self.mLineStringBuffers[inLineNo].mPositionInMultiline
-        --local newstr = 
-        --utf8.sub(str, )
+        self.mStringBuffer = utf8.sub(str, 1, pos + inCharacterIndex) .. inCharacter .. utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
     end,
-    BackDeleteAt = function (self, inPosition_3f, inDimension_3f, inLineNo, inCharacterIndex)
+    BackDeleteAt = function (self, inLineNo, inCharacterIndex)
         
     end,
     EraseAll = function(self)
@@ -93,14 +92,17 @@ Com.TextMultiLineObject = {
     WrapWithinDimensions = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f, inLinePosInMultiline)
         local i = inStartingIndex
         local dimens = self.mFontObject:GetDimension(inString)
+        local lineposmultiline = inLinePosInMultiline
         if dimens.x > inDimension_3f.x then
             local sub = self.mFontObject:GetSubstringWithinDimension(inString, inDimension_3f.x)
-            self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, sub.s, inLinePosInMultiline + sub.n)
+            self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, sub.s, lineposmultiline)
+            print(i, sub.s)
             inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
             self:WrapWithinDimensions(utf8.sub(inString, sub.n, utf8.len(inString)), i + 1, inLinePosition_3f,
                 inDimension_3f, inLinePosInMultiline + sub.n)
         else
-            self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, inString, inLinePosInMultiline)
+            self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, inString, lineposmultiline)
+            print(i, inString)
             inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
             i = i + 1
         end
@@ -151,6 +153,7 @@ Com.TextMultiLineEditObject = {
         return Obj
     end,
     Insert = function (self, inCharacter)
+        self.mTextMultiLineObject:InsertAt(self.mCursorPos_2u.x, self.mCursorPos_2u.y, inCharacter)
     end,
     Delete = function (self)
         
@@ -165,6 +168,7 @@ Com.TextMultiLineEditObject = {
     end,
     Update = function (self, inPosition_3f, inDimension_3f, inText)
         self.mTextMultiLineObject:Update(inPosition_3f, inDimension_3f, inText)
+        print(inText)
         self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self.mCursorWidth)
     end
 }
