@@ -96,13 +96,11 @@ Com.TextMultiLineObject = {
         if dimens.x > inDimension_3f.x then
             local sub = self.mFontObject:GetSubstringWithinDimension(inString, inDimension_3f.x)
             self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, sub.s, lineposmultiline)
-            print(i, sub.s)
             inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
-            self:WrapWithinDimensions(utf8.sub(inString, sub.n, utf8.len(inString)), i + 1, inLinePosition_3f,
+            i = self:WrapWithinDimensions(utf8.sub(inString, sub.n, utf8.len(inString)), i + 1, inLinePosition_3f,
                 inDimension_3f, inLinePosInMultiline + sub.n)
         else
             self.mLineStringBuffers[i]:Update(inLinePosition_3f, inDimension_3f, inString, lineposmultiline)
-            print(i, inString)
             inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
             i = i + 1
         end
@@ -125,6 +123,7 @@ Com.TextMultiLineObject = {
         local linepos = 1
         for Line in self.mStringBuffer:gmatch("(.-)\n") do
             i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f, linepos)
+            print(i)
             linepos = linepos + utf8.len(Line)
         end
     end
