@@ -342,7 +342,7 @@ Com.MaterialWindow = {
 }
 
 Com.SnipperWidget = {
-    New = function(self, inPosition_3f, inDimension_3f, inFont)
+    New = function(self, inPosition_3f, inDimension_3f, inFont, inLowerLimit, inHigherLimit)
         local Obj = {
             mPosition_3f = inPosition_3f,
             mDimension_3f = inDimension_3f,
@@ -351,7 +351,7 @@ Com.SnipperWidget = {
         setmetatable(Obj, self)
         self.__index = self
         Obj.mArea = Com.AreaObject:New(inPosition_3f, inDimension_3f)
-        local currentNumber = 10
+        local currentNumber = inLowerLimit
         Obj.mCurrentNumberObject = Com.TextLabelObject:New(tostring(currentNumber),
             vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inFont)
         local iconUp = Com.IconButton:New(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0), DropUp)
@@ -370,10 +370,12 @@ Com.SnipperWidget = {
 
             end,
             function()
+                if currentNumber<inHigherLimit then
                 currentNumber = currentNumber + 1
                 Obj.mCurrentNumberObject:Update(
                 vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inDimension_3f,
                     tostring(currentNumber))
+                end
             end
         )
         iconDown:SetFunctions(
@@ -384,10 +386,13 @@ Com.SnipperWidget = {
 
             end,
             function()
+                if currentNumber> inLowerLimit then
+
                 currentNumber = currentNumber - 1
                 Obj.mCurrentNumberObject:Update(
                 vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inDimension_3f,
                     tostring(currentNumber))
+                end
             end
         )
 
