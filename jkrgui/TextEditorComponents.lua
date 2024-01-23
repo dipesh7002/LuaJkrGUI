@@ -133,8 +133,10 @@ Com.TextMultiLineObject = {
 
         local i = 1
         local linepos = 1
+        local j = 1
         for Line in self.mStringBuffer:gmatch("(.-)\n") do
-            i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f, linepos - 1)
+            i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f, linepos - 1 + j - 1)
+            j = j + 1
             linepos = linepos + utf8.len(Line)
         end
     end
