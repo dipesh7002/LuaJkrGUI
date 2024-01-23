@@ -8,6 +8,8 @@ local UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
     "icons_material/radio_button_unchecked/baseline-2x.png")
 local DropDown = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/arrow_drop_down/baseline-2x.png")
 local DropUp = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/arrow_drop_up/baseline-2x.png")
+local LeftKey = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/keyboard_arrow_left/baseline-2x.png")
+local RightKey = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/keyboard_arrow_right/baseline-2x.png")
 
 Com.CheckButtonList = {
     New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension, inMaxStringLength)
@@ -336,4 +338,90 @@ Com.MaterialWindow = {
         verticalLayout:AddComponents({ titlebar_buttons, inComponent }, { 0.2, 0.8 })
         Com.WindowLayout.SetCentralComponent(self, verticalLayout)
     end,
+}
+--[[
+     update grda kheri position ani dimension chai total duita button ani textbutton sngai dine ani text table dine ani default ma k rakhnu xa vne index dine
+     ---------------------------------------------------------
+     load ma
+     Sele = Com.Selector:New(Font,10,20)
+     Sele:Update(vec3(300,300,80),vec3(200,30,1),{"ram","raja",'raka'}, 1)
+-----------------------------------------------------------------------------------
+    ]]
+Com.Selector = {
+    mTextBox = {},
+    mLeftButton = nil,
+    mRightButton = nil,
+    mTextTable = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
+    New = function(self, inFontObject, inMaxNoOfEntries, inMaxStringLength)
+        local Obj = {
+            mFontObject = inFontObject,
+            mTextBox = {},
+            mLeftButton = nil,
+            mRightButton = nil,
+            mTextTable = nil,
+            mPosition_3f = nil,
+            mDimension_3f = nil,
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mLeftButton = Com.IconButton:New(vec3(0, 0, 0), vec3(0, 0, 0), LeftKey)
+        Obj.mRightButton = Com.IconButton:New(vec3(0, 0, 0), vec3(0, 0, 0), RightKey)
+        for i = 1, inMaxNoOfEntries, 1 do
+            Obj.mTextBox[i] = Com.TextButtonObject:New(string.rep(" ", inMaxStringLength), inFontObject, vec3(0, 0, 0),
+                vec3(0, 0, 0))
+        end
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f, inTextTable, inDefaultIndex)
+        self.mTextTable = inTextTable
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        local index = inDefaultIndex
+        local noOfEntries = #inTextTable
+        local Component = Com.HLayout:New(0)
+        Component:AddComponents({ self.mLeftButton, self.mTextBox[1], self.mRightButton }, { 0.1, 0.8, 0.1 })
+        local selectorbox = self
+        Component.Update = function(self, inPosition_3f, inDimension_3f, inString)
+            local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+            local dimen = vec3(inDimension_3f.y, inDimension_3f.y, inDimension_3f.z)
+            self.mComponents[1]:Update(position, dimen)
+            self.mComponents[2]:Update(vec3(position.x + dimen.x, position.y, position.z),
+                vec3(inDimension_3f.x - (2 * dimen.x), dimen.y, dimen.z), inString)
+            self.mComponents[3]:Update(vec3(position.x + inDimension_3f.x - dimen.x, position.y, position.z), dimen)
+        end
+        Component:Update(self.mPosition_3f, self.mDimension_3f, inTextTable[index])
+        self.mLeftButton:SetFunctions(
+            function()
+                self.mLeftButton.mImageButton:TintColor(vec4(1, 0, 0, 1))
+            end,
+            function()
+                self.mLeftButton.mImageButton:TintColor(vec4(0, 0, 0, 1))
+            end,
+            function()
+                if index > 1 then
+                    Component:Update(self.mPosition_3f, self.mDimension_3f, inTextTable[index - 1])
+                    index = index - 1
+                end
+            end
+        )
+        self.mRightButton:SetFunctions(
+            function()
+                self.mRightButton.mImageButton:TintColor(vec4(1, 0, 0, 1))
+            end,
+            function()
+                self.mRightButton.mImageButton:TintColor(vec4(0, 0, 0, 1))
+            end,
+            function()
+                if index < noOfEntries then
+                    Component:Update(self.mPosition_3f, self.mDimension_3f, inTextTable[index + 1])
+                    index = index + 1
+                end
+            end
+        )
+    end
+
+
+
 }
