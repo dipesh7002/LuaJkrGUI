@@ -340,4 +340,65 @@ In event
             Com.WindowLayout.SetCentralComponent(self, verticalLayout)
         end,
     }
-end
+
+
+    Com.SpinnerWidget = {
+        New = function(self, inPosition_3f, inDimension_3f, inFont, inLowerLimit, inHigherLimit)
+            local Obj = {
+                mPosition_3f = inPosition_3f,
+                mDimension_3f = inDimension_3f,
+                mCurrentNumberObject = nil
+            }
+            setmetatable(Obj, self)
+            self.__index = self
+            Obj.mArea = Com.AreaObject:New(inPosition_3f, inDimension_3f)
+            local currentNumber = inLowerLimit
+            Obj.mCurrentNumberObject = Com.TextLabelObject:New(tostring(currentNumber),
+                vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inFont)
+            local iconUp = Com.IconButton:New(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0), DropUp)
+            local iconDown = Com.IconButton:New(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0), DropDown)
+            local verticalLayout = Com.VLayout:New(3)
+            verticalLayout:AddComponents({ iconUp, iconDown }, { 0.5, 0.5 })
+            verticalLayout:Update(
+                vec3(inPosition_3f.x + inDimension_3f.x - inDimension_3f.y, inPosition_3f.y, inPosition_3f.z - 3),
+                vec3(inDimension_3f.y, inDimension_3f.y, inDimension_3f.z))
+    
+            iconUp:SetFunctions(
+                function()
+    
+                end,
+                function()
+    
+                end,
+                function()
+                    if currentNumber<inHigherLimit then
+                    currentNumber = currentNumber + 1
+                    Obj.mCurrentNumberObject:Update(
+                    vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inDimension_3f,
+                        tostring(currentNumber))
+                    end
+                end
+            )
+    
+            iconDown:SetFunctions(
+                function()
+    
+                end,
+                function()
+    
+                end,
+                function()
+                    if currentNumber> inLowerLimit then
+    
+                    currentNumber = currentNumber - 1
+                    Obj.mCurrentNumberObject:Update(
+                    vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inDimension_3f,
+                        tostring(currentNumber))
+                    end
+                end
+            )
+    
+            return Obj
+        end
+    }
+    
