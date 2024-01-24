@@ -148,6 +148,10 @@ uvec2 = uvec2
 vec3 = vec3
 vec4 = vec4
 
+Print_vec3 = function (inVec3)
+	print(string.format("v(%f, %f, %f)", inVec3.x, inVec3.y, inVec3.z))	
+end
+
 
 Key = key
 
@@ -525,5 +529,19 @@ Jkr.Components.Abstract.Dispatchable = {
 	end,
 	Dispatch = function(self)
 		self.mDispatchFunction()
+	end
+}
+
+Jkr.Components.Abstract.Updatable = {
+	mUpdateFunction = nil,
+	New = function(self, inupdateFunction)
+		local Obj = {}
+		setmetatable(Obj, self)
+		self.__index = self
+		Obj.mUpdateFunction = inupdateFunction
+		return Obj
+	end,
+	Update = function(self)
+		self.mUpdateFunction()
 	end
 }
