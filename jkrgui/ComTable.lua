@@ -53,9 +53,7 @@ end
 
 Com.Draws = function()
     for _, com in ipairs(ComTable) do
-        if com.SetScissor then com:SetScissor() end
         com:Draw()
-        if com.SetScissor then Jkr.reset_scissor() end
     end
 end
 
