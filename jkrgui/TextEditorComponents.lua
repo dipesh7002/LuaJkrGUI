@@ -111,16 +111,10 @@ Com.TextMultiLineObject = {
 	end,
 	BackDeleteAt = function(self, inLineNo, inCharacterIndex)
 		local str = self.mStringBuffer
-		print("lineNo:", inLineNo)
 		local pos = self.mLineStringBuffers[inLineNo].mPositionInMultiline
 		local lhs = utf8.sub(str, 1, pos + inCharacterIndex - 2)
 		local rhs = utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
 		local final = lhs .. rhs
-		print("-------------------------------------------------------------------------------")
-		print(lhs)
-		print("-------------------------------------------------------------------------------")
-		print(rhs)
-		print("-------------------------------------------------------------------------------")
 		self.mStringBuffer = final
 		return pos +inCharacterIndex - 2
 	end,
@@ -134,7 +128,6 @@ Com.TextMultiLineObject = {
 		local substr = " "
 		local dimens = vec2(0, 0)
 		if str and inCharacterIndex <= utf8.len(str) then
-			--print(inLineNo, str, inCharacterIndex, utf8.len(str))
 			substr = utf8.sub(str, 1, inCharacterIndex - 1)
 			dimens = self.mFontObject:GetDimension(substr)
 		end
@@ -151,14 +144,6 @@ Com.TextMultiLineObject = {
 			    [self.mLineStringBuffers[lineIndex].mTextObjectId].mString
 			len = utf8.len(str)
 			if len >= inAbsoluteCharIndex and lineIndex == 1 then
-				-- print(string.format(
-				-- 	[[
-				-- 	From GetCharacterIndex:
-				-- 		Index: (%d, %d)
-				-- 		AbsIndex : %d
-				-- 		len : %d	
-				-- 	]]
-				-- , lineIndex, inAbsoluteCharIndex, inAbsoluteCharIndex, len))
 				return {line = lineIndex, charIndex = inAbsoluteCharIndex}
 			end
 			traversedChars = traversedChars + len
@@ -166,14 +151,6 @@ Com.TextMultiLineObject = {
 		end
 		local charIndex = inAbsoluteCharIndex - (traversedChars - len)
 		lineIndex = lineIndex - 1
-		-- print(string.format(
-		-- 	[[
-		-- 	From GetCharacterIndex:
-		-- 		Index: (%d, %d)
-		-- 		AbsIndex : %d,
-		-- 		TraversedChars: %d,
-		-- 	]]
-		-- , lineIndex, charIndex, inAbsoluteCharIndex, inAbsoluteCharIndex, traversedChars))
 		return { line = lineIndex, charIndex = charIndex }
 	end,
 	GetCharacterAbsoluteIndex = function(self, inLineNo, inCharacterIndex)
@@ -186,14 +163,6 @@ Com.TextMultiLineObject = {
 			traversedChars = traversedChars + len
 			lineNo = lineNo + 1
 		end
-		-- print(string.format(
-		-- 	[[
-		-- 	From GetCharacterAbsoluteIndex:
-		-- 		Index: (%d, %d)
-		-- 		AbsIndex : %d
-		-- 	]]
-		-- , lineNo, inCharacterIndex, traversedChars + inCharacterIndex))
-		-- print("Index:(",  inLineNo, inCharacterIndex, ") Abs Index:(", traversedChars + inCharacterIndex, ")")
 		return traversedChars + inCharacterIndex
 	end,
 	WrapWithinDimensions = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f,
@@ -269,7 +238,6 @@ Com.TextMultiLineEditObject = {
 		self.mTextMultiLineObject:Update(inPosition_3f, inDimension_3f, inText)
 		local pos = self.mTextMultiLineObject:GetCharacterIndex(self.mCursorPosAbsolute)
 		self.mCursorPos_2u = uvec2(pos.line, pos.charIndex)
-		-- print(self.mCursorPos_2u.x, self.mCursorPos_2u.y)
 		self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self.mCursorWidth)
 		self.mPosition_3f = inPosition_3f
 	end,

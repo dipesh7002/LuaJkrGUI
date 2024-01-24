@@ -2,7 +2,6 @@ require "jkrgui.jkrgui"
 require "jkrgui.ComTable"
 
 local lerp = function (a, b, t)
-	--return (a * (1 - t) + t * b)
 	return (a * (1 - t) + t * b) * (1 - t) + b * t
 end
 
