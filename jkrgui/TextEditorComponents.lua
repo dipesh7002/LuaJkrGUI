@@ -22,9 +22,13 @@ Com.TextCursorObject = {
 	end
 }
 
-Com.TextLineObject = {
+Com.VisualLineObject = {
 	mTextObjectId = nil,
-	mPositionInMultiline = nil,
+	mIndex = nil,
+	mEndsWithNewLine = nil,
+	mVisualDimension_2f = nil,
+	mFontObject = nil,
+	mUtf8Len = nil,
 	New = function(self, inPosition_3f, inDimension_3f, inMaxChars, inFontObject)
 		local Obj = {}
 		setmetatable(Obj, self)
@@ -34,238 +38,88 @@ Com.TextLineObject = {
 			inPosition_3f,
 			inFontObject)
 		Obj.mTextObjectId = com_i
+		Obj.mEndsWithNewLine = false
+		Obj.mFontObject = inFontObject
 		return Obj
 	end,
-	Update = function(self, inPosition_3f, inDimension_3f, inString, inPositionInMultiline)
+	Update = function(self, inPosition_3f, inDimension_3f, inString, inIndex, inEndsWithNewLine)
 		ComTable[self.mTextObjectId]:Update(inPosition_3f, inDimension_3f, inString)
-		self.mPositionInMultiline = inPositionInMultiline
+		self.mIndex = inIndex
+		self.mEndsWithNewLine = inEndsWithNewLine
+		self.mVisualDimension_2f = self.mFontObject:GetDimension(inString)
+		if inEndsWithNewLine then
+			self.mUtf8Size = utf8.len(inString) + 1
+		else
+			self.mUtf8Size = utf8.len(inString)
+		end
 	end
 }
 
-Com.TextMultiLineObject = {
-	mStringBuffer = " ",
-	mLineStringBuffers = nil,
+Com.VisualWrapLinesObject = {
+	mStringBuffer = nil,
 	mMaxNumLines = nil,
 	mVerticalDrawSpacing = nil,
-	mFontObject = nil,
-	mShouldWrap = false,
-	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxNoOfLines, inMaxChars,
-		inVerticalDrawSpacing, inShouldWrap)
+	mVisualLines = nil,
+	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars,
+		inVerticalDrawSpacing)
 		local Obj = {}
 		setmetatable(Obj, self)
 		self.__index = self
-		Obj.mLineStringBuffers = {}
-		local linePositionY = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
-		Obj.mMaxNumLines = inMaxNoOfLines
+		local linePosition = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+		Obj.mMaxNumLines = inMaxLines
 		Obj.mVerticalDrawSpacing = inVerticalDrawSpacing
 		Obj.mFontObject = inFontObject
-		if inShouldWrap then
-			Obj.mShouldWrap = inShouldWrap
-		else
-			Obj.mShouldWrap = false
-		end
-		for i = 1, inMaxNoOfLines, 1 do
-			Obj.mLineStringBuffers[#Obj.mLineStringBuffers + 1] = Com.TextLineObject
-			    :New(linePositionY,
-				    inDimension_3f,
-				    inMaxChars, inFontObject)
-			linePositionY.y = linePositionY.y + inVerticalDrawSpacing
+		Obj.mVisualLines = {}
+		for i = 1, inMaxLines, 1 do
+			Obj.mVisualLines[#Obj.mVisualLines + 1] = Com.VisualLineObject
+			    :New(linePosition, inDimension_3f, inMaxChars, inFontObject)
+			linePosition.y = linePosition.y + inVerticalDrawSpacing
 		end
 		return Obj
 	end,
-	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing)
+	Update = function (self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing)
 		if inNewStringBuffer then
 			self.mStringBuffer = inNewStringBuffer
-		end
-
+		end	
 		if inNewVerticalDrawSpacing then
 			self.mVerticalDrawSpacing = inNewVerticalDrawSpacing
 		end
-
 		self:EraseAll()
 		local linePosition = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
 		linePosition.y = linePosition.y + self.mVerticalDrawSpacing
-		-- The Text is drawn ABOVE the point, therefore a vertical-draw-spacing is being inserted
 
-		local i = 1
-		local linepos = 1
-		local j = 1
+		local lineIndex = 1
+		local visualCharsCount = 0
+		local newLinesCount = 0
 		for Line in self.mStringBuffer:gmatch("(.-)\n") do
-			i = self:WrapWithinDimensions(Line, i, linePosition, inDimension_3f, linepos + j - 2)
-			j = j + 1
-			linepos = linepos + utf8.len(Line)
+			lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f, visualCharsCount + newLinesCount)
+			newLinesCount = newLinesCount + 1
+			visualCharsCount = visualCharsCount + utf8.len(Line)
 		end
 	end,
-	--[[ Protected Functions, to be used inside another Component ]]
-	InsertAt = function(self, inLineNo, inCharacterIndex, inCharacter)
-		local str = self.mStringBuffer
-		local pos = self.mLineStringBuffers[inLineNo].mPositionInMultiline
-		local lhs = utf8.sub(str, 1, pos + inCharacterIndex - 1)
-		local toinsert = inCharacter
-		local rhs = utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
-		local final = lhs .. toinsert .. rhs
-		self.mStringBuffer = final
-		return pos + inCharacterIndex - 1
-	end,
-	BackDeleteAt = function(self, inLineNo, inCharacterIndex)
-		local str = self.mStringBuffer
-		local pos = self.mLineStringBuffers[inLineNo].mPositionInMultiline
-		local lhs = utf8.sub(str, 1, pos + inCharacterIndex - 2)
-		local rhs = utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
-		local final = lhs .. rhs
-		self.mStringBuffer = final
-		return pos + inCharacterIndex - 2
-	end,
-	EraseAll = function(self)
+	EraseAll = function (self)
 		for i = 1, self.mMaxNumLines, 1 do
-			self.mLineStringBuffers[i]:Update(vec3(0), vec3(0), " ")
-		end
+			self.mVisualLines[i]:Update(vec3(0), vec3(0), " ")
+		end	
 	end,
-	GetCharacterPosition = function(self, inPosition_3f, inLineNo, inCharacterIndex)
-		local str = ComTable[self.mLineStringBuffers[inLineNo].mTextObjectId].mString
-		local substr = " "
-		local dimens = vec2(0, 0)
-		if str and inCharacterIndex <= utf8.len(str) then
-			substr = utf8.sub(str, 1, inCharacterIndex - 1)
-			dimens = self.mFontObject:GetDimension(substr)
-		end
-		return vec3(inPosition_3f.x + dimens.x,
-			inPosition_3f.y + (inLineNo - 1) * self.mVerticalDrawSpacing,
-			inPosition_3f.z)
-	end,
-	GetCharacterIndex = function(self, inAbsoluteCharIndex)
-		local visualLineIndex = 1
-		local traversedChars = 0
-		local len = 0
-		while traversedChars <= inAbsoluteCharIndex do
-			local str = ComTable[self.mLineStringBuffers[visualLineIndex].mTextObjectId].mString
-			len = utf8.len(str)
-			if len >= inAbsoluteCharIndex and visualLineIndex == 1 then
-				return { line = visualLineIndex, charIndex = inAbsoluteCharIndex }
-			end
-			traversedChars = traversedChars + len
-			visualLineIndex = visualLineIndex + 1
-		end
-		visualLineIndex = visualLineIndex - 1
-		local absPositionOfLineInMainBuffer = self.mLineStringBuffers[visualLineIndex].mPositionInMultiline
-		local charIndex = inAbsoluteCharIndex - absPositionOfLineInMainBuffer
-		return { line = visualLineIndex, charIndex = charIndex }
-	end,
-	GetCharacterAbsoluteIndex = function(self, inLineNo, inCharacterIndex)
-		local lineNo = 1
-		local traversedChars = 0
-		while lineNo < inLineNo do
-			local str = ComTable
-			    [self.mLineStringBuffers[lineNo].mTextObjectId].mString
-			local len = utf8.len(str)
-			traversedChars = traversedChars + len
-			lineNo = lineNo + 1
-		end
-		return traversedChars + inCharacterIndex
-	end,
-	WrapWithinDimensions = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f,
-			  inLinePosInMultiline)
-		local i = inStartingIndex
+	WrapWithin = function (self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f, inVisualLineIndex)
+		local i = inStartingIndex	
 		local dimens = self.mFontObject:GetDimension(inString)
-		local lineposmultiline = inLinePosInMultiline
+		local visualLineIndex = inVisualLineIndex
 		if dimens.x > inDimension_3f.x then
-			local sub = self.mFontObject:GetSubstringWithinDimension(inString,
-				inDimension_3f.x)
-			if self.mLineStringBuffers[i] then
-				self.mLineStringBuffers[i]:Update(inLinePosition_3f,
-					inDimension_3f, sub.s,
-					lineposmultiline)
-			end
+			local sub = self.mFontObject:GetSubstringWithinDimension(inString, inDimension_3f.x)
+			if self.mVisualLines[i] then
+				self.mVisualLines[i]:Update(inLinePosition_3f, inDimension_3f, sub.s, visualLineIndex, false)	
+			end 
 			inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
-			i = self:WrapWithinDimensions(utf8.sub(inString, sub.n, utf8.len(inString)),
-				i + 1,
-				inLinePosition_3f,
-				inDimension_3f, inLinePosInMultiline + sub.n - 1)
+			i = self:WrapWithin(utf8.sub(inString, sub.n, utf8.len(inString)), i + 1, inLinePosition_3f, inDimension_3f, visualLineIndex + sub.n)
 		else
-			if self.mLineStringBuffers[i] then
-				self.mLineStringBuffers[i]:Update(inLinePosition_3f,
-					inDimension_3f,
-					inString,
-					lineposmultiline)
+			if self.mVisualLines[i] then
+				self.mVisualLines[i]:Update(inLinePosition_3f, inDimension_3f, inString, visualLineIndex, true)
 			end
 			inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
 			i = i + 1
 		end
 		return i
-	end,
-}
-
-Com.TextMultiLineEditObject = {
-	mTextMultiLineObject = nil,
-	mCursor = nil,
-	mCursorPosAbsolute = nil,
-	mCursorPos_2u = nil,
-	mCursorWidth = nil,
-	mPosition_3f = nil,
-	mDimension_3f = nil,
-	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxNoOfLines, inMaxChars,
-		inVerticalDrawSpacing, inShouldWrap, inCursorWidth)
-		local Obj = {}
-		setmetatable(Obj, self)
-		self.__index = self
-		Obj.mTextMultiLineObject = Com.TextMultiLineObject:New(inPosition_3f, inDimension_3f,
-			inFontObject,
-			inMaxNoOfLines, inMaxChars, inVerticalDrawSpacing, inShouldWrap)
-		Obj.mCursor = Com.TextCursorObject:New(inPosition_3f, vec3(0, 0, 1), vec4(1, 0, 0, 1))
-		Obj.mPosition_3f = inPosition_3f
-		if inCursorWidth then
-			Obj.mCursorWidth = inCursorWidth
-		else
-			Obj.mCursorWidth = 5
-		end
-
-		Obj:PutCursorAt(1, 1)
-		return Obj
-	end,
-	Insert = function(self, inCharacter)
-		local charIndexInMainBuffer = self.mTextMultiLineObject:InsertAt(self.mCursorPos_2u.x,
-			self.mCursorPos_2u.y, inCharacter)
-		return charIndexInMainBuffer + utf8.len(inCharacter) + 1
-	end,
-	BackDelete = function(self)
-		return self.mTextMultiLineObject:BackDeleteAt(self.mCursorPos_2u.x, self.mCursorPos_2u.y)
-	end,
-	PutCursorAt = function(self, inLine, inCharacterIndex)
-		self.mCursorPos_2u = uvec2(inLine, inCharacterIndex)
-		local absindex = self.mTextMultiLineObject:GetCharacterAbsoluteIndex(inLine,
-			inCharacterIndex)
-		self.mCursorPosAbsolute = absindex
-	end,
-	PutCursorAtAbsolute = function(self, inCharacterIndex)
-		self.mCursorPosAbsolute = inCharacterIndex
-	end,
-	Update = function(self, inPosition_3f, inDimension_3f, inText)
-		self.mTextMultiLineObject:Update(inPosition_3f, inDimension_3f, inText, nil)
-		print(self.mCursorPosAbsolute)
-		local pos = self.mTextMultiLineObject:GetCharacterIndex(self.mCursorPosAbsolute)
-		self.mCursorPos_2u = uvec2(pos.line, pos.charIndex)
-		self:SetCursor(inPosition_3f, self.mCursorPos_2u.x, self.mCursorPos_2u.y, self
-			.mCursorWidth)
-		self.mPosition_3f = inPosition_3f
-	end,
-	CursorMoveLeft = function(self)
-
-	end,
-	CursorMoveRight = function(self)
-
-	end,
-	CursorMoveUp = function(self)
-
-	end,
-	CursorMoveDown = function(self)
-
-	end,
-	--[[ Private Functions, Not to be used from outside ]]
-	SetCursor = function(self, inPosition_3f, inLine, inCharacterIndex, inCursorWidth)
-		local pos = self.mTextMultiLineObject:GetCharacterPosition(inPosition_3f, inLine,
-			inCharacterIndex)
-		self.mCursorPos_2u = uvec2(inLine, inCharacterIndex)
-		self.mCursor:Update(pos,
-			vec3(inCursorWidth, self.mTextMultiLineObject.mVerticalDrawSpacing, 1))
 	end
 }
