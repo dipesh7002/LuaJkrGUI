@@ -236,30 +236,26 @@ Com.IconButton = {
     end
 }
 Com.TextButton = {
-    New = function(self, inPosition_3f, inDimension_3f, inFont)
+    mTextButton = nil,
+    New = function(self, inPosition_3f, inDimension_3f, inFont, inString)
         local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
         setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
         setmetatable(Obj, self)
         self.__index = self
-        Obj.Text = Com.TextButtonObject:New("raja", inFont, vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z + 20),
-            inDimension_3f)
-        Obj.mHoverFunction = function()
-            print("Pressed1")
-        end
-        Obj.mClickedFunction = function()
-            print("pressed2")
-        end
-        Obj.mClickedOutfunction = function()
-            print("Preseed3")
-        end
+        Obj.mTextButton = Com.TextButtonObject:New(inString, inFont, inPosition_3f, inDimension_3f)
         return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f, inString)
+        self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
+        Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
     end
 }
 Com.MaterialWindow = {
     mVerticalLayout = nil,
     mTitleText = nil,
     New = function(self, inPosition_3f, inDimension_3f, inHitArea_2f, inTitleText, inFontObject)
-        local Obj = Com.WindowLayout:New(inPosition_3f, inDimension_3f, inHitArea_2f)
+        local Obj = Com.WindowLayout:New(inPosition_3f,
+            inDimension_3f, inHitArea_2f)
         setmetatable(self, Com.WindowLayout)
         setmetatable(Obj, self)
         self.__index = self
@@ -343,8 +339,8 @@ Com.MaterialWindow = {
      update grda kheri position ani dimension chai total duita button ani textbutton sngai dine ani text table dine ani default ma k rakhnu xa vne index dine
      ---------------------------------------------------------
      load ma
-     Sele = Com.Selector:New(Font,10,20)
-     Sele:Update(vec3(300,300,80),vec3(200,30,1),{"ram","raja",'raka'}, 1)
+     Sele = Com.Selector:New({"ram","raja",'raka'},1,Font,10)
+     Sele:Update(vec3(300,300,80),vec3(200,30,1))
 -----------------------------------------------------------------------------------
     ]]
 Com.Selector = {
@@ -354,32 +350,33 @@ Com.Selector = {
     mTextTable = nil,
     mPosition_3f = nil,
     mDimension_3f = nil,
-    New = function(self, inFontObject, inMaxNoOfEntries, inMaxStringLength)
+    mIndex = nil,
+    New = function(self, inTextTable, inDefaultIndex, inFontObject, inMaxStringLength)
         local Obj = {
             mFontObject = inFontObject,
             mTextBox = {},
             mLeftButton = nil,
             mRightButton = nil,
-            mTextTable = nil,
+            mTextTable = inTextTable,
             mPosition_3f = nil,
             mDimension_3f = nil,
+            mIndex = inDefaultIndex,
         }
         setmetatable(Obj, self)
         self.__index = self
         Obj.mLeftButton = Com.IconButton:New(vec3(0, 0, 0), vec3(0, 0, 0), LeftKey)
         Obj.mRightButton = Com.IconButton:New(vec3(0, 0, 0), vec3(0, 0, 0), RightKey)
-        for i = 1, inMaxNoOfEntries, 1 do
+        for i = 1, #inTextTable, 1 do
             Obj.mTextBox[i] = Com.TextButtonObject:New(string.rep(" ", inMaxStringLength), inFontObject, vec3(0, 0, 0),
                 vec3(0, 0, 0))
         end
         return Obj
     end,
-    Update = function(self, inPosition_3f, inDimension_3f, inTextTable, inDefaultIndex)
-        self.mTextTable = inTextTable
+    Update = function(self, inPosition_3f, inDimension_3f)
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
-        local index = inDefaultIndex
-        local noOfEntries = #inTextTable
+        local index = self.mIndex
+        local noOfEntries = #self.mTextTable
         local Component = Com.HLayout:New(0)
         Component:AddComponents({ self.mLeftButton, self.mTextBox[1], self.mRightButton }, { 0.1, 0.8, 0.1 })
         local selectorbox = self
@@ -391,7 +388,7 @@ Com.Selector = {
                 vec3(inDimension_3f.x - (2 * dimen.x), dimen.y, dimen.z), inString)
             self.mComponents[3]:Update(vec3(position.x + inDimension_3f.x - dimen.x, position.y, position.z), dimen)
         end
-        Component:Update(self.mPosition_3f, self.mDimension_3f, inTextTable[index])
+        Component:Update(self.mPosition_3f, self.mDimension_3f, self.mTextTable[index])
         self.mLeftButton:SetFunctions(
             function()
                 self.mLeftButton.mImageButton:TintColor(vec4(1, 0, 0, 1))
@@ -401,7 +398,7 @@ Com.Selector = {
             end,
             function()
                 if index > 1 then
-                    Component:Update(self.mPosition_3f, self.mDimension_3f, inTextTable[index - 1])
+                    Component:Update(self.mPosition_3f, self.mDimension_3f, self.mTextTable[index - 1])
                     index = index - 1
                 end
             end
@@ -415,7 +412,7 @@ Com.Selector = {
             end,
             function()
                 if index < noOfEntries then
-                    Component:Update(self.mPosition_3f, self.mDimension_3f, inTextTable[index + 1])
+                    Component:Update(self.mPosition_3f, self.mDimension_3f, self.mTextTable[index + 1])
                     index = index + 1
                 end
             end
