@@ -111,10 +111,16 @@ Com.TextMultiLineObject = {
 	end,
 	BackDeleteAt = function(self, inLineNo, inCharacterIndex)
 		local str = self.mStringBuffer
+		print("lineNo:", inLineNo)
 		local pos = self.mLineStringBuffers[inLineNo].mPositionInMultiline
-		local lhs = utf8.sub(str, 1, pos + inCharacterIndex - 1 - 1)
+		local lhs = utf8.sub(str, 1, pos + inCharacterIndex - 2)
 		local rhs = utf8.sub(str, pos + inCharacterIndex, utf8.len(str))
 		local final = lhs .. rhs
+		print("-------------------------------------------------------------------------------")
+		print(lhs)
+		print("-------------------------------------------------------------------------------")
+		print(rhs)
+		print("-------------------------------------------------------------------------------")
 		self.mStringBuffer = final
 		return pos +inCharacterIndex - 2
 	end,
@@ -249,7 +255,7 @@ Com.TextMultiLineEditObject = {
 		return charIndexInMainBuffer + utf8.len(inCharacter) + 1
 	end,
 	BackDelete = function(self)
-		self.mTextMultiLineObject:BackDeleteAt()
+		return self.mTextMultiLineObject:BackDeleteAt(self.mCursorPos_2u.x, self.mCursorPos_2u.y)
 	end,
 	PutCursorAt = function(self, inLine, inCharacterIndex)
 		self.mCursorPos_2u = uvec2(inLine, inCharacterIndex)
