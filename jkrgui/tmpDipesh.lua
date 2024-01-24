@@ -68,7 +68,7 @@ Com.IconTextButton = {
         self.__index = self
         Obj.mText = Com.TextLabelObject:New(inText, vec3(0, 0, inPosition_3f.z), inFontObject)
         Obj.mHorizontalLayout = Com.HLayout:New(5)
-        Obj.mHorizontalLayout:AddComponents({Obj.mImageButton, Obj.mText}, {0.8, 0.2})
+        Obj.mHorizontalLayout:AddComponents({Obj.mImageButton, Obj.mText}, {0.3, 0.7})
         Obj.mHorizontalLayout:Update(inPosition_3f, inDimension_3f)
         return Obj
     end,
