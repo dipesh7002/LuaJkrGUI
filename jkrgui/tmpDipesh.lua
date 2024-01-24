@@ -59,3 +59,21 @@ Com.Slider = {
         return Obj
     end
 }
+
+Com.IconTextButton = {
+    New = function (self, inPosition_3f, inDimension_3f, inIconName, inText, inFontObject)
+        local Obj = Com.IconButton:New(inPosition_3f, inDimension_3f, inIconName)
+        setmetatable(self, Com.IconButton)
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mText = Com.TextLabelObject:New(inText, vec3(0, 0, inPosition_3f.z), inFontObject)
+        Obj.mHorizontalLayout = Com.HLayout:New(5)
+        Obj.mHorizontalLayout:AddComponents({Obj.mImageButton, Obj.mText}, {0.8, 0.2})
+        Obj.mHorizontalLayout:Update(inPosition_3f, inDimension_3f)
+        return Obj
+    end,
+    Update = function (self, inPosition_3f, inDimension_3f, inText)
+        self.mText:Update(inPosition_3f, inDimension_3f, inText)
+        Com.IconButton.Update(self, inPosition_3f, inDimension_3f)
+    end
+}
