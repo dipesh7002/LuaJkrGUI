@@ -211,7 +211,10 @@ Com.WindowLayout = {
     Update = function(self, inPosition_3f, inDimension_3f, inHitArea_2f)
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
-        self.mHitArea_2f = inHitArea_2f
+        if inHitArea_2f then
+	self.mHitArea_2f = inHitArea_2f
+        end
+        self.mComponentObject:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
         self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
     end
 }
