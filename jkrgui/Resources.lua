@@ -37,3 +37,57 @@ imageStore(storageImage, to_draw_at, final_color);
 Jkr.GLSL.Clear = [[
 imageStore(storageImage, to_draw_at, vec4(0, 0, 0, 0));
 ]]
+
+-- Threed Shaders Below
+
+Jkr.GLSL.PushLayout = [[
+
+    layout(push_constant, std430) uniform pc {
+        mat4 mvp;
+        vec4 rough;
+        vec4 rgb;
+    } push;
+
+]]
+
+Jkr.GLSL.UBLayout = [[
+
+    layout(set = 0, binding = 1) uniform UBO {
+        mat4 view;
+        mat4 proj;
+        vec3 campos;
+        vec4 lights[10];
+    } ubo;
+
+]]
+
+
+Jkr.GLSL.Constant3D = function ()
+    local VShader = Jkr.GLSL.PushLayout .. Jkr.GLSL.UBLayout .. [[
+
+        void GlslMain()
+        {
+            gl_Position = ubo.proj * ubo.view * push.mvp * vec4(inPosition, 1.0f);	
+        }
+
+    ]]
+
+    local FShader = Jkr.GLSL.PushLayout .. Jkr.GLSL.UBLayout .. [[
+    	layout(location = 0) out vec4 out_color;
+
+        void GlslMain()
+        {
+            out_color = vec4(1, 0, 0, 1);
+        }
+
+    ]]
+
+    local CShader = [[
+        void GlslMain() 
+        {
+
+        }
+    ]]
+
+    return {v = VShader, f = FShader, c = CShader}
+end

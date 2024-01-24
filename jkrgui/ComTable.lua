@@ -60,6 +60,13 @@ Com.Draws = function()
 end
 
 
-Com.Update = function()
-    
+local gUpdatesLoadedIndex = 1
+Com.Updates = function()
+	if gUpdatesLoadedIndex <= #ComTable_SingleTimeUpdate then
+		ComTable_SingleTimeUpdate[gUpdatesLoadedIndex]:Update()
+		gUpdatesLoadedIndex = gUpdatesLoadedIndex + 1
+	else
+		ComTable_SingleTimeUpdate = {}
+		gUpdatesLoadedIndex = 1
+	end
 end
