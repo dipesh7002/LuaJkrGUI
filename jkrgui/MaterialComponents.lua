@@ -370,11 +370,12 @@ Com.SpinnerWidget = {
 
             end,
             function()
-                if currentNumber<inHigherLimit then
-                currentNumber = currentNumber + 1
-                Obj.mCurrentNumberObject:Update(
-                vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inDimension_3f,
-                    tostring(currentNumber))
+                if currentNumber < inHigherLimit then
+                    currentNumber = currentNumber + 1
+                    Obj.mCurrentNumberObject:Update(
+                        vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z),
+                        inDimension_3f,
+                        tostring(currentNumber))
                 end
             end
         )
@@ -387,16 +388,59 @@ Com.SpinnerWidget = {
 
             end,
             function()
-                if currentNumber> inLowerLimit then
-
-                currentNumber = currentNumber - 1
-                Obj.mCurrentNumberObject:Update(
-                vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inDimension_3f,
-                    tostring(currentNumber))
+                if currentNumber > inLowerLimit then
+                    currentNumber = currentNumber - 1
+                    Obj.mCurrentNumberObject:Update(
+                        vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z),
+                        inDimension_3f,
+                        tostring(currentNumber))
                 end
             end
         )
 
         return Obj
     end
+}
+
+Com.DrawingTool = {
+
+    New = function(self)
+        local Obj = {
+            mLineId = nil,
+            mLines = {}
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        Com.NewComponent_Event()
+        ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+            function()
+                if E.is_left_button_pressed() then
+                    print("Event call ta vairaxa")
+                    local mousePos = E.get_mouse_pos()
+                    local newLine = { start = { x = mousePos.x, y = mousePos.y }, endpos = { x = mousePos.x, y = mousePos.y } }
+                    table.insert(Obj.mLines, newLine)
+                end
+
+                if #Obj.mLines > 0 then
+                    local mousePos = E.get_mouse_pos()
+                    local lastLine = Obj.mLines[#Obj.mLines]
+                    lastLine.endpos = { x = mousePos.x, y = mousePos.y }
+                    Obj.mLineId = L.Add(vec2(lastLine.start.x, lastLine.start.y), vec2(lastLine.endpos.x, lastLine.endpos.y), 1)
+                end
+            end
+        )
+        Com.NewComponent()
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
+               print("Draw call ta vairaxa")
+
+            for _, line in ipairs(Obj.mLines) do
+                L.Bind()
+                L.Draw(vec4(1, 0, 0, 1), Int(WindowDimension.x), Int(WindowDimension.y),
+                    Int(Obj.mLineId), Int(Obj.mLineId), GetIdentityMatrix())
+
+            end
+
+        end)
+    end
+   
 }
