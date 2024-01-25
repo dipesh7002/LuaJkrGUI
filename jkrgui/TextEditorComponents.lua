@@ -170,15 +170,14 @@ Com.VisualTextEditObject = {
 		while self.mCursorPosition >= charsTraversed do
 			charsTraversed = charsTraversed + visualLines[lineIndex].mUtf8Len
 			lineIndex = lineIndex + 1
-			if not visualLines[lineIndex] then
+			if not visualLines[lineIndex] or visualLines[lineIndex].mUtf8Len == 0  then
 				break
 			end
 		end
 		local charIndex = 1
 		lineIndex = lineIndex - 1
-
-		if visualLines[lineIndex + 1] and visualLines[lineIndex].mUtf8Len ~= 0 then
-			-- If nextline is present
+		if visualLines[lineIndex + 1] and visualLines[lineIndex + 1].mUtf8Len ~= 0 then
+			-- If nextline is present is not empty
 			charIndex = charsTraversed - visualLines[lineIndex].mUtf8Len
 			charIndex = self.mCursorPosition - charIndex
 		else
