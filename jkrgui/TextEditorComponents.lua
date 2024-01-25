@@ -141,6 +141,8 @@ Com.VisualLineWrapperObject = {
 Com.VisualTextEditObject = {
 	mCursor = nil,
 	mCursorPosition = nil, -- this refers to position of the cursor with respect to the StringBuffer
+	mCharOffset = nil,
+	mLargeString = nil,
 	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars,
 		inVerticalDrawSpacing)
 		local Obj = Com.VisualLineWrapperObject:New(inPosition_3f, inDimension_3f, inFontObject,
@@ -149,6 +151,8 @@ Com.VisualTextEditObject = {
 		setmetatable(Obj, self)
 		self.__index = self
 		Obj.mCursorPosition = 1
+		Obj.mCharOffset = 0
+		Obj.mLargeString = ""
 		Obj.mCursor = Com.TextCursorObject:New(vec3(0), vec3(0.5), vec4(1, 0, 0, 1))
 		return Obj
 	end,
@@ -163,11 +167,11 @@ Com.VisualTextEditObject = {
 		local depth = self.mCursor.mPosition_3f.z
 		return vec3(dimens.x, (line - 1) * self.mVerticalDrawSpacing, depth)
 	end,
-	GetVisualCursorPosition = function(self)
+	GetVisualPosition = function (self, inPosition)
 		local visualLines = self.mVisualLines
 		local lineIndex = 1
 		local charsTraversed = 0
-		while self.mCursorPosition >= charsTraversed do
+		while inPosition >= charsTraversed do
 			charsTraversed = charsTraversed + visualLines[lineIndex].mUtf8Len
 			lineIndex = lineIndex + 1
 			if not visualLines[lineIndex] or visualLines[lineIndex].mUtf8Len == 0  then
@@ -179,11 +183,21 @@ Com.VisualTextEditObject = {
 		if visualLines[lineIndex + 1] and visualLines[lineIndex + 1].mUtf8Len ~= 0 then
 			-- If nextline is present is not empty
 			charIndex = charsTraversed - visualLines[lineIndex].mUtf8Len
-			charIndex = self.mCursorPosition - charIndex
+			charIndex = inPosition - charIndex
 		else
-			charIndex = visualLines[lineIndex].mUtf8Len
+			if inPosition >=  self:GetVisualExtreme() then
+				charIndex = visualLines[lineIndex].mUtf8Len
+			else
+				charIndex = charsTraversed - visualLines[lineIndex].mUtf8Len
+				charIndex = inPosition - charIndex
+			end
+
 		end
 		return  { line = lineIndex, char = charIndex }
+		
+	end,
+	GetVisualCursorPosition = function(self)
+		return self:GetVisualPosition(self.mCursorPosition)
 	end,
 	GetLineExtremes = function(self, inVisualLineNo)
 		return { left = self.mVisualLines[inVisualLineNo].mIndex, right = self.mVisualLines
@@ -193,22 +207,92 @@ Com.VisualTextEditObject = {
 		local chars = 0
 		for i = 1, #self.mVisualLines, 1 do
 			chars = chars + self.mVisualLines[i].mUtf8Len
-			print("i", i, "length", self.mVisualLines[i].mUtf8Len)
 		end
 		return chars
 	end,
+	CursorInsert = function(self, inStr)
+		local str = self.mLargeString
+		local lhs = utf8.sub(str, 1, self.mCursorPosition + self.mCharOffset - 1)
+		local toInsert = inStr
+		local toInsertLen = utf8.len(toInsert)
+		local rhs = utf8.sub(str, self.mCursorPosition + self.mCharOffset, utf8.len(str))
+		local final = lhs .. toInsert .. rhs
+		self.mLargeString = final
+
+		for i = 1, toInsertLen, 1 do
+			self:CursorMoveRight()	
+		end
+	end,
+	CursorRemove = function (self)
+		local str = self.mLargeString	
+		if self.mCursorPosition > 1 then
+			local lhs = utf8.sub(str, 1, self.mCursorPosition + self.mCharOffset - 2)
+			local rhs = utf8.sub(str, self.mCursorPosition + self.mCharOffset, utf8.len(str))
+			self.mLargeString = lhs .. rhs
+		end
+		self:CursorMoveLeft()
+	end,
 	CursorMoveRight = function(self)
-		local cursorPos = self:GetVisualCursorPosition()
-		print(self.mMaxNumLines)
 		local isWithinRightBottomMostExtreme = self.mCursorPosition <= self:GetVisualExtreme()
-		print("line:", cursorPos.line, "char:", cursorPos.char, "maxlines:", self.mMaxNumLines, "len:", self.mVisualLines[self.mMaxNumLines].mUtf8Len, "visualExtreme", self:GetVisualExtreme())
 		if isWithinRightBottomMostExtreme then
 			self.mCursorPosition = self.mCursorPosition + 1
 		end
 	end,
+	CursorMoveLeft = function (self)
+		local isWithinTopLeftMostExtreme = self.mCursorPosition >= 1
+		if isWithinTopLeftMostExtreme then
+			self.mCursorPosition = self.mCursorPosition - 1	
+		end
+	end,
+	CursorMoveDown = function (self)
+		local cursorPos = self:GetVisualCursorPosition()
+		local extremePos = self:GetVisualPosition(self:GetVisualExtreme())
+		if cursorPos.line < extremePos.line then
+			cursorPos.line = cursorPos.line + 1
+			local lineExtremes = self:GetLineExtremes(cursorPos.line)
+			local lineSpan = lineExtremes.right - lineExtremes.left
+			io.write(string.format(
+				[[
+					-----
+					lineExtremes.right: %d
+					lineExtremes.left : %d
+					cursorPos.line : %d
+					cursorPos.char : %d
+					lineSpan : %d
+					-----
+				]]
+			, lineExtremes.right, lineExtremes.left, cursorPos.line, cursorPos.char, lineSpan))
+			if cursorPos.char > lineSpan then
+				self.mCursorPosition = lineExtremes.right
+			else
+				self.mCursorPosition = lineExtremes.left + cursorPos.char
+			end
+			cursorPos = self:GetVisualCursorPosition()
+			print("CursorPosition", self.mCursorPosition, "::", cursorPos.line, cursorPos.char)
+		end
+	end,
+	CursorMoveUp = function (self)
+		local cursorPos = self:GetVisualCursorPosition()	
+		if cursorPos.line > 1 then
+			cursorPos.line = cursorPos.line - 1	
+			local lineExtremes = self:GetLineExtremes(cursorPos.line)
+			local lineSpan = lineExtremes.right - lineExtremes.left
+			if cursorPos.char > lineSpan then
+				self.mCursorPosition = lineExtremes.right
+			else
+				self.mCursorPosition = lineExtremes.left + cursorPos.char
+			end
+			cursorPos = self:GetVisualCursorPosition()
+			print("CursorPosition", self.mCursorPosition, "::", cursorPos.line, cursorPos.char)
+		end
+	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
-		Com.VisualLineWrapperObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer,
-			inNewVerticalDrawSpacing)
+		if inNewStringBuffer then
+			self.mLargeString = inNewStringBuffer
+		end
+		local visualStringBuffer = utf8.sub(self.mLargeString, self.mCharOffset + 1, utf8.len(self.mLargeString))
+		Com.VisualLineWrapperObject.Update(self, inPosition_3f, inDimension_3f, visualStringBuffer,
+				inNewVerticalDrawSpacing)
 		local vis = self:GetVisualCursorPosition()
 		local cursorPos = self:GetGraphicalCursorPosition(vis)
 		cursorPos.x = cursorPos.x + inPosition_3f.x 
