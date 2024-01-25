@@ -206,11 +206,14 @@ Com.VisualTextEditObject = {
         return self:GetVisualPosition(self.mCursorPosition)
     end,
     GetLineExtremes = function(self, inVisualLineNo)
-        return {
-            left = self.mVisualLines[inVisualLineNo].mIndex,
-            right = self.mVisualLines
-            [inVisualLineNo].mIndex + self.mVisualLines[inVisualLineNo].mUtf8Len
-        }
+ 	local left = self.mVisualLines[inVisualLineNo].mIndex
+	local right = self.mVisualLines[inVisualLineNo].mIndex + self.mVisualLines[inVisualLineNo].mUtf8Len
+	if self.mVisualLines[inVisualLineNo - 1] then
+		if self.mVisualLines[inVisualLineNo - 1].mEndsWithNewLine then
+			left = left + 2
+		end
+	end
+        return {left = left, right = right }
     end,
     GetVisualExtreme = function(self)
         local chars = 0
