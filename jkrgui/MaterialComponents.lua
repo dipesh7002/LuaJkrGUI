@@ -2,6 +2,10 @@ require "jkrgui.PrimitiveComponents"
 require "jkrgui.ExtraComponents"
 require "jkrgui.LayoutComponents"
 
+function Lerp(a, b, t)
+	return b * t + (1 - t) * a
+end
+
 function LoadMaterialComponents()
 	local CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
 		"icons_material/radio_button_checked/baseline-2x.png")
@@ -458,11 +462,16 @@ In event
 
 	Com.MaterialVerticalScrollArea = {
 		mScrollableComponent = nil,
+		mScrollerComponentObject = nil,
+		mScrolling = nil,
 		New = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
 			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
 			setmetatable(self, Com.ScrollProxy)
 			setmetatable(Obj, self)
 			self.__index = self
+			Obj.mScrollerComponentObject = Jkr.ComponentObject:New(vec3(0), vec3(0))
+			Obj.mScrolling = false
+
 
 			return Obj
 		end,
@@ -476,19 +485,58 @@ In event
 			local horizontalArea = Com.HLayout:New(0)
 			scrollbarV:AddComponents({IconUp, scrollArea, IconDown}, {0.1, 0.8, 0.1})
 			horizontalArea:AddComponents({inComponent, scrollbarV}, {0.9, 0.1})
+			local Scroller = Com.AreaObject:New(vec3(0), vec3(0))
+			Scroller:SetFillColor(vec4(1, 0, 0, 1))
 
 			local This = self
 			horizontalArea.Update = function (self, inPosition_3f, inDimension_3f)
 				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, inDimension_3f.y, 1)
 				local componentArea_3f = vec3(inDimension_3f.x - scrollArea_3f.x, inDimension_3f.y, inDimension_3f.z)
-				self.mComponents[1]:Update(inPosition_3f, componentArea_3f)
 				local scrollAreaPosition_3f = vec3(inPosition_3f.x + componentArea_3f.x, inPosition_3f.y, inPosition_3f.z)
+				self.mComponents[1]:Update(inPosition_3f, componentArea_3f)
 				self.mComponents[2]:Update(scrollAreaPosition_3f, scrollArea_3f)
-				print(componentArea_3f.x, componentArea_3f.y, componentArea_3f.z)
-				print("Pos:", inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
 			end
 
+			scrollbarV.Update = function (self, inPosition_3f, inDimension_3f)
+				local upDownArea_3f = vec3(This.mScrollbarArea_2f.x, This.mScrollbarArea_2f.x, inDimension_3f.z)	
+				local iconUpPosition_3f = inPosition_3f
+				local areaPos_3f = vec3(iconUpPosition_3f.x, iconUpPosition_3f.y + upDownArea_3f.y, iconUpPosition_3f.z) 
+				local areaDimension_3f = vec3(inDimension_3f.x, inDimension_3f.y - 2 * upDownArea_3f.y, inDimension_3f.z)
+				local iconDownPosition_3f = vec3(areaPos_3f.x, areaPos_3f.y + areaDimension_3f.y, areaPos_3f.z)
+				self.mComponents[1]:Update(iconUpPosition_3f, upDownArea_3f)
+				self.mComponents[2]:Update(areaPos_3f, areaDimension_3f)
+				self.mComponents[3]:Update(iconDownPosition_3f, upDownArea_3f)
+
+				-- Scrollbar Position Calculation
+				--local Ypos = Lerp(areaPos_3f.y, areaPos_3f.y + (areaDimension_3f.y - This.mScrollbarSizeFactor * areaPos_3f.y), This.mScrollbarPositionNormalized)
+				local Ypos = Lerp(areaPos_3f.y, areaPos_3f.y + (areaDimension_3f.y - This.mScrollbarSizeFactor * areaDimension_3f.y), This.mScrollbarPositionNormalized)
+				local scrollerPosition = vec3(areaPos_3f.x, Ypos, areaPos_3f.z)
+				local scrollerDimension = vec3(areaDimension_3f.x, areaDimension_3f.y * This.mScrollbarSizeFactor, areaDimension_3f.z)
+				Scroller:Update(scrollerPosition, scrollerDimension)
+				This.mScrollerComponentObject:Update(scrollerPosition, scrollerDimension)
+			end
 			self.mCentralComponent = horizontalArea	
+
+			Com.NewComponent_Event()
+			ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+				function ()
+					self.mScrollerComponentObject:Event()
+					if self.mScrollerComponentObject.mClicked_b or (self.mScrolling and E.is_left_button_pressed()) then
+						local relpos = E.get_relative_mouse_pos()
+						This.mScrollbarPositionNormalized = This.mScrollbarPositionNormalized + relpos.y / 30
+						local sn = This.mScrollbarPositionNormalized
+						if This.mScrollbarPositionNormalized >= 1 then
+							This.mScrollbarPositionNormalized = 1
+						elseif This.mScrollbarPositionNormalized <= 0 then
+							This.mScrollbarPositionNormalized = 0
+						end
+						This:Update(This.mPosition_3f, This.mDimension_3f)
+						self.mScrolling = true
+					else
+						self.mScrolling = false
+					end
+				end
+			)
 
 		end,
 		Update = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f)
