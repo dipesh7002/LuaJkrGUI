@@ -455,4 +455,44 @@ In event
 			Com.WindowLayout.SetCentralComponent(self, verticalLayout)
 		end,
 	}
+
+	Com.MaterialVerticalScrollArea = {
+		mScrollableComponent = nil,
+		New = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
+			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
+			setmetatable(self, Com.ScrollProxy)
+			setmetatable(Obj, self)
+			self.__index = self
+
+			return Obj
+		end,
+		SetScrollableComponent = function(self, inComponent)
+			local IconUp = Com.IconButton:New(vec3(0), vec3(0), DropUp)
+			local IconDown = Com.IconButton:New(vec3(0), vec3(0), DropDown)
+			local scrollArea = Com.AreaObject:New(vec3(0), vec3(0))
+			local NewColorArea = vec4(Theme.Colors.Area.Border.x, Theme.Colors.Area.Border.y, Theme.Colors.Area.Border.z, Theme.Colors.Area.Border.w)
+			scrollArea:SetFillColor(NewColorArea)
+			local scrollbarV = Com.VLayout:New(0)
+			local horizontalArea = Com.HLayout:New(0)
+			scrollbarV:AddComponents({IconUp, scrollArea, IconDown}, {0.1, 0.8, 0.1})
+			horizontalArea:AddComponents({inComponent, scrollbarV}, {0.9, 0.1})
+
+			local This = self
+			horizontalArea.Update = function (self)
+				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, This.mScrollbarArea_2f.y, 1)
+				local componentArea_3f = vec3(This.mDimension_3f.x - scrollArea_3f.x, This.mDimension_3f.y, This.mDimension_3f.z)
+				self.mComponents[1]:Update(This.mPosition_3f, componentArea_3f)
+				local scrollAreaPosition_3f = vec3(This.mPosition_3f.x + componentArea_3f.x, This.mPosition_3f.y, This.mPosition_3f.z)
+				self.mComponents[2]:Update(scrollAreaPosition_3f, scrollArea_3f)
+			end
+
+			self.mCentralComponent = horizontalArea	
+
+		end,
+		Update = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f)
+			self.mPosition_3f = inPosition_3f
+			self.mDimension_3f = inDimension_3f
+			self.mCentralComponent:Update(inPosition_3f, inDimension_3f, inScrollbarArea_2f)
+		end
+	}
 end

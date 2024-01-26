@@ -37,6 +37,9 @@ Com.AreaObject = {
         local AreaPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
         local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
         ComTable[self.mAreaId]:Update(AreaPos, AreaDimen)
+    end,
+    SetFillColor = function (self, inColor_4f)
+	ComTable[self.mIds.y].mFillColor = vec4(inColor_4f.x, inColor_4f.y, inColor_4f.z, inColor_4f.w)	
     end
 }
 

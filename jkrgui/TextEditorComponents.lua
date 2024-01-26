@@ -202,6 +202,9 @@ Com.VisualTextEditObject = {
 
 		return { line = lineIndex, char = charIndex }
 	end,
+	GetNearestGraphicalCharacterPosition = function (self, inX, inY)
+		-- TODO	
+	end,
 	GetVisualCursorPosition = function(self)
 		return self:GetVisualPosition(self.mCursorPosition)
 	end,
