@@ -73,8 +73,8 @@ Com.VLayout = {
 	Update = function(self, inPosition_3f, inDimension_3f)
 		local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
 		local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
-		self.mPosition_3f = inPosition_3f
-		self.mDimension_3f = inDimension_3f
+		self.mPosition_3f = position
+		self.mDimension_3f = dimension
 		local paddingY = self.mPadding
 		if self.mRatioTable then
 			for index, value in ipairs(self.mComponents) do
@@ -232,7 +232,8 @@ Com.WindowLayout = {
 		end
 		self.mComponentObject:Update(self.mPosition_3f,
 			vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
-		self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
+		local component_Dimension3f = vec3(self.mDimension_3f.x, self.mDimension_3f.y - self.mHitArea_2f.y, self.mDimension_3f.z)
+		self.mCentralComponent:Update(inPosition_3f, component_Dimension3f)
 	end
 }
 
@@ -302,11 +303,6 @@ Com.ScrollProxy = {
 		Obj.mPosition_3f = inPosition_3f
 		Obj.mDimension_3f = inDimension_3f
 		return  Obj
-	end,
-	Update = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f)
-		self.mPosition_3f = inPosition_3f
-		self.mDimension_3f = inDimension_3f
-		self.mScrollbarArea_2f = inScrollbarArea_2f
 	end,
 	Start = function (self)
 		Com.NewComponent()

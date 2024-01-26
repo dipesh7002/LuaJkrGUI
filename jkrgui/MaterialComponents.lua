@@ -478,12 +478,14 @@ In event
 			horizontalArea:AddComponents({inComponent, scrollbarV}, {0.9, 0.1})
 
 			local This = self
-			horizontalArea.Update = function (self)
-				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, This.mScrollbarArea_2f.y, 1)
-				local componentArea_3f = vec3(This.mDimension_3f.x - scrollArea_3f.x, This.mDimension_3f.y, This.mDimension_3f.z)
-				self.mComponents[1]:Update(This.mPosition_3f, componentArea_3f)
-				local scrollAreaPosition_3f = vec3(This.mPosition_3f.x + componentArea_3f.x, This.mPosition_3f.y, This.mPosition_3f.z)
+			horizontalArea.Update = function (self, inPosition_3f, inDimension_3f)
+				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, inDimension_3f.y, 1)
+				local componentArea_3f = vec3(inDimension_3f.x - scrollArea_3f.x, inDimension_3f.y, inDimension_3f.z)
+				self.mComponents[1]:Update(inPosition_3f, componentArea_3f)
+				local scrollAreaPosition_3f = vec3(inPosition_3f.x + componentArea_3f.x, inPosition_3f.y, inPosition_3f.z)
 				self.mComponents[2]:Update(scrollAreaPosition_3f, scrollArea_3f)
+				print(componentArea_3f.x, componentArea_3f.y, componentArea_3f.z)
+				print("Pos:", inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
 			end
 
 			self.mCentralComponent = horizontalArea	
