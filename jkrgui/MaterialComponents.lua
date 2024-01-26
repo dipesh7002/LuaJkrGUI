@@ -2,7 +2,7 @@ require "jkrgui.PrimitiveComponents"
 require "jkrgui.ExtraComponents"
 require "jkrgui.LayoutComponents"
 
-function LoadMaterialComponents()
+--function LoadMaterialComponents()
 	local CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
 		"icons_material/radio_button_checked/baseline-2x.png")
 	local UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
@@ -315,10 +315,12 @@ Com.TextButton = {
         setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
         setmetatable(Obj, self)
         self.__index = self
+		Obj.mText = inString
         Obj.mTextButton = Com.TextButtonObject:New(inString, inFont, inPosition_3f, inDimension_3f)
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inString)
+		self.mText = inString
         self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
         Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
     end
@@ -454,4 +456,5 @@ Com.TextButton = {
 			Com.WindowLayout.SetCentralComponent(self, verticalLayout)
 		end,
 	}
-end
+	
+--end
