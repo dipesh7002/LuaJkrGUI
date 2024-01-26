@@ -60,7 +60,6 @@ Com.VisualLineObject = {
 		else
 			self.mUtf8Len = utf8.len(inString)
 		end
-		print("UTF8LEN:", self.mUtf8Len)
 	end
 }
 
@@ -145,7 +144,6 @@ Com.VisualTextEditObject = {
 	-- this refers to position of the cursor with respect to the StringBuffer
 	mPosition_3f = nil,
 	mDimension_3f = nil,
-	mHiddenLineStack = nil,
 	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars,
 		inVerticalDrawSpacing)
 		local Obj = Com.VisualLineWrapperObject:New(inPosition_3f, inDimension_3f, inFontObject,
@@ -155,7 +153,6 @@ Com.VisualTextEditObject = {
 		self.__index = self
 		Obj.mCursorPosition = 1
 		Obj.mCursor = Com.TextCursorObject:New(vec3(0), vec3(0.5), vec4(1, 0, 0, 1))
-		Obj.mHiddenLineStack = {}
 		return Obj
 	end,
 	GetGraphicalCursorPosition = function(self, inVisualCursorPosition)
@@ -229,7 +226,6 @@ Com.VisualTextEditObject = {
 		local rhs = utf8.sub(str, self.mCursorPosition, utf8.len(str))
 		local final = lhs .. toInsert .. rhs
 		self.mStringBuffer = final
-
 		for i = 1, toInsertLen, 1 do
 			self:CursorMoveRight()
 		end
@@ -251,7 +247,7 @@ Com.VisualTextEditObject = {
 		end
 	end,
 	CursorMoveLeft = function(self)
-		local isWithinTopLeftMostExtreme = self.mCursorPosition >= 1
+		local isWithinTopLeftMostExtreme = self.mCursorPosition > 1
 		if isWithinTopLeftMostExtreme then
 			self.mCursorPosition = self.mCursorPosition - 1
 		end
@@ -309,4 +305,48 @@ Com.VisualTextEditObject = {
 		self.mPosition_3f = inPosition_3f
 		self.mDimension_3f = inDimension_3f
 	end
+}
+
+Com.PlainTextEditObject = {
+	New = function (self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars, inVerticalDrawSpacing)
+		local Obj = Com.VisualTextEditObject:New(inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars, inVerticalDrawSpacing)
+		setmetatable(self, Com.VisualTextEditObject)
+		setmetatable(Obj, self)
+		self.__index = self
+		Com.NewComponent_Event()
+		E.start_text_input() -- TODO paxi hataune
+		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+			function ()
+				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
+				local is_enter = E.is_key_pressed(Key.SDLK_RETURN)
+				local is_up = E.is_key_pressed(Key.SDLK_UP)
+				local is_down = E.is_key_pressed(Key.SDLK_DOWN)
+				local is_left = E.is_key_pressed(Key.SDLK_LEFT)
+				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
+				if E.is_text_being_input() and not is_backspace then
+					local input = E.get_input_text()
+					print(input)
+					Obj:CursorInsert(input)			
+					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
+				end
+				if E.is_keypress_event() then
+					if is_left then
+						Obj:CursorMoveLeft()
+					elseif is_right then
+						Obj:CursorMoveRight()
+					elseif is_up then
+						Obj:CursorMoveUp()
+					elseif is_down then
+						Obj:CursorMoveDown()
+					elseif is_backspace then
+						Obj:CursorRemove()
+					elseif is_enter then
+						Obj:CursorInsert("\n")
+					end	
+					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
+				end
+			end
+		)
+		return Obj
+	end 
 }
