@@ -460,6 +460,43 @@ In event
 		end,
 	}
 
+	--[[
+		Material Veritcal Scroll bar-- Can Scroll a component Vertically
+			-- inComponentDimension_3f refers to the dimension of component, scroll garne area ma dimension lai scissor le kaatne ho,
+				tei vaera, purai component kok dimension chae elle dine. Like euta text ma 1000 lines xa, ani scroll area ma 100
+				lines scissor garya xa vane, tyo 1000 lines wala dimension chae yo ho
+			-- inScrollbarArea_2f Scrollbar ko motapa (width) linxa, 2f vae pani y value le garne kei haina, just x value linxa
+			-- inScrollbarSizeFactor vaneko scrollbar ma tyo scroll garne rectangle ko purai vertical area ko kati percent area hunxa vanne ho
+				(normalized matlab 0.0 dekhi 1.0 samma hunxa yo value)
+			-- inMaxYDisplacement, tyo scrollbar purai scrolled huda kheri (like sapse tala huda kheri) component lai kati le displace garne ho mathi tira
+				that is this
+		===================================================================================================
+		-- Example (In Load Callback)
+
+		LoadMaterialComponents()
+		Font = Jkr.FontObject:New("font.ttf", 4)
+		ImagePreload = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/4k/outline.png")
+
+		local Window = Com.MaterialWindow:New(vec3(400, 100, 80), vec3(200, 10, 1), vec2(200, 20), "Fuck You",
+			Font)
+		local str =
+		"There are many peoople in this world who\nWill kill their selves for world\nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\n"
+		local from = { mPosition_3f = vec3(0, 400, 80), mDimension_3f = vec3(200, 200, 1) }
+		local to = { mPosition_3f = vec3(400, 100, 80), mDimension_3f = vec3(200, 100, 1) }
+		Window:Start()
+		local Inside = function()
+			local TextObj = Com.PlainTextEditObject:New(vec3(0), vec3(0), Font, 4, 30, 30)
+			TextObj:Update(vec3(0), vec3(200, 500, 1), str, 20, 1)
+			local materialVerticalScrollArea = Com.MaterialVerticalScrollArea:New(vec3(200, 200, 5),
+				vec3(200, 200, 1), vec3(200, 200, 1), 20, vec2(20, 200), 0.1, 0.3)
+			materialVerticalScrollArea:SetScrollableComponent(TextObj)
+			Window:SetCentralComponent(materialVerticalScrollArea)
+		end
+		Inside()
+		Window:End()
+
+		Com.AnimateSingleTimePosDimen(Window, from, to, 0.1)
+	]]
 	Com.MaterialVerticalScrollArea = {
 		mScrollableComponent = nil,
 		mScrollerComponentObject = nil,
