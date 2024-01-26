@@ -464,15 +464,17 @@ In event
 		mScrollableComponent = nil,
 		mScrollerComponentObject = nil,
 		mScrolling = nil,
-		New = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
+		mComponentDimension_3f = nil,
+		mMaxYDisplacement = nil,
+		New = function (self, inPosition_3f, inDimension_3f, inComponentDimension_3f, inMaxYDisplacement, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
 			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
 			setmetatable(self, Com.ScrollProxy)
 			setmetatable(Obj, self)
 			self.__index = self
 			Obj.mScrollerComponentObject = Jkr.ComponentObject:New(vec3(0), vec3(0))
 			Obj.mScrolling = false
-
-
+			Obj.mComponentDimension_3f = inComponentDimension_3f
+			Obj.mMaxYDisplacement = inMaxYDisplacement
 			return Obj
 		end,
 		SetScrollableComponent = function(self, inComponent)
@@ -493,7 +495,14 @@ In event
 				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, inDimension_3f.y, 1)
 				local componentArea_3f = vec3(inDimension_3f.x - scrollArea_3f.x, inDimension_3f.y, inDimension_3f.z)
 				local scrollAreaPosition_3f = vec3(inPosition_3f.x + componentArea_3f.x, inPosition_3f.y, inPosition_3f.z)
-				self.mComponents[1]:Update(inPosition_3f, componentArea_3f)
+
+				local componentDisplacePosition = Lerp(0, This.mMaxYDisplacement, This.mScrollbarPositionNormalized)
+				local componentPosition = vec3(inPosition_3f.x, inPosition_3f.y - componentDisplacePosition, inPosition_3f.z)
+				if This.mComponentDimension_3f then
+					componentArea_3f.y = This.mComponentDimension_3f.y
+				end
+
+				self.mComponents[1]:Update(componentPosition, componentArea_3f)
 				self.mComponents[2]:Update(scrollAreaPosition_3f, scrollArea_3f)
 			end
 
@@ -539,9 +548,15 @@ In event
 			)
 
 		end,
-		Update = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f)
+		Update = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inComponentDimension_3f, inMaxYDisplacement)
 			self.mPosition_3f = inPosition_3f
 			self.mDimension_3f = inDimension_3f
+			if inComponentDimension_3f then
+				self.mComponentDimension_3f = inComponentDimension_3f
+			end
+			if inMaxYDisplacement then
+				self.mMaxYDisplacement = inMaxYDisplacement
+			end
 			self.mCentralComponent:Update(inPosition_3f, inDimension_3f, inScrollbarArea_2f)
 		end
 	}
