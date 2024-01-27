@@ -99,11 +99,22 @@ Com.VisualLineWrapperObject = {
 		local lineIndex = 1
 		local visualCharsIndex = 1
 		local newLinesCount = 0
+		local stringBufferLength = utf8.len(self.mStringBuffer)
 		for Line in self.mStringBuffer:gmatch("(.-)\n") do
+			local len = utf8.len(Line)
+			local _newline = newLinesCount + 1
+			local _vischars = visualCharsIndex + len
+			local probabaleNewLinePos = _newline + _vischars - 1
+			local hasNewLine = false
+			if probabaleNewLinePos <= stringBufferLength then
+				if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
+					hasNewLine = true
+				end
+			end
 			lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
-				visualCharsIndex + newLinesCount)
-			newLinesCount = newLinesCount + 1
-			visualCharsIndex = visualCharsIndex + utf8.len(Line)
+				visualCharsIndex + newLinesCount, hasNewLine)
+			newLinesCount = _newline
+			visualCharsIndex = _vischars
 		end
 	end,
 	EraseAll = function(self)
@@ -112,7 +123,7 @@ Com.VisualLineWrapperObject = {
 		end
 	end,
 	WrapWithin = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f,
-		       inVisualLineIndex)
+		       inVisualLineIndex, inEndsWithNewline)
 		local i = inStartingIndex
 		local dimens = self.mFontObject:GetDimension(inString)
 		local visualLineIndex = inVisualLineIndex
@@ -125,11 +136,11 @@ Com.VisualLineWrapperObject = {
 			end
 			inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
 			i = self:WrapWithin(utf8.sub(inString, sub.n, utf8.len(inString)), i + 1,
-				inLinePosition_3f, inDimension_3f, visualLineIndex + sub.n - 1)
+				inLinePosition_3f, inDimension_3f, visualLineIndex + sub.n - 1, inEndsWithNewline)
 		else
 			if self.mVisualLines[i] then
 				self.mVisualLines[i]:Update(inLinePosition_3f, inDimension_3f,
-					inString, visualLineIndex, true)
+					inString, visualLineIndex, inEndsWithNewline)
 			end
 			inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
 			i = i + 1
@@ -159,13 +170,26 @@ Com.VisualTextEditObject = {
 		local line, char = inVisualCursorPosition.line, inVisualCursorPosition.char
 		local str = self.mVisualLines[line].mString
 		local dimens = vec2(0, 0)
+
+
 		if str and char < self.mVisualLines[line].mUtf8Len then
+			if self.mVisualLines[line].mEndsWithNewLine then
+				local substr = utf8.sub(str, 1, char)
+				dimens = self.mFontObject:GetDimension(substr)
+			else
+				local substr = utf8.sub(str, 1, char - 1)
+				dimens = self.mFontObject:GetDimension(substr)
+			end
+		end
+
+		local isLastLine = self.mVisualLines[line + 1] and self.mVisualLines[line + 1].mUtf8Len == 0 
+		--and self.mVisualLines[line + 1].mEndsWithNewLine == false 
+		if isLastLine then
+			print("Char:", char, "len:", self.mVisualLines[line].mUtf8Len)
 			local substr = utf8.sub(str, 1, char)
 			dimens = self.mFontObject:GetDimension(substr)
-		else
-			local substr = utf8.sub(str, 1, char - 1)
-			dimens = self.mFontObject:GetDimension(substr)
 		end
+
 		local depth = self.mCursor.mPosition_3f.z
 		return vec3(dimens.x, (line - 1) * self.mVerticalDrawSpacing, depth)
 	end,
@@ -191,7 +215,7 @@ Com.VisualTextEditObject = {
 			charIndex = charsTraversedIndex - visualLines[lineIndex].mUtf8Len
 			charIndex = inPosition - charIndex
 		else
-			if inPosition >= self:GetVisualExtreme() then
+			if inPosition > self:GetVisualExtreme() then
 				charIndex = visualLines[lineIndex].mUtf8Len
 			else
 				charIndex = charsTraversedIndex -
@@ -199,7 +223,7 @@ Com.VisualTextEditObject = {
 				charIndex = inPosition - charIndex
 			end
 		end
-
+		print(inPosition, "NEXT::", lineIndex, charIndex)
 		return { line = lineIndex, char = charIndex }
 	end,
 	GetNearestGraphicalCharacterPosition = function (self, inX, inY)
@@ -229,6 +253,7 @@ Com.VisualTextEditObject = {
 		local rhs = utf8.sub(str, self.mCursorPosition, utf8.len(str))
 		local final = lhs .. toInsert .. rhs
 		self.mStringBuffer = final
+		self:Update(self.mPosition_3f, self.mDimension_3f)
 		for i = 1, toInsertLen, 1 do
 			self:CursorMoveRight()
 		end
@@ -244,7 +269,7 @@ Com.VisualTextEditObject = {
 		self:CursorMoveLeft()
 	end,
 	CursorMoveRight = function(self)
-		local isWithinRightBottomMostExtreme = self.mCursorPosition < self:GetVisualExtreme()
+		local isWithinRightBottomMostExtreme = self.mCursorPosition <= self:GetVisualExtreme()
 		if isWithinRightBottomMostExtreme then
 			self.mCursorPosition = self.mCursorPosition + 1
 		end
