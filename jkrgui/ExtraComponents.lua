@@ -173,46 +173,57 @@ Com.ListSelectorObject = {
     end
 }
 
-
 Com.FileMenuBarObject = {
     mMainArea = nil,
-    mDepth = nil,
     mHeight = nil,
     mFileMenu = nil,
-    New = function(self, inFileMenu, inHeight, inDepth, inFontObject)
+    mDimension_3f = nil,
+    New = function(self, inFileMenu, inHeight, inFontObject, inDepth)
         local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
         local mainareapos = vec3(0, 0, inDepth)
         local mainareadimen = vec3(WindowDimension.x, inHeight, 1)
         Obj.mMainArea = Com.AreaObject:New(mainareapos, mainareadimen)
-        Obj.mDepth = inDepth
         Obj.mHeight = inHeight
+        Obj.mDepth = inDepth
         Obj.mButtons = {}
         Obj.mFileMenu = inFileMenu
-        local i = 1
-        for index, value in ipairs(inFileMenu) do
-            local pos = vec3(50 * (i - 1), 0, inDepth - 3)
-            local dimen = vec3(50, inHeight, 1)
-            Obj.mButtons[#Obj.mButtons + 1] = Com.TextButtonObject:New(inFileMenu[i].name, inFontObject, pos, dimen)
-            i = i + 1
+        Obj.mNoOfEntries = #inFileMenu
+        Obj.mDimension_3f = nil
+        for i = 1, #inFileMenu, 1 do
+            Obj.mButtons[i] = Com.TextButton:New(mainareapos, vec3(0, 0, 0), inFontObject, inFileMenu[i].name)
         end
         return Obj
     end,
-    Event = function(self)
-        local mainareapos = vec3(0, 0, self.mDepth)
-        local mainareadimen = vec3(WindowDimension.x, self.mHeight, 1)
-        self.mMainArea:Update(mainareapos, mainareadimen)
-        for index, value in ipairs(self.mFileMenu) do
-            self.mButtons[index]:Event()
-            local pos = vec3(50 * (index - 1), self.mHeight, self.mDepth - 3)
-            if self.mButtons[index].mPressed then
-                self.mFileMenu[index].action(pos)
-            end
+    Update = function(self, inPosition_3f, inDimension_3f)
+        self.mDimension_3f = inDimension_3f
+        local ratiotable = {}
+
+        for i = 1, self.mNoOfEntries, 1 do
+            ratiotable[i] = 1 / self.mNoOfEntries
+        end
+        local horizontalcomponents = Com.HLayout:New(0)
+        horizontalcomponents:AddComponents(self.mButtons, ratiotable)
+        horizontalcomponents:Update(vec3(0, 0, self.mDepth), inDimension_3f)
+        local position = horizontalcomponents:GetComponentPosition()
+        for i = 1, self.mNoOfEntries, 1 do
+            self.mButtons[i]:SetFunctions(
+                function()
+                    ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor = vec4(0, 0, 1, 0.7)
+                end,
+                function()
+                    local nc = Theme.Colors.Area.Normal
+                    ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor = vec4(nc.x, nc.y, nc.z, nc.w)
+                end,
+                function()
+                    local pos = vec3(position[i].x, position[i].y + self.mHeight, position[i].z)
+                    self.mFileMenu[i].action(pos)
+                end
+            )
         end
     end
 }
-
 
 Com.ContextMenu = {
     mMainArea = nil,
@@ -235,20 +246,17 @@ Com.ContextMenu = {
         local button_dimension = vec3(0, 0, 0)
         for i = 1, inNoOfEntries, 1 do
             local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1), inPosition_3f.z - 3)
-            Obj.mButtons[i] = Com.TextButtonObject:New(string.rep(" ", inMaxStringLength), inFontObject, pos,
-                button_dimension)
-            i = i + 1
+            Obj.mButtons[i] = Com.TextButton:New(pos,
+                button_dimension, inFontObject, string.rep(" ", inMaxStringLength))
         end
         return Obj
     end,
-    Update = function(self, inContextMenuTable, inPosition_3f, inCellDimension_3f)
+    Update = function(self, inPosition_3f, inCellDimension_3f, inContextMenuTable)
         self.mCurrentContextMenu = inContextMenuTable
-        -- Clear Up
         self.mMainArea:Update(vec3(0, 0, self.mMainArea.mPosition_3f.z), vec3(0, 0, 0))
         for index, value in ipairs(self.mButtons) do
             value:Update(vec3(0, 0, value.mPosition_3f.z), vec3(0, 0, 0), " ")
         end
-
         local inNoOfEntries = #inContextMenuTable
         local MainAreaDimension = vec3(inCellDimension_3f.x, inCellDimension_3f.y * inNoOfEntries, 1)
         local mainareapos = vec3(inPosition_3f.x, inPosition_3f.y, self.mMainArea.mPosition_3f.z)
@@ -258,138 +266,22 @@ Com.ContextMenu = {
                 self.mButtons[i].mPosition_3f.z)
             self.mButtons[i]:Update(pos, inCellDimension_3f, inContextMenuTable[i].name)
         end
-    end,
-    Event = function(self)
-        local NoOfEntries = #self.mCurrentContextMenu
-        for i = 1, NoOfEntries, 1 do
-            self.mButtons[i]:Event()
-            if self.mButtons[i].mPressed then
-                self.mCurrentContextMenu[i].action()
-            end
-        end
-
-        if E.is_left_button_pressed() then
-            self:Update({}, vec3(0, 0, 0), vec3(0, 0, 0))
-        end
-    end
-}
-
-Com.PopupMenu = {
-    mMainArea = nil,
-    mHeadButton = nil,
-    mInfo = nil,
-    mButton = nil,
-    New = function(self, inDepth, inFontObject, inMaxChars)
-        local Obj = {
-            mPosition_3f = vec3(0, 0, inDepth),
-            mDimension_3f = vec3(0, 0, 0),
-            mFontObject = inFontObject,
-        }
-        setmetatable(Obj, self)
-        self.__index = self
-        Obj.mMainArea = Com.AreaObject:New(vec3(0, 0, inDepth), vec3(0, 0, 0))
-        Obj.mHeadButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4),
-            vec3(0, 0, 0))
-        Obj.mHeadButton:TurnOffShadow()
-        Obj.mInfo = Com.TextLabelObject:New(string.rep(" ", inMaxChars * 5), vec3(0, 0, inDepth - 3), inFontObject)
-        Obj.mButton = Com.TextButtonObject:New(string.rep(" ", inMaxChars), inFontObject, vec3(0, 0, inDepth - 4),
-            vec3(0, 0, 0))
-        return Obj
-    end,
-
-    Update = function(self, inPosition_3f, inDimension_3f, inHeadString, inInfo)
-        self.mMainArea:Update(inPosition_3f, inDimension_3f)
-        local buttondimen = vec3(inDimension_3f.x, 25, 1)
-        local buttonpos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
-        self.mHeadButton:Update(buttonpos, buttondimen, inHeadString)
-        local infopos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z - 4)
-        self.mInfo:Update(vec3(inPosition_3f.x + 10, inPosition_3f.y + 25 * 2, inPosition_3f.z - 3), inDimension_3f,
-            inInfo)
-        buttonpos = vec3(inPosition_3f.x + inDimension_3f.y / 2, inPosition_3f.y + 25 * 2.5, inPosition_3f.z - 4)
-        buttondimen = vec3(60, 25, 1)
-        self.mButton:Update(buttonpos, buttondimen, "Cancel")
-    end
-}
-
-
-Com.ImgRect = {
-    mDimension_3f = vec3(0, 0, 0),
-    mPosition_3f = vec3(0, 0, 0),
-    mId = nil,
-    mImgId = nil,
-    New = function(self, inPosition_3f, inDimension_3f)
-        local Obj = {
-            mDimension_2f = inDimension_3f,
-            mPosition_3f = inPosition_3f,
-            mId = nil,
-            mImgId = nil,
-
-        }
-
-        setmetatable(Obj, self)
-        self.__index = self
-        Com.NewComponent()
-
-        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, "stickman.png",
-            vec2(inDimension_3f.x, inDimension_3f.y))
-
-        ComTable[com_i].mFillColor = vec4(1, 0, 0, 1)
-        ComTable[com_i].mComponentObject.mFocusOnHover_b = false
-        -- com_i)
-        Obj.mIds.y = com_i
-        Obj.mAreaId = com_i
-        return Obj
-    end,
-    Event = function()
-    end,
-    Update = function(self)
-        local Dimension = vec2(self.mDimension_2f.x, self.mDimension_2f.y)
-        local rect_gen = Generator(Shapes.rectangle, Dimension)
-        -- Hello eVeryone
-        -- WHat
-        S.Update(Int(self.mId), rect_gen, self.mPosition_3f)
-    end
-}
-
-Com.ToggleButton = {
-    New = function(self, inPosition_3f, inDimension_3f)
-        local Obj = {}
-        setmetatable(Obj, self)
-        self.__index = self
-        Obj.mTableForObject = {}
-        Obj.mPosition_3f = inPosition_3f
-        Obj.mDimension_3f = inDimension_3f
-        Obj.mFirst = true
-        Obj.mTableForObject[1] = Com.ImageLabelObject:New(
-            "icons_material/toggle_on/baseline-2x.png",
-            inPosition_3f,
-            inDimension_3f)
-        Obj.mTableForObject[2] = Com.ImageLabelObject:New(
-            "icons_material/toggle_off/baseline-2x.png",
-            vec3(0, 0, 0),
-            vec3(0, 0, 0))
-        Obj.mTableForObject[1]:TintColor(vec4(1, 0, 0, 1))
-        return Obj
-    end,
-    Update = function(self, inPosition_3f, inDimension_3f)
-        if self.mFirst then
-            self.mTableForObject[1]:Update(inPosition_3f, inDimension_3f)
-            self.mTableForObject[2]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
-            self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
-        else
-            self.mTableForObject[2]:Update(inPosition_3f, inDimension_3f)
-            self.mTableForObject[1]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
-            self.mTableForObject[2]:TintColor(vec4(0, 0, 0, 0.5))
+        for i = 1, inNoOfEntries, 1 do
+            self.mButtons[i]:SetFunctions(
+                function()
+                    ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor = vec4(0.5, 0, 1, 0.7)
+                end,
+                function()
+                    local nc = Theme.Colors.Area.Normal
+                    ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor = vec4(nc.x, nc.y, nc.z, nc.w)
+                    if E.is_left_button_pressed() then
+                        self:Update(vec3(0, 0, 0), vec3(0, 0, 0), {})
+                    end
+                end,
+                function()
+                end
+            )
         end
     end,
-    Event = function(self)
-        local MousePos = E.get_mouse_pos()
-        if E.is_left_button_pressed() and MousePos.x > self.mPosition_3f.x and MousePos.x < (self.mPosition_3f.x + self.mDimension_3f.x) and MousePos.y > self.mPosition_3f.y and MousePos.y < (self.mPosition_3f.y + self.mDimension_3f.y) then
-            self.mFirst = not self.mFirst
-            self:Update(self.mPosition_3f, self.mDimension_3f)
-        else
-            self.mTableForObject[1]:TintColor(vec4(0, 0, 1, 1))
-            self.mTableForObject[2]:TintColor(vec4(0, 0, 0, 0.5))
-        end
-    end
+
 }
