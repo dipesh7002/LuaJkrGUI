@@ -185,7 +185,6 @@ Com.VisualTextEditObject = {
 		local isLastLine = self.mVisualLines[line + 1] and self.mVisualLines[line + 1].mUtf8Len == 0 
 		--and self.mVisualLines[line + 1].mEndsWithNewLine == false 
 		if isLastLine then
-			print("Char:", char, "len:", self.mVisualLines[line].mUtf8Len)
 			local substr = utf8.sub(str, 1, char)
 			dimens = self.mFontObject:GetDimension(substr)
 		end
@@ -223,7 +222,6 @@ Com.VisualTextEditObject = {
 				charIndex = inPosition - charIndex
 			end
 		end
-		print(inPosition, "NEXT::", lineIndex, charIndex)
 		return { line = lineIndex, char = charIndex }
 	end,
 	GetNearestGraphicalCharacterPosition = function (self, inX, inY)
@@ -353,7 +351,6 @@ Com.PlainTextEditObject = {
 				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
 				if E.is_text_being_input() and not is_backspace then
 					local input = E.get_input_text()
-					print(input)
 					Obj:CursorInsert(input)			
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
 				end
