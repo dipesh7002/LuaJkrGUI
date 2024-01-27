@@ -36,6 +36,7 @@ function LoadMaterialComponents(inLoadCompute)
 
 	end
 
+
 	Com.CheckButtonList = {
 		New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension,
 			inMaxStringLength)
@@ -331,6 +332,24 @@ In event
 		end
 	}
 
+Com.TextButton = {
+    mTextButton = nil,
+    New = function(self, inPosition_3f, inDimension_3f, inFont, inString)
+        local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
+        setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
+        setmetatable(Obj, self)
+        self.__index = self
+		Obj.mText = inString
+        Obj.mTextButton = Com.TextButtonObject:New(inString, inFont, inPosition_3f, inDimension_3f)
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f, inString)
+		self.mText = inString
+        self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
+        Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+    end
+}
+
 	Com.IconButton = {
 		mImageButton = nil,
 		New = function(self, inPosition_3f, inDimension_3f, inIconName)
@@ -349,27 +368,8 @@ In event
 			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
 		end
 	}
-	Com.TextButton = {
-		New = function(self, inPosition_3f, inDimension_3f, inFont)
-			local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
-			setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
-			setmetatable(Obj, self)
-			self.__index = self
-			Obj.Text = Com.TextButtonObject:New("raja", inFont,
-				vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z + 20),
-				inDimension_3f)
-			Obj.mHoverFunction = function()
-				print("Pressed1")
-			end
-			Obj.mClickedFunction = function()
-				print("pressed2")
-			end
-			Obj.mClickedOutfunction = function()
-				print("Preseed3")
-			end
-			return Obj
-		end
-	}
+
+
 	Com.MaterialWindow = {
 		mVerticalLayout = nil,
 		mTitleText = nil,
@@ -378,6 +378,7 @@ In event
 			setmetatable(self, Com.WindowLayout)
 			setmetatable(Obj, self)
 			self.__index = self
+
 
 			Obj.mPosition_3f = inPosition_3f
 			Obj.mDimension_3f = inDimension_3f

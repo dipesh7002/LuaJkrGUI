@@ -323,3 +323,64 @@ Com.ScrollProxy = {
 		end)
 	end
 }
+Com.ScrollbarLayout = {
+    mHitArea_2f = nil,
+    mComponentObject = nil,
+    mCentralComponent = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
+    mMoving = nil,
+    New = function(self, inPosition_3f, inDimension_3f, inHitArea_2f)
+        local Obj = {}
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mHitArea_2f = inHitArea_2f
+        Obj.mHitAreaPosition_3f = vec3(inPosition_3f.x + inDimension_3f.x - inHitArea_2f.x, inPosition_3f.y, inPosition_3f.z)
+        Obj.mComponentObject = Jkr.ComponentObject:New(Obj.mHitAreaPosition_3f, vec3(inHitArea_2f.x, inHitArea_2f.y, 1))
+        Obj.mPosition_3f = inPosition_3f
+        Obj.mDimension_3f = inDimension_3f
+        Obj.mMoving = false
+        return Obj
+    end,
+    Start = function(self)
+        Com.NewComponent()
+        local i = com_i
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
+            local offset = vec2(self.mPosition_3f.x, self.mPosition_3f.y)
+            local extent = vec2(self.mDimension_3f.x - self.mHitArea_2f.x, self.mDimension_3f.y)
+            if offset.x > 0 and offset.y > 0 then
+                Jkr.set_scissor(offset, extent)
+            end
+        end)
+    end,
+    End = function(self)
+        Com.NewComponent()
+        local i = com_i
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(function()
+            Jkr.reset_scissor()
+        end)
+    end,
+    SetCentralComponent = function(self, inComponent)
+        self.mCentralComponent = inComponent
+        self.mCentralComponent:Update(self.mPosition_3f, self.mDimension_3f)
+        Com.NewComponent_Event()
+        ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+            function()
+                self.mComponentObject:Event()
+                if self.mComponentObject.mClicked_b or (self.mMoving and E.is_left_button_pressed()) then
+                    local mpos = E.get_relative_mouse_pos()
+                    self.mHitAreaPosition_3f.y = self.mHitAreaPosition_3f.y + mpos.y
+                    self.mComponentObject:Update(self.mHitAreaPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+                    self.mMoving = true
+                else
+                    self.mMoving = false
+                end
+            end
+        )
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
+    end
+}
