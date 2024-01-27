@@ -6,15 +6,35 @@ function Lerp(a, b, t)
 	return b * t + (1 - t) * a
 end
 
-function LoadMaterialComponents()
-	local CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
-		"icons_material/radio_button_checked/baseline-2x.png")
-	local UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
-		"icons_material/radio_button_unchecked/baseline-2x.png")
-	local DropDown = Jkr.Components.Abstract.ImageObject:New(0, 0,
-		"icons_material/arrow_drop_down/baseline-2x.png")
-	local DropUp = Jkr.Components.Abstract.ImageObject:New(0, 0,
-		"icons_material/arrow_drop_up/baseline-2x.png")
+function LoadMaterialComponents(inLoadCompute)
+	local CheckedImagePreload = {}
+	local UnCheckedImagePreload = {}
+	local DropDown = {}
+	local DropUp = {}
+
+	if not inLoadCompute then
+		CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
+			"icons_material/radio_button_checked/baseline-2x.png")
+		UnCheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
+			"icons_material/radio_button_unchecked/baseline-2x.png")
+		DropDown = Jkr.Components.Abstract.ImageObject:New(0, 0,
+			"icons_material/arrow_drop_down/baseline-2x.png")
+		DropUp = Jkr.Components.Abstract.ImageObject:New(0, 0,
+			"icons_material/arrow_drop_up/baseline-2x.png")
+	else
+		local Painter_Image = Jkr.Components.Abstract.PainterImageObject:New(40, 40)
+		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 16, 16, 1)
+		Ip_Clear:RegisterImage(Painter_Image)
+		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false, Jkr.GLSL.RoundedCircle, 16, 16, 1)
+		local ImagePrev = Jkr.Components.Abstract.ImageObject:New(40, 40)
+		Com.NewComponent_SingleTimeDispatch()
+		ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
+			function ()
+				Ip_RoundedCircle:Paint(vec4(0.5, 0.5, 0.5, 0.5), vec4(1), vec4(0.5), ImagePrev, Ip_Clear)
+			end
+		)
+
+	end
 
 	Com.CheckButtonList = {
 		New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension,
