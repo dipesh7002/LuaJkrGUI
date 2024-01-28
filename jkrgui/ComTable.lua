@@ -45,9 +45,11 @@ end
 local gDispatchesLoadedIndex = 1
 Com.Dispatches = function()
     if gDispatchesLoadedIndex <= #ComTable_SingleTimeDispatch then
-        print(gDispatchesLoadedIndex)
         ComTable_SingleTimeDispatch[gDispatchesLoadedIndex]:Dispatch()
         gDispatchesLoadedIndex = gDispatchesLoadedIndex + 1
+    else
+	ComTable_SingleTimeDispatch = {}
+	gDispatchesLoadedIndex = 1
     end
 end
 
