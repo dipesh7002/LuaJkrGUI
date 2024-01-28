@@ -2,7 +2,23 @@ require "jkrgui.PrimitiveComponents"
 require "jkrgui.MaterialComponents"
 require "jkrgui.LayoutComponents"
 
-
+Com.TextButton = {
+    mTextButton = nil,
+    New = function(self, inPosition_3f, inDimension_3f, inFont, inString)
+        local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
+        setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mText = inString
+        Obj.mTextButton = Com.TextButtonObject:New(inString, inFont, inPosition_3f, inDimension_3f)
+        return Obj
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f, inString)
+        self.mText = inString
+        self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
+        Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+    end
+}
 
 Com.FileMenuBarObject_Duplicate = {
     mMainArea = nil,
@@ -22,6 +38,7 @@ Com.FileMenuBarObject_Duplicate = {
         Obj.mFileMenu = inFileMenu
         Obj.mNoOfEntries = #inFileMenu
         Obj.mDimension_3f = nil
+        Obj.mFontObject = inFontObject
         for i = 1, #inFileMenu, 1 do
             Obj.mButtons[i] = Com.TextButton:New(mainareapos, vec3(0, 0, 0), inFontObject, inFileMenu[i].name)
         end
@@ -30,14 +47,29 @@ Com.FileMenuBarObject_Duplicate = {
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mDimension_3f = inDimension_3f
         local ratiotable = {}
+        local position = {}
 
         for i = 1, self.mNoOfEntries, 1 do
             ratiotable[i] = 1 / self.mNoOfEntries
         end
         local horizontalcomponents = Com.HLayout:New(0)
         horizontalcomponents:AddComponents(self.mButtons, ratiotable)
+        local FileMenu = self
+        horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
+            local dimension = vec3(inDimension_3f.x * ratiotable[1], inDimension_3f.y, inDimension_3f.z)
+            local dimen_string = FileMenu.mFontObject:GetDimension(FileMenu.mFileMenu[1].name)
+            local padding = dimension.x - dimen_string.x
+            for i = 1, FileMenu.mNoOfEntries, 1 do
+                position[i] = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+                self.mComponents[i]:Update(position[i], dimension, self.mComponents[i].mText)
+                inPosition_3f.x = inPosition_3f.x + dimension.x
+                if i < FileMenu.mNoOfEntries then
+                    dimen_string = FileMenu.mFontObject:GetDimension(FileMenu.mFileMenu[i + 1].name)
+                    dimension.x = dimen_string.x + padding
+                end
+            end
+        end
         horizontalcomponents:Update(vec3(0, 0, self.mDepth), inDimension_3f)
-        local position = horizontalcomponents:GetComponentPosition()
         for i = 1, self.mNoOfEntries, 1 do
             self.mButtons[i]:SetFunctions(
                 function()
@@ -80,7 +112,6 @@ Com.ContextMenu_Duplicate = {
             local pos = vec3(inPosition_3f.x, inPosition_3f.y + inCellDimension_3f.y * (i - 1), inPosition_3f.z - 3)
             Obj.mButtons[i] = Com.TextButton:New(pos,
                 button_dimension, inFontObject, string.rep(" ", inMaxStringLength))
-                
         end
         return Obj
     end,
