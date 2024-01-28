@@ -1,6 +1,7 @@
 require "jkrgui.PrimitiveComponents"
 require "jkrgui.ExtraComponents"
 require "jkrgui.LayoutComponents"
+require "jkrgui.Resources"
 
 function Lerp(a, b, t)
 	return b * t + (1 - t) * a
@@ -30,9 +31,15 @@ function LoadMaterialComponents(inLoadCompute)
 		Com.NewComponent_SingleTimeDispatch()
 		ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
 			function ()
-				Ip_RoundedCircle:Paint(vec4(0.5, 0.5, 0.5, 0.5), vec4(1), vec4(0.5), ImagePrev, Ip_Clear)
+				Ip_Clear:BindImage()
+				Ip_RoundedCircle:BindPainter()
+				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev, Ip_Clear)
 			end
 		)
+		CheckedImagePreload = ImagePrev
+		UnCheckedImagePreload = ImagePrev
+		DropDown = ImagePrev
+		DropUp = ImagePrev
 
 	end
 
