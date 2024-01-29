@@ -303,7 +303,7 @@ Jkr.ComponentObject = {
 			self.mHovered_b = E.is_mouse_on_top(Int(self.mBoundedRectId_i),
 				Int(self.mPosition_3f.z))
 		end
-		if self.mHovered_b and E.is_left_button_pressed() then
+		if self.mHovered_b and E.is_mousepress_event() and E.is_left_button_pressed() then
 			self.mClicked_b = true
 		else
 			self.mClicked_b = false

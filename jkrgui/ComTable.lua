@@ -28,7 +28,7 @@ end
 
 com_upd = 0
 Com.NewComponent_Update = function()
-    com_upds = com_upd + 1 
+    com_upd = com_upd + 1 
 end
 
 com_upds = 0
@@ -50,6 +50,7 @@ Com.Dispatches = function()
     else
 	ComTable_SingleTimeDispatch = {}
 	gDispatchesLoadedIndex = 1
+	com_sdisi = 0
     end
 end
 
@@ -68,5 +69,10 @@ Com.Updates = function()
 	else
 		ComTable_SingleTimeUpdate = {}
 		gUpdatesLoadedIndex = 1
+		com_upds = 0
+	end
+
+	for _, com in ipairs(ComTable_Update) do
+		com:Update()
 	end
 end

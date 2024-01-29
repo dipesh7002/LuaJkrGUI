@@ -340,7 +340,7 @@ Com.PlainTextEditObject = {
 		setmetatable(Obj, self)
 		self.__index = self
 		Com.NewComponent_Event()
-		E.start_text_input() -- TODO paxi hataune
+		E.stop_text_input()
 		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
 			function ()
 				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
