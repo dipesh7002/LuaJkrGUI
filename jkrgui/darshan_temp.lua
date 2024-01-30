@@ -14,6 +14,7 @@ to_draw_at.x = to_draw_at.x + xx;
 to_draw_at.y = to_draw_at.y + yy;
 vec4 pure_color = push.mColor;
 
+
 vec2 imageko_size = vec2(push.mPosDimen.z, push.mPosDimen.w); // GlobalInvocations
 float x_cartesian = (float(gl_GlobalInvocationID.x) - float(imageko_size.x) / float(2)) / (float((imageko_size.x) / float(2)));
 float y_cartesian = (float(imageko_size.y) / float(2) - float(gl_GlobalInvocationID.y)) / (float(imageko_size.y) / float(2));
