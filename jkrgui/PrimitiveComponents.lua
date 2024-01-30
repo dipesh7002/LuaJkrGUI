@@ -30,6 +30,7 @@ Com.AreaObject = {
         Obj.mAreaId = com_i
         return Obj
     end,
+    
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f

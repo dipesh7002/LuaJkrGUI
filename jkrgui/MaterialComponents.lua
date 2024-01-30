@@ -476,7 +476,7 @@ In event
             verticalLayout:Update(
                 vec3(inPosition_3f.x + inDimension_3f.x - inDimension_3f.y, inPosition_3f.y, inPosition_3f.z - 3),
                 vec3(inDimension_3f.y, inDimension_3f.y, inDimension_3f.z))
-    
+			
             iconUp:SetFunctions(
                 function()
     

@@ -23,8 +23,6 @@ Com.HLayout = {
     Update = function(self, inPosition_3f, inDimension_3f)
         local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
         local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
-
-
         local paddingX = self.mPadding
 
         if self.mRatioTable then
@@ -34,7 +32,7 @@ Com.HLayout = {
                     self.mComponents[index].mText)
                 position.x = position.x + dimension.x * self.mRatioTable[index] + paddingX
             end
-        end
+        end 
     end,
     GetComponentPosition = function(self)
         local position = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z)
@@ -113,7 +111,7 @@ Com.StackLayout = {
         self.mDimension_3f = inDimension_3f
         for index, value in ipairs(self.mComponents) do
             value:Update(vec3(position.x, position.y, position.z),
-                vec3(dimension.x, dimension.y , dimension.z),
+                vec3(dimension.x, dimension.y, dimension.z),
                 self.mComponents[index].mText)
             position.z = position.z - self.mChangingZvalue
         end
@@ -212,7 +210,7 @@ Com.WindowLayout = {
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
         if inHitArea_2f then
-	self.mHitArea_2f = inHitArea_2f
+            self.mHitArea_2f = inHitArea_2f
         end
         self.mComponentObject:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
         self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
@@ -235,7 +233,7 @@ Com.ButtonProxy = {
             mDimension_3f = inDimension_3f,
             mHoverFunction = function() end,
             mClickedFunction = function() end,
-            mHoverOutFunction = function () end,
+            mHoverOutFunction = function() end,
         }
         setmetatable(Obj, self)
         self.__index = self
@@ -252,7 +250,6 @@ Com.ButtonProxy = {
                 if Obj.mComponentObject.mClicked_b then
                     Obj.mClickedFunction()
                 end
-                
             end
         )
         return Obj
