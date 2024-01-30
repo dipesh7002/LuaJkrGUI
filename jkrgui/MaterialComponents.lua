@@ -1,6 +1,7 @@
 require "jkrgui.PrimitiveComponents"
 require "jkrgui.ExtraComponents"
 require "jkrgui.LayoutComponents"
+require "jkrgui.Resources"
 
 function Lerp(a, b, t)
 	return b * t + (1 - t) * a
@@ -23,16 +24,22 @@ function LoadMaterialComponents(inLoadCompute)
 			"icons_material/arrow_drop_up/baseline-2x.png")
 	else
 		local Painter_Image = Jkr.Components.Abstract.PainterImageObject:New(40, 40)
-		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 16, 16, 1)
+		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 1, 1, 1)
 		Ip_Clear:RegisterImage(Painter_Image)
-		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false, Jkr.GLSL.RoundedCircle, 16, 16, 1)
+		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false, Jkr.GLSL.RoundedCircle, 256, 256, 1)
 		local ImagePrev = Jkr.Components.Abstract.ImageObject:New(40, 40)
 		Com.NewComponent_SingleTimeDispatch()
 		ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
 			function ()
-				Ip_RoundedCircle:Paint(vec4(0.5, 0.5, 0.5, 0.5), vec4(1), vec4(0.5), ImagePrev, Ip_Clear)
+				Ip_Clear:BindImage()
+				Ip_RoundedCircle:BindPainter()
+				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev, Ip_Clear)
 			end
 		)
+		CheckedImagePreload = ImagePrev
+		UnCheckedImagePreload = ImagePrev
+		DropDown = ImagePrev
+		DropUp = ImagePrev
 
 	end
 

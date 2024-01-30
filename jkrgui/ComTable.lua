@@ -28,7 +28,7 @@ end
 
 com_upd = 0
 Com.NewComponent_Update = function()
-    com_upds = com_upd + 1 
+    com_upd = com_upd + 1 
 end
 
 com_upds = 0
@@ -45,9 +45,12 @@ end
 local gDispatchesLoadedIndex = 1
 Com.Dispatches = function()
     if gDispatchesLoadedIndex <= #ComTable_SingleTimeDispatch then
-        print(gDispatchesLoadedIndex)
         ComTable_SingleTimeDispatch[gDispatchesLoadedIndex]:Dispatch()
         gDispatchesLoadedIndex = gDispatchesLoadedIndex + 1
+    else
+	ComTable_SingleTimeDispatch = {}
+	gDispatchesLoadedIndex = 1
+	com_sdisi = 0
     end
 end
 
@@ -66,5 +69,10 @@ Com.Updates = function()
 	else
 		ComTable_SingleTimeUpdate = {}
 		gUpdatesLoadedIndex = 1
+		com_upds = 0
+	end
+
+	for _, com in ipairs(ComTable_Update) do
+		com:Update()
 	end
 end

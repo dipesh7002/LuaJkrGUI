@@ -166,13 +166,45 @@ require "jkrgui.Config" -- #include "Config" vane jastai C ma
 Depth = 75
 Time = 0                                -- Increments each frame
 WindowDimension = GetWindowDimensions() -- Can get Window dimensions just by doing WindowDimension.x, WindowDimension.y
+DisplayDimension = get_display_dimensions()
+local fY = DisplayDimension.y / 1080
+local fX = DisplayDimension.x / 1920
+local f = 0
 
+if fX > fY then
+	f = fX
+else
+	f = fY
+end
 -- To be called at Update Callback
 function FrameUpdate()
 	Time = Time + 1
 	WindowDimension = GetWindowDimensions()
+	-- WindowDimension = vec2()
 end
 
+
+function FontSize(inSize)
+	return Int(inSize * f)
+end
+
+function P(inx, iny, ind)
+	inx = inx * f
+	iny = iny * f
+	return vec3(inx, iny, ind)
+end
+
+function P2(inx, iny)
+	inx = inx * f
+	iny = iny * f
+	return vec2(inx, iny)
+end
+
+function D(inx, iny, inz)
+	inx = inx * f
+	iny = iny * f
+	return vec3(inx, iny, 1)
+end
 --[[
         This is a fontObject, which holds a certain font of certain size
 ]]
@@ -271,7 +303,7 @@ Jkr.ComponentObject = {
 			self.mHovered_b = E.is_mouse_on_top(Int(self.mBoundedRectId_i),
 				Int(self.mPosition_3f.z))
 		end
-		if self.mHovered_b and E.is_left_button_pressed() then
+		if self.mHovered_b and E.is_mousepress_event() and E.is_left_button_pressed() then
 			self.mClicked_b = true
 		else
 			self.mClicked_b = false
@@ -477,6 +509,11 @@ Jkr.Components.Util.ImagePainter = {
 	end,
 	Paint = function(self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inPainterWithRegisteredImage)
 		self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)
+		S.CopyImage(Int(inImageObject.mId),
+			inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
+	end,
+	PaintEXT = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inPainterWithRegisteredImage, inX, inY, inZ)
+		self.mPainter:paintext(inPosDimen_4f, inColor_4f, inParam_4f, Int(inX), Int(inY), Int(inZ))
 		S.CopyImage(Int(inImageObject.mId),
 			inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
 	end,
