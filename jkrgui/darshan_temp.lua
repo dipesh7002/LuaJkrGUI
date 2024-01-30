@@ -62,7 +62,7 @@ Com.DrawableArea = {
 		self.__index = self
 		Obj.mPainterImage = Jkr.Components.Abstract.PainterImageObject:New(inCanvasSize_2f.x,
 			inCanvasSize_2f.y)
-		Obj.mIpClear = Jkr.Components.Util.ImagePainter:New("cache/ClearD.Compute", false,
+		Obj.mIpClear = Jkr.Components.Util.ImagePainter:New("cache/ClearD.Compute", true,
 			Jkr.GLSL.ClearD, localInv.x, localInv.y, localInv.z)
 		Obj.mIpClear:RegisterImage(Obj.mPainterImage)
 		Obj.mIpPainter = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircleD.Compute", true,
@@ -77,7 +77,7 @@ Com.DrawableArea = {
 		Obj.mPainterBrushes = {}
 		Obj.mPainterBrushes[#Obj.mPainterBrushes+1] = Obj.mIpClear
 		Obj.mPainterBrushes[#Obj.mPainterBrushes+1] = Obj.mIpPainter
-		Obj.mCurrentPainterBrushIndex = 2
+		Obj.mCurrentPainterBrushIndex = 1
 		Obj.mCurrentPainterBrushDimension = vec2(50, 50)
 		Obj.mCurrentColor = vec4(1, 0, 0.1, 1)
 		Obj.mCurrentLocalBrushDimen = vec2(0.9, 0.9)
@@ -215,7 +215,7 @@ LoadDarshan = function()
 	ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
 		function(self)
 			Canvas:Bind()
-			Canvas:Clear(vec4(1, 1, 1, 1))
+			Canvas:Clear(vec4(0, 0, 0, 1))
 		end
 	)
 end
