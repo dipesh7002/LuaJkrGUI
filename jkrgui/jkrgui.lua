@@ -167,15 +167,17 @@ Depth = 75
 Time = 0                                -- Increments each frame
 WindowDimension = GetWindowDimensions() -- Can get Window dimensions just by doing WindowDimension.x, WindowDimension.y
 DisplayDimension = get_display_dimensions()
+print(DisplayDimension.x,DisplayDimension.y)
 local fY = DisplayDimension.y / 1080
 local fX = DisplayDimension.x / 1920
-local f = 0
+local f = 1
 
-if fX > fY then
-	f = fX
-else
-	f = fY
-end
+-- if fX > fY then
+-- 	f = fX
+-- else
+-- 	f = fY
+-- end
+
 -- To be called at Update Callback
 function FrameUpdate()
 	Time = Time + 1
