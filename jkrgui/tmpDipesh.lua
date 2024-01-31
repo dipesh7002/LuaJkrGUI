@@ -17,6 +17,7 @@ Com.Slider = {
             mDimension_3f = inDimension_3f,
             mCurrentNumberObject = nil
         }
+
         setmetatable(Obj, self)
         self.__index = self
         Obj.mArea = Com.AreaObject:New(inPosition_3f, inDimension_3f)
@@ -82,21 +83,47 @@ Com.IconTextButton = {
     end
 }
 
--- Com.OutlinedArea = {
---     New = function(self, inPosition_3f, inDimension_3f, inBorderColor)
---         local Obj = Com.AreaObject:New(vec3(inPosition_3f.x - 20, inPosition_3f.y - 2, inPosition_3f.z ),
---             vec3(inDimension_3f.x + 4, inDimension_3f.y + 4, inDimension_3f.z))
---         setmetatable(self, Com.AreaObject)
---         setmetatable(Obj, self)
---         self.__index = self
---         Obj.mFillColor = inBorderColor
---         Obj.mMainArea = Com.AreaObject:New(inPosition_3f, inDimension_3f)
---     end,
---     Update = function (self, inPosition_3f, inDimension_3f)
---             self.Update(self, inPosition_3f, inDimension_3f)
---             self.mMainArea:Update(inPosition_3f, inDimension_3f)
---     end
--- }
+
+Com.OutlineAreaObject = {
+    mIds = vec2(0, 0),
+    mPosition_3f = vec3(0, 0, 0),
+    mDimension_3f = vec3(0, 0, 0),
+    mAreaId = nil,
+    New = function(self, inPosition_3f, inDimension_3f)
+        local Obj = {
+            mIds = vec2(0, 0),
+            mPosition_3f = vec3(0, 0, 0),
+            mDimension_3f = vec3(0, 0, 0),
+            mAreaId = 0,
+        }
+        -- "AreaObject Construction")
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mPosition_3f = inPosition_3f
+        Obj.mDimension_3f = inDimension_3f
+
+        local AreaPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+
+        Com.NewComponent()
+        ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(AreaPos, AreaDimen, nil, nil)
+        local nc = Theme.Colors.Area.Normal
+        ComTable[com_i].mFillColor = vec4(nc.x, nc.y, nc.z, nc.w)
+        Obj.mIds.y = com_i
+        Obj.mAreaId = com_i
+        return Obj
+    end,
+
+    Update = function(self, inPosition_3f, inDimension_3f)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        local i = self.mIds.x
+        local AreaPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        ComTable[self.mAreaId]:Update(AreaPos, AreaDimen)
+    end
+}
+
 
 Com.IconTabWidget = {
     New = function(self, inFontObject, inMaxNoOfTabs, inMaxStringLength, inTabHeight)
@@ -148,7 +175,7 @@ Com.IconTabWidget = {
                     self.mComponentObjects[index].mPosition_3f.y)
                 local extent = vec2(self.mComponentObjects[index].mDimension_3f.x,
                     self.mComponentObjects[index].mDimension_3f.y)
-              
+
                 if offset.x > 0 and offset.y > 0 then
                     Jkr.set_scissor(offset, extent)
                 end
@@ -166,10 +193,10 @@ Com.IconTabWidget = {
                         self.mCloseButton[index]:Update(tabsPosition,
                             vec3(tabDimension.x / 3, tabDimension.y / 3, tabDimension.z))
                         self.mCloseButton[index].mImageButton:TintColor(vec4(1, 0, 0, 1))
-
                     else
                         self.mCloseButton[index]:Update(vec3(0, 0, 1), vec3(0, 0, 1))
-                        self.mBottomAreas[index]:Update(vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z +1),inDimension_3f)
+                        self.mBottomAreas[index]:Update(vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z + 1),
+                            inDimension_3f)
                     end
 
                     if self.mComponentObjects[index].mClicked_b then

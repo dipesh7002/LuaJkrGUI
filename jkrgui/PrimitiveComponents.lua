@@ -13,6 +13,7 @@ Com.AreaObject = {
             mDimension_3f = vec3(0, 0, 0),
             mAreaId = 0,
         }
+        
         -- "AreaObject Construction")
         setmetatable(Obj, self)
         self.__index = self
@@ -120,6 +121,7 @@ Com.ImageLabelObject = {
             end
         )
     end,
+    
     PaintByComputeDispatch = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
         local ip = inPainterWithPainterParameters
         inPainterWithRegisteredImage:BindImage()

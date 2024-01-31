@@ -206,6 +206,7 @@ Com.WindowLayout = {
             end
         )
     end,
+    
     Update = function(self, inPosition_3f, inDimension_3f, inHitArea_2f)
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
