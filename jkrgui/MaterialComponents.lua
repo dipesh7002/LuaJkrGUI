@@ -326,17 +326,6 @@ In event
 				end
 			end
 
-			--  else
-
-			--[[for i = 2, inNoOfEntries + 1 , 1 do
-            self.mButtons[i]:Event()
-            print("pressed1")
-            if self.mButtons[i].mPressed then
-                print("Pressed2")
-                self:Update(self.mPosition_3f,self.mDimension_3f,self.mCurrentComboContent[i])
-            end
-
-        end]]
 		end
 	}
 
@@ -386,7 +375,6 @@ In event
 			setmetatable(self, Com.WindowLayout)
 			setmetatable(Obj, self)
 			self.__index = self
-
 
 			Obj.mPosition_3f = inPosition_3f
 			Obj.mDimension_3f = inDimension_3f
@@ -594,7 +582,6 @@ In event
 				self.mComponents[3]:Update(iconDownPosition_3f, upDownArea_3f)
 
 				-- Scrollbar Position Calculation
-				--local Ypos = Lerp(areaPos_3f.y, areaPos_3f.y + (areaDimension_3f.y - This.mScrollbarSizeFactor * areaPos_3f.y), This.mScrollbarPositionNormalized)
 				local Ypos = Lerp(areaPos_3f.y,
 					areaPos_3f.y +
 					(areaDimension_3f.y - This.mScrollbarSizeFactor * areaDimension_3f.y),
@@ -672,25 +659,31 @@ In event
 					button_dimension, inFontObject,
 					string.rep(" ", inMaxStringLength))
 			end
+			Obj.mCellDimension_3f = inCellDimension_3f
 			return Obj
 		end,
-		Update = function(self, inPosition_3f, inCellDimension_3f, inContextMenuTable)
-			self.mCurrentContextMenu = inContextMenuTable
+		Update = function(self, inPosition_3f, inDimension_3f, inCellDimension_3f, inContextMenuTable)
+			if inContextMenuTable then
+				self.mCurrentContextMenu = inContextMenuTable
+			end
+			if inCellDimension_3f then
+				self.mCellDimension_3f = inCellDimension_3f
+			end
+
 			self.mMainArea:Update(vec3(0, 0, self.mMainArea.mPosition_3f.z), vec3(0, 0, 0))
 			for index, value in ipairs(self.mButtons) do
 				value:Update(vec3(0, 0, value.mPosition_3f.z), vec3(0, 0, 0), " ")
 			end
-			local inNoOfEntries = #inContextMenuTable
-			local MainAreaDimension = vec3(inCellDimension_3f.x, inCellDimension_3f.y * inNoOfEntries,
+			local inNoOfEntries = #self.mCurrentContextMenu
+			local MainAreaDimension = vec3(self.mCellDimension_3f.x, self.mCellDimension_3f.y * inNoOfEntries,
 				1)
 			local mainareapos = vec3(inPosition_3f.x, inPosition_3f.y, self.mMainArea.mPosition_3f.z)
 			self.mMainArea:Update(mainareapos, MainAreaDimension)
 			for i = 1, inNoOfEntries, 1 do
 				local pos = vec3(inPosition_3f.x,
-					inPosition_3f.y + inCellDimension_3f.y * (i - 1),
+					inPosition_3f.y + self.mCellDimension_3f.y * (i - 1),
 					self.mButtons[i].mPosition_3f.z)
-				self.mButtons[i]:Update(pos, inCellDimension_3f, inContextMenuTable[i].name)
-				print(inContextMenuTable[i].name)
+				self.mButtons[i]:Update(pos, self.mCellDimension_3f, self.mCurrentContextMenu[i].name)
 			end
 			for i = 1, inNoOfEntries, 1 do
 				self.mButtons[i]:SetFunctions(
@@ -703,11 +696,9 @@ In event
 						local nc = Theme.Colors.Area.Normal
 						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
 						    vec4(nc.x, nc.y, nc.z, nc.w)
-						if E.is_left_button_pressed() then
-							self:Update(vec3(0, 0, 0),
-								vec3(0, 0, 0),
-								{})
-						end
+						-- if E.is_left_button_pressed() then
+						-- 	self:Update(vec3(0, 0, 0), nil, vec3(0, 0, 0), {})
+						-- end
 					end,
 					function()
 					end

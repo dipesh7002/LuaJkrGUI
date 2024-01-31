@@ -243,13 +243,14 @@ Darshan.CanvasExperiment = function()
 end
 
 Darshan.SanskritDictionary = function()
-	Font = Jkr.FontObject:New("font.ttf", FontSize(20))
+	LoadMaterialComponents(true)
+	BigFont = Jkr.FontObject:New("font.ttf", FontSize(20))
 	local apricot_color = vec4(0.99, 0.83, 0.73, 1)
 
 	local TopBarSizeFactor = 0.08
 	local TopBar = Com.Canvas:New(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
 	TopBar:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
-	TopBar:AddPainterBrush(Com.GetCanvasPainter("RoundedRectangle", true))
+	TopBar:AddPainterBrush(Com.GetCanvasPainter("RoundedRectangle", false))
 	TopBar:MakeCanvasImage(WindowDimension.x, WindowDimension.y * TopBarSizeFactor)
 
 	local Vlayout = Com.VLayout:New(0)
@@ -272,12 +273,59 @@ Darshan.SanskritDictionary = function()
 	)
 
 	local topText = "संस्कृतम्"
-	local tB = Com.TextLabelObject:New(topText, vec3(WindowDimension.x / 4 - Font:GetDimension(topText).x / 2, 0.01 * WindowDimension.y, 20), Font)
+	local tB = Com.TextLabelObject:New(topText, vec3(WindowDimension.x / 4 - BigFont:GetDimension(topText).x / 2, 0.01 * WindowDimension.y, 20), BigFont)
+
+	ContextMenuEntries_Run = {
+		[1] = {
+			name = "आरम्भः",
+			action = function()
+
+			end
+		},
+		[2] = {
+			name = "परामर्शः",
+			action = function()
+
+			end
+		},
+		[3] = {
+			name = "विस्तारः",
+			action = function()
+			end
+		},
+		[4] = {
+			name = "विस्तारः",
+			action = function()
+			end
+		},
+		[5] = {
+			name = "विस्तारः",
+			action = function()
+			end
+		}
+	}
+
+
+	local sc = Com.MaterialVerticalScrollArea:New(P(200, 200, 50), P(200, 200, 1), D(200, 200, 1), 20, P2(20, 200), 0.1, 0.3)
+	sc:Start()
+	local function insideScrollbar()
+		local cm = Com.ContextMenu:New(vec3(200, 200, 50), vec3(100, 100, 1), BigFont, 10, 100)
+		cm:Update(vec3(100, 100, 30), nil, vec3(100, 30, 1), ContextMenuEntries_Run)
+		sc:SetScrollableComponent(cm)
+		sc:Update(vec3(100, 100, 30), vec3(100, 100, 1))
+	end
+	insideScrollbar()
+	sc:Update(vec3(100, 100, 30), vec3(100, 100, 1))
+
+
+	local searchBar = Com.PlainTextLineEditObject:New(vec3(200, 400, 20), vec3(100, 100, 1), BigFont, 100)
+	-- sc:End()
 end
 
 LoadDarshan = function()
 	Darshan.SanskritDictionary()
 	-- Darshan.CanvasExperiment()
+	-- LoadMainH()
 	-- Darshan.TextEditor()
 end
 
