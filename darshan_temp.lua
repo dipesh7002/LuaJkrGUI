@@ -1,40 +1,5 @@
 require "mainh"
 
-Jkr.GLSL.ClearD = [[
-to_draw_at.x = to_draw_at.x + int(push.mPosDimen.x);
-to_draw_at.y = to_draw_at.y + int(push.mPosDimen.y);
-imageStore(storageImage, to_draw_at, vec4(push.mColor.x, push.mColor.y, push.mColor.z, push.mColor.w));
-]]
-
-Jkr.GLSL.RoundedCircleD = [[
-int xx = int(push.mPosDimen.x);
-int yy = int(push.mPosDimen.y);
-to_draw_at.x = to_draw_at.x + xx;
-to_draw_at.y = to_draw_at.y + yy;
-vec4 pure_color = push.mColor;
-
-vec2 imageko_size = vec2(push.mPosDimen.z, push.mPosDimen.w); // GlobalInvocations
-float x_cartesian = (float(gl_GlobalInvocationID.x) - float(imageko_size.x) / float(2)) / (float((imageko_size.x) / float(2)));
-float y_cartesian = (float(imageko_size.y) / float(2) - float(gl_GlobalInvocationID.y)) / (float(imageko_size.y) / float(2));
-
-vec2 xy_cartesian = vec2(x_cartesian, y_cartesian);
-vec2 center = vec2(0, 0);
-vec2 hw = vec2(0.9, 0.9);
-float radius = hw.x;
-
-float color = distance(xy_cartesian, center) - radius;
-color = smoothstep(-1, 1, -color);
-
-vec4 old_color = imageLoad(storageImage, to_draw_at);
-vec4 final_color = vec4(push.mColor.x * color, push.mColor.y * color, push.mColor.z * color, push.mColor.w * color);
-//final_color = mix(final_color, old_color, push.mParam.w);
-
-if (color >= 0.7)
-{
-	imageStore(storageImage, to_draw_at, pure_color);
-}
-]]
-
 
 -- LoadMainH()
 local localInv = { x = 1, y = 1, z = 1 }
@@ -252,7 +217,7 @@ end
 Darshan.CanvasExperiment = function()
 	IpClear = Jkr.Components.Util.ImagePainter:New("cache/ClearD.Compute", false,
 		Jkr.GLSL.ClearD, localInv.x, localInv.y, localInv.z)
-	IpPainter = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircleD.Compute", true,
+	IpPainter = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircleD.Compute", false,
 		Jkr.GLSL.RoundedCircleD, localInv.x, localInv.y, localInv.z)
 	local DrawWableWindow = Com.MaterialWindow:New(P(400, 100, 80), D(500, 500, 1), P2(200, 20), "Canvas",
 		Font)
@@ -279,51 +244,35 @@ end
 
 Darshan.SanskritDictionary = function()
 	Font = Jkr.FontObject:New("font.ttf", FontSize(20))
-	local apricot_color = vec4(0.98, 0.81, 0.69, 1)
-
-	IpClear = Jkr.Components.Util.ImagePainter:New("cache/ClearD.Compute", false,
-		Jkr.GLSL.ClearD, localInv.x, localInv.y, localInv.z)
-	IpPainter = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircleD.Compute", true,
-		Jkr.GLSL.RoundedCircleD, localInv.x, localInv.y, localInv.z)
+	local apricot_color = vec4(0.99, 0.83, 0.73, 1)
 
 	local TopBarSizeFactor = 0.08
 	local TopBar = Com.Canvas:New(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
-	TopBar:AddPainterBrush(IpClear)
+	TopBar:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
+	TopBar:AddPainterBrush(Com.GetCanvasPainter("RoundedRectangle", true))
+	TopBar:MakeCanvasImage(WindowDimension.x, WindowDimension.y * TopBarSizeFactor)
+
 	local Vlayout = Com.VLayout:New(0)
 	local PageLayout = Com.VLayout:New(0)
 	Vlayout:AddComponents({ TopBar, PageLayout }, { TopBarSizeFactor, 1 - TopBarSizeFactor })
-	TopBar:MakeCanvasImage(WindowDimension.x, WindowDimension.y * TopBarSizeFactor)
 	Vlayout:Update(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
 
 
 	Com.NewComponent_SingleTimeDispatch()
 	ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
 		function ()
+			TopBar.CurrentBrushId = 2
 			TopBar:Bind()	
-			TopBar:Paint(vec4(0, 0, WindowDimension.x, WindowDimension.y * TopBarSizeFactor), apricot_color, vec4(1, 1, 1, 1))
+			local startingY = -WindowDimension.y + TopBarSizeFactor * WindowDimension.y * 1.8
+			local startingX = - WindowDimension.x
+			local endingX = WindowDimension.x * 2
+			local endingY = WindowDimension.y + TopBarSizeFactor * WindowDimension.y
+			TopBar:Paint(vec4(startingX, startingY, endingX, endingY), apricot_color, vec4(1.2, 1, 1, 0.8), endingX, endingY, 1)
 		end
 	)
 
 	local topText = "संस्कृतम्"
-	local tB = Com.TextLabelObject:New(topText, vec3(WindowDimension.x / 2 - Font:GetDimension(topText).x / 2, 0.02 * WindowDimension.y, 20), Font)
-
-	-- local TopBarSizeFactor = 0.08
-	-- TopBar = Com.DrawableArea:New(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1),
-	-- 	vec2(WindowDimension.x, TopBarSizeFactor * WindowDimension.y), true, IpClear, IpPainter)
-	-- Vlayout:AddComponents({ TopBar, PageLayout }, { TopBarSizeFactor, 1 - TopBarSizeFactor })
-	-- Vlayout:Update(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
-
-
-	-- Com.NewComponent_SingleTimeDispatch()
-	-- ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
-	-- 	function()
-	-- 		TopBar:Bind()
-	-- 		TopBar:Clear(vec4(1, 1, 1, 1))
-	-- 		-- TopBar:Clear(apricot_color)
-	-- 		TopBar:Bind()
-	-- 		TopBar:PaintByPosition(vec4(1), vec4(WindowDimension.x * 2, WindowDimension.y, 1, 1), apricot_color)
-	-- 	end
-	-- )
+	local tB = Com.TextLabelObject:New(topText, vec3(WindowDimension.x / 4 - Font:GetDimension(topText).x / 2, 0.01 * WindowDimension.y, 20), Font)
 end
 
 LoadDarshan = function()

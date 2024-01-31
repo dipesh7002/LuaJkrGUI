@@ -210,8 +210,8 @@ Com.Canvas = {
 		self.mPainterBrushes[1]:BindImage()
 		self.mPainterBrushes[self.CurrentBrushId]:BindPainter()
 	end,
-	Paint = function (self, inBrushPosDimen_4f, inColor_4f, inParam_4f)
-		self.mPainterBrushes[self.CurrentBrushId]:PaintEXT(inBrushPosDimen_4f, inColor_4f, inParam_4f, self.mImage, self.mPainterBrushes[1], inBrushPosDimen_4f.z, inBrushPosDimen_4f.w, 1)
+	Paint = function (self, inBrushPosDimen_4f, inColor_4f, inParam_4f, inX, inY, inZ)
+		self.mPainterBrushes[self.CurrentBrushId]:PaintEXT(inBrushPosDimen_4f, inColor_4f, inParam_4f, self.mImage, self.mPainterBrushes[1], inX, inY, inZ)
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f)
 		self.mPosition_3f = inPosition_3f
