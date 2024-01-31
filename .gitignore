@@ -1,7 +1,8 @@
 *.dll
 /*.bin
 /*.exe
-/*.lua
+main.lua
+mainh.lua
 /*.ttf
 jkrgui/.DS_Store
 /*.png

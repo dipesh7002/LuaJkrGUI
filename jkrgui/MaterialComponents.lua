@@ -24,29 +24,31 @@ function LoadMaterialComponents(inLoadCompute)
 			"icons_material/arrow_drop_up/baseline-2x.png")
 	else
 		local Painter_Image = Jkr.Components.Abstract.PainterImageObject:New(40, 40)
-		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 1, 1, 1)
+		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 1,
+			1, 1)
 		Ip_Clear:RegisterImage(Painter_Image)
-		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false, Jkr.GLSL.RoundedCircle, 256, 256, 1)
+		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false,
+			Jkr.GLSL.RoundedCircle, 256, 256, 1)
 		local ImagePrev = Jkr.Components.Abstract.ImageObject:New(40, 40)
 		Com.NewComponent_SingleTimeDispatch()
 		ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
-			function ()
+			function()
 				Ip_Clear:BindImage()
 				Ip_RoundedCircle:BindPainter()
-				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev, Ip_Clear)
+				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev,
+					Ip_Clear)
 			end
 		)
 		CheckedImagePreload = ImagePrev
 		UnCheckedImagePreload = ImagePrev
 		DropDown = ImagePrev
 		DropUp = ImagePrev
-
 	end
 
 
 	Com.CheckButtonList = {
 		New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension,
-			inMaxStringLength)
+			     inMaxStringLength)
 			local Obj = {
 				mMaxNoOfEntries = inMaxNoOfEntries,
 				mTableObjectForDescription = {},
@@ -85,8 +87,8 @@ function LoadMaterialComponents(inLoadCompute)
 				if self.mIndex == i or self.mIndex == nil then
 					if inStringTable[i].mFirst then
 						self.mButtonChecked[i]:Update(
-						vec3(position.x, position.y,
-							position.z),
+							vec3(position.x, position.y,
+								position.z),
 							inDimension_3f)
 						self.mButtonUnchecked[i]
 						    :Update(vec3(0, 0, 0),
@@ -94,11 +96,11 @@ function LoadMaterialComponents(inLoadCompute)
 					else
 						self.mButtonUnchecked[i]
 						    :Update(
-						    vec3(position.x, position
-						    .y, position.z),
+							    vec3(position.x, position
+								    .y, position.z),
 							    inDimension_3f)
 						self.mButtonChecked[i]:Update(
-						vec3(0, 0, 0), vec3(0, 0, 0))
+							vec3(0, 0, 0), vec3(0, 0, 0))
 					end
 				end
 				self.mPosition_3f[i] = vec3(position.x, position.y,
@@ -130,11 +132,11 @@ function LoadMaterialComponents(inLoadCompute)
 					    (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
 					    MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
 						self.mCurrentStringTable[i].mFirst = not
-						self.mCurrentStringTable[i]
-						.mFirst
+						    self.mCurrentStringTable[i]
+						    .mFirst
 						self.mIndex = i
 						self:Update(
-						self.mPosition_3f[1],
+							self.mPosition_3f[1],
 							self.mDimension_3f
 							[1],
 							self.mCurrentStringTable) -- first button ko position dinuprxaw
@@ -197,7 +199,7 @@ In event
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inOneCellDimension_3f, inComboContent,
-			   inDefaultString, inHeadString)
+			        inDefaultString, inHeadString)
 			self.mCurrentComboContent = inComboContent
 			self.mHeadString = inHeadString
 			local inNoOfEntries = #inComboContent
@@ -217,11 +219,11 @@ In event
 				else
 					if self.Flag then
 						self.mButtons[i]:Update(
-						position, inOneCellDimension_3f,
+							position, inOneCellDimension_3f,
 							inComboContent[i - 1])
 					else
 						self.mButtons[i]:Update(
-						vec3(0, 0, self.mDepth),
+							vec3(0, 0, self.mDepth),
 							vec3(0, 0, 0),
 							" ")
 					end
@@ -239,8 +241,8 @@ In event
 			if self.isDropDown then
 				self.DropDownButton:Update(
 					vec3(
-					self.mPosition_3f[1].x +
-					self.mDimension_3f[1].x,
+						self.mPosition_3f[1].x +
+						self.mDimension_3f[1].x,
 						self.mPosition_3f[1].y,
 						self.mDepth - 5),
 					vec3(self.mDimension_3f[1].y + 5,
@@ -250,8 +252,8 @@ In event
 			else
 				self.DropUpButton:Update(
 					vec3(
-					self.mPosition_3f[1].x +
-					self.mDimension_3f[1].x,
+						self.mPosition_3f[1].x +
+						self.mDimension_3f[1].x,
 						self.mPosition_3f[1].y,
 						self.mDepth - 5),
 					vec3(self.mDimension_3f[1].y + 5,
@@ -270,7 +272,7 @@ In event
 					    (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
 					    MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
 						self.ChoosenChoice = self
-						.mCurrentComboContent[i - 1]
+						    .mCurrentComboContent[i - 1]
 						self:Update(
 							self.mPosition_3f
 							[1],
@@ -287,7 +289,7 @@ In event
 					if MousePos.x > (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.x < (self.mPosition_3f[1].x + self.mDimension_3f[1].x + self.mDimension_3f[1].y + 5) and MousePos.y > self.mPosition_3f[1].y and
 					    MousePos.y < (self.mPosition_3f[1].y + self.mDimension_3f[1].y) then
 						self.isDropDown = not self
-						.isDropDown
+						    .isDropDown
 						if self.isDropDown then
 							self.Flag = false
 
@@ -339,23 +341,23 @@ In event
 		end
 	}
 
-Com.TextButton = {
-    mTextButton = nil,
-    New = function(self, inPosition_3f, inDimension_3f, inFont, inString)
-        local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
-        setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
-        setmetatable(Obj, self)
-        self.__index = self
-		Obj.mText = inString
-        Obj.mTextButton = Com.TextButtonObject:New(inString, inFont, inPosition_3f, inDimension_3f)
-        return Obj
-    end,
-    Update = function(self, inPosition_3f, inDimension_3f, inString)
-		self.mText = inString
-        self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
-        Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
-    end
-}
+	Com.TextButton = {
+		mTextButton = nil,
+		New = function(self, inPosition_3f, inDimension_3f, inFont, inString)
+			local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
+			setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
+			setmetatable(Obj, self)
+			self.__index = self
+			Obj.mText = inString
+			Obj.mTextButton = Com.TextButtonObject:New(inString, inFont, inPosition_3f, inDimension_3f)
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inString)
+			self.mText = inString
+			self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
+			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+		end
+	}
 
 	Com.IconButton = {
 		mImageButton = nil,
@@ -455,10 +457,10 @@ Com.TextButton = {
 			local Window = self
 			horizontalcomponents.Update = function(self, inPosition_3f, inDimension_3f)
 				local dimen = vec3(Window.mHitArea_2f.y, Window.mHitArea_2f
-				.y, inDimension_3f.z)
+					.y, inDimension_3f.z)
 				local position = vec3(
-				inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f
-				.y, inPosition_3f.z)
+					inPosition_3f.x + inDimension_3f.x - dimen.x, inPosition_3f
+					.y, inPosition_3f.z)
 				for i = #self.mComponents, 2, -1 do
 					self.mComponents[i]:Update(position, dimen)
 					position.x = position.x - dimen.x
@@ -531,8 +533,10 @@ Com.TextButton = {
 		mScrolling = nil,
 		mComponentDimension_3f = nil,
 		mMaxYDisplacement = nil,
-		New = function (self, inPosition_3f, inDimension_3f, inComponentDimension_3f, inMaxYDisplacement, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
-			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
+		New = function(self, inPosition_3f, inDimension_3f, inComponentDimension_3f, inMaxYDisplacement,
+			     inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
+			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f,
+				inScrollbarSensitivity, inScrollbarSizeFactor)
 			setmetatable(self, Com.ScrollProxy)
 			setmetatable(Obj, self)
 			self.__index = self
@@ -546,23 +550,28 @@ Com.TextButton = {
 			local IconUp = Com.IconButton:New(vec3(0), vec3(0), DropUp)
 			local IconDown = Com.IconButton:New(vec3(0), vec3(0), DropDown)
 			local scrollArea = Com.AreaObject:New(vec3(0), vec3(0))
-			local NewColorArea = vec4(Theme.Colors.Area.Border.x, Theme.Colors.Area.Border.y, Theme.Colors.Area.Border.z, Theme.Colors.Area.Border.w)
+			local NewColorArea = vec4(Theme.Colors.Area.Border.x, Theme.Colors.Area.Border.y,
+				Theme.Colors.Area.Border.z, Theme.Colors.Area.Border.w)
 			scrollArea:SetFillColor(NewColorArea)
 			local scrollbarV = Com.VLayout:New(0)
 			local horizontalArea = Com.HLayout:New(0)
-			scrollbarV:AddComponents({IconUp, scrollArea, IconDown}, {0.1, 0.8, 0.1})
-			horizontalArea:AddComponents({inComponent, scrollbarV}, {0.9, 0.1})
+			scrollbarV:AddComponents({ IconUp, scrollArea, IconDown }, { 0.1, 0.8, 0.1 })
+			horizontalArea:AddComponents({ inComponent, scrollbarV }, { 0.9, 0.1 })
 			local Scroller = Com.AreaObject:New(vec3(0), vec3(0))
 			Scroller:SetFillColor(vec4(1, 0, 0, 1))
 
 			local This = self
-			horizontalArea.Update = function (self, inPosition_3f, inDimension_3f)
+			horizontalArea.Update = function(self, inPosition_3f, inDimension_3f)
 				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, inDimension_3f.y, 1)
-				local componentArea_3f = vec3(inDimension_3f.x - scrollArea_3f.x, inDimension_3f.y, inDimension_3f.z)
-				local scrollAreaPosition_3f = vec3(inPosition_3f.x + componentArea_3f.x, inPosition_3f.y, inPosition_3f.z)
+				local componentArea_3f = vec3(inDimension_3f.x - scrollArea_3f.x,
+					inDimension_3f.y, inDimension_3f.z)
+				local scrollAreaPosition_3f = vec3(inPosition_3f.x + componentArea_3f.x,
+					inPosition_3f.y, inPosition_3f.z)
 
-				local componentDisplacePosition = Lerp(0, This.mMaxYDisplacement, This.mScrollbarPositionNormalized)
-				local componentPosition = vec3(inPosition_3f.x, inPosition_3f.y - componentDisplacePosition, inPosition_3f.z)
+				local componentDisplacePosition = Lerp(0, This.mMaxYDisplacement,
+					This.mScrollbarPositionNormalized)
+				local componentPosition = vec3(inPosition_3f.x,
+					inPosition_3f.y - componentDisplacePosition, inPosition_3f.z)
 				if This.mComponentDimension_3f then
 					componentArea_3f.y = This.mComponentDimension_3f.y
 				end
@@ -571,33 +580,42 @@ Com.TextButton = {
 				self.mComponents[2]:Update(scrollAreaPosition_3f, scrollArea_3f)
 			end
 
-			scrollbarV.Update = function (self, inPosition_3f, inDimension_3f)
-				local upDownArea_3f = vec3(This.mScrollbarArea_2f.x, This.mScrollbarArea_2f.x, inDimension_3f.z)	
+			scrollbarV.Update = function(self, inPosition_3f, inDimension_3f)
+				local upDownArea_3f = vec3(This.mScrollbarArea_2f.x, This.mScrollbarArea_2f.x,
+					inDimension_3f.z)
 				local iconUpPosition_3f = inPosition_3f
-				local areaPos_3f = vec3(iconUpPosition_3f.x, iconUpPosition_3f.y + upDownArea_3f.y, iconUpPosition_3f.z) 
-				local areaDimension_3f = vec3(inDimension_3f.x, inDimension_3f.y - 2 * upDownArea_3f.y, inDimension_3f.z)
-				local iconDownPosition_3f = vec3(areaPos_3f.x, areaPos_3f.y + areaDimension_3f.y, areaPos_3f.z)
+				local areaPos_3f = vec3(iconUpPosition_3f.x,
+					iconUpPosition_3f.y + upDownArea_3f.y, iconUpPosition_3f.z)
+				local areaDimension_3f = vec3(inDimension_3f.x,
+					inDimension_3f.y - 2 * upDownArea_3f.y, inDimension_3f.z)
+				local iconDownPosition_3f = vec3(areaPos_3f.x, areaPos_3f.y + areaDimension_3f.y,
+					areaPos_3f.z)
 				self.mComponents[1]:Update(iconUpPosition_3f, upDownArea_3f)
 				self.mComponents[2]:Update(areaPos_3f, areaDimension_3f)
 				self.mComponents[3]:Update(iconDownPosition_3f, upDownArea_3f)
 
 				-- Scrollbar Position Calculation
 				--local Ypos = Lerp(areaPos_3f.y, areaPos_3f.y + (areaDimension_3f.y - This.mScrollbarSizeFactor * areaPos_3f.y), This.mScrollbarPositionNormalized)
-				local Ypos = Lerp(areaPos_3f.y, areaPos_3f.y + (areaDimension_3f.y - This.mScrollbarSizeFactor * areaDimension_3f.y), This.mScrollbarPositionNormalized)
+				local Ypos = Lerp(areaPos_3f.y,
+					areaPos_3f.y +
+					(areaDimension_3f.y - This.mScrollbarSizeFactor * areaDimension_3f.y),
+					This.mScrollbarPositionNormalized)
 				local scrollerPosition = vec3(areaPos_3f.x, Ypos, areaPos_3f.z)
-				local scrollerDimension = vec3(areaDimension_3f.x, areaDimension_3f.y * This.mScrollbarSizeFactor, areaDimension_3f.z)
+				local scrollerDimension = vec3(areaDimension_3f.x,
+					areaDimension_3f.y * This.mScrollbarSizeFactor, areaDimension_3f.z)
 				Scroller:Update(scrollerPosition, scrollerDimension)
 				This.mScrollerComponentObject:Update(scrollerPosition, scrollerDimension)
 			end
-			self.mCentralComponent = horizontalArea	
+			self.mCentralComponent = horizontalArea
 
 			Com.NewComponent_Event()
 			ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
-				function ()
+				function()
 					self.mScrollerComponentObject:Event()
 					if self.mScrollerComponentObject.mClicked_b or (self.mScrolling and E.is_left_button_pressed()) then
 						local relpos = E.get_relative_mouse_pos()
-						This.mScrollbarPositionNormalized = This.mScrollbarPositionNormalized + relpos.y / 30
+						This.mScrollbarPositionNormalized = This
+						    .mScrollbarPositionNormalized + relpos.y / 30
 						local sn = This.mScrollbarPositionNormalized
 						if This.mScrollbarPositionNormalized >= 1 then
 							This.mScrollbarPositionNormalized = 1
@@ -611,9 +629,9 @@ Com.TextButton = {
 					end
 				end
 			)
-
 		end,
-		Update = function (self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inComponentDimension_3f, inMaxYDisplacement)
+		Update = function(self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inComponentDimension_3f,
+			        inMaxYDisplacement)
 			self.mPosition_3f = inPosition_3f
 			self.mDimension_3f = inDimension_3f
 			if inComponentDimension_3f then
@@ -623,6 +641,139 @@ Com.TextButton = {
 				self.mMaxYDisplacement = inMaxYDisplacement
 			end
 			self.mCentralComponent:Update(inPosition_3f, inDimension_3f, inScrollbarArea_2f)
+		end
+	}
+
+
+	Com.ContextMenu = {
+		mMainArea = nil,
+		mCellDimension_3f = vec3(0, 0, 0),
+		mPosition_3f = nil,
+		mButtons = nil,
+		mMaxNoOfEntries = nil,
+		New = function(self, inPosition_3f, inCellDimension_3f, inFontObject, inNoOfEntries,
+			     inMaxStringLength)
+			local Obj = {
+				mPosition_3f = inPosition_3f,
+				mCellDimension_3f = inCellDimension_3f,
+				mButtons = {},
+				mMaxNoOfEntries = inNoOfEntries,
+				mCurrentContextMenu = {}
+			}
+			setmetatable(Obj, self)
+			self.__index = self
+			local MainAreaDimen = vec3(0, 0, 1)
+			Obj.mMainArea = Com.AreaObject:New(inPosition_3f, MainAreaDimen)
+			local button_dimension = vec3(0, 0, 0)
+			for i = 1, inNoOfEntries, 1 do
+				local pos = vec3(inPosition_3f.x,
+					inPosition_3f.y + inCellDimension_3f.y * (i - 1),
+					inPosition_3f.z - 3)
+				Obj.mButtons[i] = Com.TextButton:New(pos,
+					button_dimension, inFontObject,
+					string.rep(" ", inMaxStringLength))
+			end
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inCellDimension_3f, inContextMenuTable)
+			self.mCurrentContextMenu = inContextMenuTable
+			self.mMainArea:Update(vec3(0, 0, self.mMainArea.mPosition_3f.z), vec3(0, 0, 0))
+			for index, value in ipairs(self.mButtons) do
+				value:Update(vec3(0, 0, value.mPosition_3f.z), vec3(0, 0, 0), " ")
+			end
+			local inNoOfEntries = #inContextMenuTable
+			local MainAreaDimension = vec3(inCellDimension_3f.x, inCellDimension_3f.y * inNoOfEntries,
+				1)
+			local mainareapos = vec3(inPosition_3f.x, inPosition_3f.y, self.mMainArea.mPosition_3f.z)
+			self.mMainArea:Update(mainareapos, MainAreaDimension)
+			for i = 1, inNoOfEntries, 1 do
+				local pos = vec3(inPosition_3f.x,
+					inPosition_3f.y + inCellDimension_3f.y * (i - 1),
+					self.mButtons[i].mPosition_3f.z)
+				self.mButtons[i]:Update(pos, inCellDimension_3f, inContextMenuTable[i].name)
+				print(inContextMenuTable[i].name)
+			end
+			for i = 1, inNoOfEntries, 1 do
+				self.mButtons[i]:SetFunctions(
+					function()
+						local nc = Theme.Colors.Area.Border
+						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
+						    vec4(nc.x, nc.y, nc.z, nc.w)
+					end,
+					function()
+						local nc = Theme.Colors.Area.Normal
+						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
+						    vec4(nc.x, nc.y, nc.z, nc.w)
+						if E.is_left_button_pressed() then
+							self:Update(vec3(0, 0, 0),
+								vec3(0, 0, 0),
+								{})
+						end
+					end,
+					function()
+					end
+				)
+			end
+		end,
+
+	}
+
+
+	Com.FileMenuBarObject = {
+		mMainArea = nil,
+		mHeight = nil,
+		mFileMenu = nil,
+		mDimension_3f = nil,
+		New = function(self, inFileMenu, inHeight, inFontObject, inDepth)
+			local Obj = {}
+			setmetatable(Obj, self)
+			self.__index = self
+			local mainareapos = vec3(0, 0, inDepth)
+			local mainareadimen = vec3(WindowDimension.x, inHeight, 1)
+			Obj.mMainArea = Com.AreaObject:New(mainareapos, mainareadimen)
+			Obj.mHeight = inHeight
+			Obj.mDepth = inDepth
+			Obj.mButtons = {}
+			Obj.mFileMenu = inFileMenu
+			Obj.mNoOfEntries = #inFileMenu
+			Obj.mDimension_3f = nil
+			for i = 1, #inFileMenu, 1 do
+				Obj.mButtons[i] = Com.TextButton:New(mainareapos, vec3(0, 0, 0),
+					inFontObject, inFileMenu[i].name)
+			end
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f)
+			self.mDimension_3f = inDimension_3f
+			local ratiotable = {}
+
+			for i = 1, self.mNoOfEntries, 1 do
+				ratiotable[i] = 1 / self.mNoOfEntries
+			end
+			local horizontalcomponents = Com.HLayout:New(0)
+			horizontalcomponents:AddComponents(self.mButtons, ratiotable)
+			horizontalcomponents:Update(vec3(0, 0, self.mDepth), inDimension_3f)
+			local position = horizontalcomponents:GetComponentPosition()
+			for i = 1, self.mNoOfEntries, 1 do
+				self.mButtons[i]:SetFunctions(
+					function()
+						local c = Theme.Colors.Area.Border
+						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
+						    vec4(c.x, c.y, c.z, c.w)
+					end,
+					function()
+						local nc = Theme.Colors.Area.Normal
+						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
+						    vec4(nc.x, nc.y, nc.z, nc.w)
+					end,
+					function()
+						local pos = vec3(position[i].x,
+							position[i].y + self.mHeight,
+							position[i].z)
+						self.mFileMenu[i].action(pos)
+					end
+				)
+			end
 		end
 	}
 end
