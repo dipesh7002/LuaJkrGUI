@@ -78,7 +78,7 @@ Com.DrawableArea = {
 		Obj.mPainterBrushes[#Obj.mPainterBrushes+1] = Obj.mIpClear
 		Obj.mPainterBrushes[#Obj.mPainterBrushes+1] = Obj.mIpPainter
 		Obj.mCurrentPainterBrushIndex = 1
-		Obj.mCurrentPainterBrushDimension = vec2(50, 50)
+		Obj.mCurrentPainterBrushDimension = vec2(1, 1)
 		Obj.mCurrentColor = vec4(1, 0, 0.1, 1)
 		Obj.mCurrentLocalBrushDimen = vec2(0.9, 0.9)
 		Obj.mCurrentParams = vec4(0.5, 0.5, 0.5, 0.5) 
@@ -203,7 +203,7 @@ LoadDarshan = function()
 	local DrawWableInside = function()
 		local Area = Com.AreaObject:New(P(400, 100, 80), D(200, 10, 1))
 		Area:SetFillColor(vec4(0.9, 0.9, 0.9, 1))
-		Canvas = Com.DrawableArea:New(P(0, 0, 0), D(0, 0), vec2(500, 500))
+		Canvas = Com.DrawableArea:New(P(0, 0, 0), D(0, 0), vec2(20, 20))
 		local Stack = Com.StackLayout:New(1)
 		Stack:AddComponents({ Area, Canvas })
 		DrawWableWindow:SetCentralComponent(Stack)
