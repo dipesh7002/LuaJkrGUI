@@ -163,7 +163,6 @@ require "jkrgui.Config" -- #include "Config" vane jastai C ma
         100 means farthest from the camera
         Depth is basically a  reference taken.
 ]]
-Depth = 75
 Time = 0                                -- Increments each frame
 WindowDimension = GetWindowDimensions() -- Can get Window dimensions just by doing WindowDimension.x, WindowDimension.y
 DisplayDimension = get_display_dimensions()
@@ -428,11 +427,11 @@ Jkr.Components.Static.TextObject = {
 			T.SetCurrentFace(inFontObject.mId)
 			T.SetTextProperty(TextH.left, TextV.top)
 			Obj.mId = T.Add(Obj.mString,
-				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Depth))
+				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z))
 			Obj.mDimension_2f = inFontObject:GetDimension(Obj.mString)
 		else
 			Obj.mId = r.balt.add(inFontObject.mId, Obj.mString,
-				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Depth))
+				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z))
 		end
 
 		Obj.mFont = inFontObject
