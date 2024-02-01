@@ -399,35 +399,52 @@ Com.PlainTextLineEditObject = {
 					if not Obj.mTextInputStarted then
 						E.start_text_input()
 						Obj.mCursor:SetColor(vec4(1, 0, 0, 1))
+						Obj.mTextInputStarted = true
 					else
 						E.stop_text_input()
 						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
+						Obj.mTextInputStarted = false
+					end
+				else
+					if E.is_mousepress_event() and E.is_left_button_pressed() then
+						E.stop_text_input()	
+						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
+						Obj.mTextInputStarted = false
 					end
 				end
+
 				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
 				local is_left = E.is_key_pressed(Key.SDLK_LEFT)
 				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
+				local shouldUpdate = false
 				if E.is_text_being_input() and not is_backspace then
 					local input = E.get_input_text()
 					Obj:CursorInsert(input)			
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
+					shouldUpdate = true
 				end
 				if E.is_keypress_event() then
 					if is_left then
 						Obj:CursorMoveLeft()
+						shouldUpdate = true
 					elseif is_right then
 						Obj:CursorMoveRight()
+						shouldUpdate = true
 					elseif is_backspace then
 						Obj:CursorRemove()
+						shouldUpdate = true
 					end	
+				end
+				if shouldUpdate then
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
 				end
 			end
 		)
 		return Obj
 	end,
-	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
-		   self.mComponentObject:Update(inPosition_3f, inDimension_3f)
-		   Com.VisualTextEditObject:Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
+	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing,
+		   inCursorWidth)
+		self.mComponentObject:Update(inPosition_3f, inDimension_3f)
+		Com.VisualTextEditObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
 	end
 }

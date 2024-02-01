@@ -243,37 +243,32 @@ Darshan.CanvasExperiment = function()
 end
 
 Darshan.SanskritDictionary = function()
-	LoadMaterialComponents(true)
-	BigFont = Jkr.FontObject:New("font.ttf", FontSize(20))
+	LoadMaterialComponents(false)
+	BigFont = Com.GetFont("font", "Large")
 	local apricot_color = vec4(0.99, 0.83, 0.73, 1)
 
-	local TopBarSizeFactor = 0.08
 	local TopBar = Com.Canvas:New(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
-	TopBar:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
-	TopBar:AddPainterBrush(Com.GetCanvasPainter("RoundedRectangle", false))
-	TopBar:MakeCanvasImage(WindowDimension.x, WindowDimension.y * TopBarSizeFactor)
+	local TopBarSizeFactor = 0.08
+	local hsizeTabBar = 300
+	local function topBar()
+		TopBar:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
+		TopBar:AddPainterBrush(Com.GetCanvasPainter("RoundedRectangle", false))
+		TopBar:MakeCanvasImage(WindowDimension.x, WindowDimension.y * TopBarSizeFactor)
 
-	local Vlayout = Com.VLayout:New(0)
-	local PageLayout = Com.VLayout:New(0)
-	Vlayout:AddComponents({ TopBar, PageLayout }, { TopBarSizeFactor, 1 - TopBarSizeFactor })
-	Vlayout:Update(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
+		local Vlayout = Com.VLayout:New(0)
+		local PageLayout = Com.VLayout:New(0)
+		Vlayout:AddComponents({ TopBar, PageLayout }, { TopBarSizeFactor, 1 - TopBarSizeFactor })
+		Vlayout:Update(P(0, 0, 80), vec3(hsizeTabBar, WindowDimension.y, 1))
+
+		local topText = "संस्कृतम्"
+		local tB = Com.TextLabelObject:New(topText,
+			vec3(WindowDimension.x / 4 - BigFont:GetDimension(topText).x / 2, 0.01 * WindowDimension.y,
+				20),
+			BigFont)
+	end
+	topBar()
 
 
-	Com.NewComponent_SingleTimeDispatch()
-	ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
-		function ()
-			TopBar.CurrentBrushId = 2
-			TopBar:Bind()	
-			local startingY = -WindowDimension.y + TopBarSizeFactor * WindowDimension.y * 1.8
-			local startingX = - WindowDimension.x
-			local endingX = WindowDimension.x * 2
-			local endingY = WindowDimension.y + TopBarSizeFactor * WindowDimension.y
-			TopBar:Paint(vec4(startingX, startingY, endingX, endingY), apricot_color, vec4(1.2, 1, 1, 0.8), endingX, endingY, 1)
-		end
-	)
-
-	local topText = "संस्कृतम्"
-	local tB = Com.TextLabelObject:New(topText, vec3(WindowDimension.x / 4 - BigFont:GetDimension(topText).x / 2, 0.01 * WindowDimension.y, 20), BigFont)
 
 	ContextMenuEntries_Run = {
 		[1] = {
@@ -306,20 +301,76 @@ Darshan.SanskritDictionary = function()
 	}
 
 
-	local sc = Com.MaterialVerticalScrollArea:New(P(200, 200, 50), P(200, 200, 1), D(200, 200, 1), 20, P2(20, 200), 0.1, 0.3)
-	sc:Start()
-	local function insideScrollbar()
-		local cm = Com.ContextMenu:New(vec3(200, 200, 50), vec3(100, 100, 1), BigFont, 10, 100)
-		cm:Update(vec3(100, 100, 30), nil, vec3(100, 30, 1), ContextMenuEntries_Run)
-		sc:SetScrollableComponent(cm)
-		sc:Update(vec3(100, 100, 30), vec3(100, 100, 1))
+	local RoundedCircle = Com.Canvas:New(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
+	local circlePImageSize = vec2(40, 40)
+	local function searchBar()
+		local ha = Com.VLayout:New(0)
+		local area = Com.AreaObject:New(vec3(10, 10, 10), vec3(10, 10, 1))
+		local searchBar = Com.PlainTextLineEditObject:New(vec3(200, 400, 20), vec3(100, 100, 1),
+			Com.GetFont("font", "Large"), 100)
+		searchBar:Update(vec3(200, 400, 20), vec3(100, 100, 1), "\n", 20, 1)
+		ha:AddComponents({ searchBar, area }, { 0.9, 0.05 })
+		ha:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 30),
+			vec3(WindowDimension.x * 0.8, WindowDimension.y * 0.05, 30))
+
+		local HLayout = Com.HLayout:New(5)
+		local Icon = Com.ImageLabelObject:New("icons_material/search/baseline.png", vec3(100, 100, 30), vec3(10, 10, 1))
+		Icon:TintColor(vec4(0, 0, 0, 1))
+		HLayout.Update = function (self, inPosition_3f, inDimension_3f)
+			Com.HLayout.Update(self, inPosition_3f, inDimension_3f)
+			local pos = vec3(inPosition_3f.x, inPosition_3f.y - inDimension_3f.y / 4, inPosition_3f.z)
+			self.mComponents[1]:Update(pos, vec3(40, 40, 1))
+			-- local ipos = vec3(pos.x, pos.y, pos.z - 1)
+			-- Icon:Update(ipos, vec3(circlePImageSize.x, circlePImageSize.y, 1))
+		end
+
+		-- local ipos = vec3(pos.x, pos.y, pos.z - 1)
+		-- Icon:Update(ipos, vec3(circlePImageSize.x, circlePImageSize.y, 1))
+
+		RoundedCircle:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
+		RoundedCircle:AddPainterBrush(Com.GetCanvasPainter("Circle", false))
+		RoundedCircle:MakeCanvasImage(circlePImageSize.x, circlePImageSize.y)
+		HLayout:AddComponents({ RoundedCircle.mImageLabel, ha, Com.HLayout:New(0) }, { 0.1, 0.8, 0.1 })
+		HLayout:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 30),
+			vec3(WindowDimension.x, WindowDimension.y * 0.05, 30))
 	end
-	insideScrollbar()
-	sc:Update(vec3(100, 100, 30), vec3(100, 100, 1))
+	searchBar()
 
+	local function scrollArea()
+		local sc = Com.MaterialVerticalScrollArea:New(P(200, 200, 50), P(200, 200, 1), D(200, 200, 1), 20,
+			P2(20, 200), 0.1, 0.3)
+		sc:Start()
+		local function insideScrollbar()
+			local cm = Com.ContextMenu:New(vec3(200, 200, 50), vec3(100, 100, 1),
+				Com.GetFont("font", "large"), 10, 100)
+			cm:Update(vec3(100, 100, 30), nil, vec3(100, 30, 1), ContextMenuEntries_Run)
+			sc:SetScrollableComponent(cm)
+			sc:Update(vec3(100, 100, 30), vec3(100, 100, 1))
+		end
+		insideScrollbar()
+		sc:Update(vec3(100, 100, 30), vec3(100, 100, 1))
+		sc:End()
+	end
+	-- scrollArea()
 
-	local searchBar = Com.PlainTextLineEditObject:New(vec3(200, 400, 20), vec3(100, 100, 1), BigFont, 100)
-	-- sc:End()
+	Com.NewComponent_SingleTimeDispatch()
+	ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
+		function()
+			TopBar.CurrentBrushId = 2
+			TopBar:Bind()
+			local startingY = -WindowDimension.y + TopBarSizeFactor * WindowDimension.y * 1.8
+			local startingX = -WindowDimension.x
+			local endingX = WindowDimension.x * 2
+			local endingY = WindowDimension.y + TopBarSizeFactor * WindowDimension.y
+			TopBar:Paint(vec4(startingX, startingY, endingX, endingY), apricot_color,
+				vec4(1.2, 1, 1, 0.8), endingX, endingY, 1)
+
+			RoundedCircle.CurrentBrushId = 2
+			RoundedCircle:Bind()
+			RoundedCircle:Paint(vec4(0, 0, circlePImageSize.x, circlePImageSize.y), apricot_color, vec4(1.8, 1, 1, 0.8), circlePImageSize.x, circlePImageSize.y, 1)
+		end
+	)
+
 end
 
 LoadDarshan = function()
@@ -328,4 +379,3 @@ LoadDarshan = function()
 	-- LoadMainH()
 	-- Darshan.TextEditor()
 end
-

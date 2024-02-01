@@ -253,7 +253,8 @@ Jkr.ComponentObject = {
 	mFocus_b = false,
 	mBoundedRectId_i = 0,
 	mFocusOnHover_b = false,
-	mTransparentToMouse_b = false,
+	TransparentToMouse_b = false,
+	ContinousPress = false,
 	New = function(self, inPosition_3f, inDimension_3f)
 		local Obj = {}
 		--("Component Construction")
@@ -264,7 +265,8 @@ Jkr.ComponentObject = {
 		Obj.mDimension_3f = inDimension_3f
 		Obj.mClicked_b = false
 		Obj.mHovered_b = false
-		Obj.mTransparentToMouse_b = false
+		Obj.TransparentToMouse_b = false
+		Obj.ContinousPress = false
 		local pos = vec2(Obj.mPosition_3f.x, Obj.mPosition_3f.y)
 		local dim = vec2(Obj.mDimension_3f.x, Obj.mDimension_3f.y)
 		Obj.mBoundedRectId_i = E.set_bounded_rect(pos, dim, Int(Obj.mPosition_3f.z))
@@ -296,17 +298,25 @@ Jkr.ComponentObject = {
 	-- Mouse le maathi gayo vane focus hune nahune
 	-- Jastai, mTransparentToMouse_b = true vayo vane, kunai element ko muntira vae pani focus hunxa
 	Event = function(self)
-		if self.mTransparentToMouse_b then
+		if self.TransparentToMouse_b then
 			self.mHovered_b = E.is_mouse_within(Int(self.mBoundedRectId_i),
 				Int(self.mPosition_3f.z))
 		else
 			self.mHovered_b = E.is_mouse_on_top(Int(self.mBoundedRectId_i),
 				Int(self.mPosition_3f.z))
 		end
-		if self.mHovered_b and E.is_mousepress_event() and E.is_left_button_pressed() then
-			self.mClicked_b = true
+		if not self.ContinousPress then
+			if self.mHovered_b and E.is_mousepress_event() and E.is_left_button_pressed() then
+				self.mClicked_b = true
+			else
+				self.mClicked_b = false
+			end
 		else
-			self.mClicked_b = false
+			if self.mHovered_b and E.is_left_button_pressed_continous() then
+				self.mClicked_b = true
+			else
+				self.mClicked_b = false
+			end
 		end
 	end,
 
@@ -478,6 +488,9 @@ Jkr.Components.Abstract.PainterImageObject = {
 		self.__index = self
 		Obj.mImage = Jkr.painter_image(Int(inWidth), Int(inHeight))
 		return Obj
+	end,
+	Register = function(self, inCompatibleImagePainter)
+		self.mImage:register(inCompatibleImagePainter.mPainter)
 	end
 }
 
@@ -504,6 +517,9 @@ Jkr.Components.Util.ImagePainter = {
 	BindImage = function(self)
 		self.mPainter:bind_image()
 	end,
+	BindImageFromImage = function(self, inPainterImageObject)
+		self.mPainter:bind_image_from_image(inPainterImageObject.mImage)
+	end,
 	BindPainter = function(self)
 		self.mPainter:bind()
 	end,
@@ -512,10 +528,10 @@ Jkr.Components.Util.ImagePainter = {
 		S.CopyImage(Int(inImageObject.mId),
 			inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
 	end,
-	PaintEXT = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inPainterWithRegisteredImage, inX, inY, inZ)
+	PaintEXT = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inImage, inX, inY, inZ)
 		self.mPainter:paintext(inPosDimen_4f, inColor_4f, inParam_4f, Int(inX), Int(inY), Int(inZ))
 		S.CopyImage(Int(inImageObject.mId),
-			inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
+			inImage.mImage)
 	end,
 	PaintImages = function(self, inPosDimen_4f, inColor_4f, inParam_4f, ...)
 		self.mPainter:paint(inPosDimen_4f, inColor_4f, inParam_4f)

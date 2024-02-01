@@ -1,5 +1,23 @@
 require "jkrgui.jkrgui"
 
+Com.Fonts = {}
+
+Com.GetFont = function(inFontName, inSize)
+	local size = inSize
+	if size == "large" then
+		size = FontSize(16)
+	elseif size == "Small" then
+		size = FontSize(12)
+	elseif size == "Large" then
+		size = FontSize(20)
+	end
+	if not Com.CanvasPainters[inFontName .. inSize] then
+		Com.Fonts[inFontName .. inSize] = Jkr.FontObject:New(inFontName .. ".ttf", size)
+	end
+	return Com.Fonts[inFontName .. inSize]
+end
+-- FONT MANAGEMENT
+
 -- These are legacy Stuff that we will sort out during maintainence time
 Jkr.GLSL = {}
 
@@ -59,20 +77,17 @@ Jkr.GLSL["ClearCanvas"] = CanvasHeader .. [[
 
 Jkr.GLSL["CircleCanvas"] = CanvasHeader .. [[
 	vec2 center = vec2(0, 0);
-	vec2 hw = vec2(0.9, 0.9);
+	vec2 hw = vec2(0.8, 0.8);
 	float radius = hw.x;
 
 	float color = distance(xy_cartesian, center) - radius;
-	color = smoothstep(-1, 1, -color);
-
 	vec4 old_color = imageLoad(storageImage, to_draw_at);
-	vec4 final_color = vec4(push.mColor.x * color, push.mColor.y * color, push.mColor.z * color, push.mColor.w * color);
-	//final_color = mix(final_color, old_color, push.mParam.w);
+	vec4 final_color = vec4(pure_color.x * color, pure_color.y * color, pure_color.z * color, pure_color.w * color);
+	final_color = mix(final_color, old_color, color);
+	final_color = mix(pure_color, final_color, color);
+	final_color.a = smoothstep(0.95, 1, final_color.a);
 
-	if (color >= 0.7)
-	{
-		imageStore(storageImage, to_draw_at, pure_color);
-	}
+	imageStore(storageImage, to_draw_at, vec4(pure_color.xyz, final_color.a));
 ]]
 
 Jkr.GLSL["RoundedRectangleCanvas"] = CanvasHeader .. [[

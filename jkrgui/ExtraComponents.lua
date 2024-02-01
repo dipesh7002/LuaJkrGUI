@@ -202,16 +202,18 @@ Com.Canvas = {
 	end,
 	MakeCanvasImage = function (self, inWidth, inHeight)
 		self.mPainterImage = Jkr.Components.Abstract.PainterImageObject:New(inWidth, inHeight)
-		self.mPainterBrushes[1]:RegisterImage(self.mPainterImage)	
+		self.mPainterImage:Register(self.mPainterBrushes[1])
+		-- self.mPainterBrushes[1]:RegisterImage(self.mPainterImage)	
 		self.mImage = Jkr.Components.Abstract.ImageObject:New(inWidth, inHeight)
 		self.mImageLabel = Com.ImageLabelObject:NewExisting(self.mImage, self.mPosition_3f, self.mDimension_3f)
 	end,
 	Bind = function (self)
-		self.mPainterBrushes[1]:BindImage()
+		-- self.mPainterBrushes[1]:BindImage()
 		self.mPainterBrushes[self.CurrentBrushId]:BindPainter()
+		self.mPainterBrushes[1]:BindImageFromImage(self.mPainterImage)
 	end,
 	Paint = function (self, inBrushPosDimen_4f, inColor_4f, inParam_4f, inX, inY, inZ)
-		self.mPainterBrushes[self.CurrentBrushId]:PaintEXT(inBrushPosDimen_4f, inColor_4f, inParam_4f, self.mImage, self.mPainterBrushes[1], inX, inY, inZ)
+		self.mPainterBrushes[self.CurrentBrushId]:PaintEXT(inBrushPosDimen_4f, inColor_4f, inParam_4f, self.mImage, self.mPainterImage, inX, inY, inZ)
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f)
 		self.mPosition_3f = inPosition_3f
