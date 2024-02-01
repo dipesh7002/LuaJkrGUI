@@ -312,22 +312,26 @@ Darshan.SanskritDictionary = function()
 		ha:AddComponents({ searchBar, area }, { 0.9, 0.05 })
 		ha:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 30),
 			vec3(WindowDimension.x * 0.8, WindowDimension.y * 0.05, 30))
-
-		local HLayout = Com.HLayout:New(5)
-		local Icon = Com.ImageLabelObject:New("icons_material/search/outline.png", vec3(100, 100, 25), vec3(10, 10, 1))
-		Icon:TintColor(vec4(1, 0, 0, 1))
-		HLayout.Update = function (self, inPosition_3f, inDimension_3f)
-			Com.HLayout.Update(self, inPosition_3f, inDimension_3f)
-			local pos = vec3(inPosition_3f.x, inPosition_3f.y - inDimension_3f.y / 4, inPosition_3f.z)
-			self.mComponents[1]:Update(pos, vec3(80, 80, 1))
-			Icon:Update(vec3(pos.x, pos.y, 25), vec3(circlePImageSize.x, circlePImageSize.y, 25))
-		end
-
-		-- local ipos = vec3(pos.x, pos.y, pos.z - 1)
-
 		RoundedCircle:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
 		RoundedCircle:AddPainterBrush(Com.GetCanvasPainter("Circle", true))
 		RoundedCircle:MakeCanvasImage(circlePImageSize.x, circlePImageSize.y)
+
+		local Image = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/search/outline.png")
+		local Icon = Com.ImageLabelObject:NewExisting(Image, vec3(30, 10, 9), vec3(100, 100, 1))
+		Icon:TintColor(vec4(1, 0, 0, 1))
+
+		local HLayout = Com.HLayout:New(5)
+		HLayout.Update = function (self, inPosition_3f, inDimension_3f)
+			Com.HLayout.Update(self, inPosition_3f, inDimension_3f)
+			local pos = vec3(inPosition_3f.x, inPosition_3f.y - inDimension_3f.y / 4, inPosition_3f.z)
+			self.mComponents[1]:Update(pos, vec3(40, 40, 1))
+			local ipos = vec3(pos.x, pos.y, pos.z - 1)
+			Icon:Update(vec3(pos.x, pos.y, 25), vec3(circlePImageSize.x / 2, circlePImageSize.y / 2, 1))
+		end
+
+
+
+
 		HLayout:AddComponents({ RoundedCircle.mImageLabel, ha, Com.HLayout:New(0) }, { 0.1, 0.8, 0.1 })
 		HLayout:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 80),
 			vec3(WindowDimension.x, WindowDimension.y * 0.05, 30))
