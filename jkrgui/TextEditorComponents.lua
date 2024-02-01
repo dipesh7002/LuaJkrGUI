@@ -11,8 +11,7 @@ Com.TextCursorObject = {
 		setmetatable(Obj, self)
 		self.__index = self
 		Com.NewComponent()
-		ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, nil,
-			nil)
+		ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, nil, nil)
 		ComTable[com_i].mFillColor = inColor_4f
 		Obj.mWidth = inDimension_3f.x
 		Obj.mShapeId = com_i
@@ -25,6 +24,9 @@ Com.TextCursorObject = {
 		ComTable[self.mShapeId]:Update(inPosition_3f, inDimension_3f)
 		self.mPosition_3f = inPosition_3f
 		self.mDimension_3f = inDimension_3f
+	end,
+	SetColor = function(self, inColor_4f)
+		ComTable[self.mShapeId].mFillColor = inColor_4f
 	end
 }
 
@@ -374,4 +376,75 @@ Com.PlainTextEditObject = {
 		)
 		return Obj
 	end 
+}
+
+Com.PlainTextLineEditObject = {
+	mTextInputStarted = nil,
+	New = function (self, inPosition_3f, inDimension_3f, inFontObject, inMaxChars)
+		local Obj = Com.VisualTextEditObject:New(inPosition_3f, inDimension_3f, inFontObject, 2, inMaxChars, 20)	
+		setmetatable(self, Com.VisualTextEditObject)
+		setmetatable(Obj, self)
+		self.__index = self
+		E.stop_text_input()
+
+		Obj.mComponentObject = Jkr.ComponentObject:New(inPosition_3f, inDimension_3f)
+		Obj.mTextInputStarted = false
+		Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
+
+		Com.NewComponent_Event()
+		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+			function ()
+				Obj.mComponentObject:Event()
+				if Obj.mComponentObject.mClicked_b then
+					if not Obj.mTextInputStarted then
+						E.start_text_input()
+						Obj.mCursor:SetColor(vec4(1, 0, 0, 1))
+						Obj.mTextInputStarted = true
+					else
+						E.stop_text_input()
+						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
+						Obj.mTextInputStarted = false
+					end
+				else
+					if E.is_mousepress_event() and E.is_left_button_pressed() then
+						E.stop_text_input()	
+						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
+						Obj.mTextInputStarted = false
+					end
+				end
+
+				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
+				local is_left = E.is_key_pressed(Key.SDLK_LEFT)
+				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
+				local shouldUpdate = false
+				if E.is_text_being_input() and not is_backspace then
+					local input = E.get_input_text()
+					Obj:CursorInsert(input)			
+					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
+					shouldUpdate = true
+				end
+				if E.is_keypress_event() then
+					if is_left then
+						Obj:CursorMoveLeft()
+						shouldUpdate = true
+					elseif is_right then
+						Obj:CursorMoveRight()
+						shouldUpdate = true
+					elseif is_backspace then
+						Obj:CursorRemove()
+						shouldUpdate = true
+					end	
+				end
+				if shouldUpdate then
+					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
+				end
+			end
+		)
+		return Obj
+	end,
+	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing,
+		   inCursorWidth)
+		self.mComponentObject:Update(inPosition_3f, inDimension_3f)
+		Com.VisualTextEditObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
+	end
 }
