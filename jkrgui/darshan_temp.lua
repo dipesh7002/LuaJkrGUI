@@ -75,19 +75,19 @@ Com.DrawableArea = {
 
 
 		Obj.mPainterBrushes = {}
-		Obj.mPainterBrushes[#Obj.mPainterBrushes+1] = Obj.mIpClear
-		Obj.mPainterBrushes[#Obj.mPainterBrushes+1] = Obj.mIpPainter
+		Obj.mPainterBrushes[#Obj.mPainterBrushes + 1] = Obj.mIpClear
+		Obj.mPainterBrushes[#Obj.mPainterBrushes + 1] = Obj.mIpPainter
 		Obj.mCurrentPainterBrushIndex = 1
 		Obj.mCurrentPainterBrushDimension = vec2(50, 50)
 		Obj.mCurrentColor = vec4(1, 0, 0.1, 1)
 		Obj.mCurrentLocalBrushDimen = vec2(0.9, 0.9)
-		Obj.mCurrentParams = vec4(0.5, 0.5, 0.5, 0.5) 
+		Obj.mCurrentParams = vec4(0.5, 0.5, 0.5, 0.5)
 
 		Obj.mClearColor = vec4(1, 1, 1, 1)
 
 		Com.NewComponent_Event()
 		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
-			function ()
+			function()
 				if E.is_keypress_event() then
 					if E.is_key_pressed(Key.SDLK_UP) then
 						Obj.mCurrentPainterBrushDimension.x = Obj.mCurrentPainterBrushDimension.x + 10
@@ -111,37 +111,38 @@ Com.DrawableArea = {
 				if E.is_left_button_pressed_continous() then
 					local m = E.get_mouse_pos()
 					local isInsideImage = m.x > Obj.mPosition_3f.x and
-					    m.y > Obj.mPosition_3f.y
+						m.y > Obj.mPosition_3f.y
 					if isInsideImage then
 						if E.is_key_pressed_continous(Key.SDL_SCANCODE_LSHIFT) then
 							Com.NewComponent_SingleTimeDispatch()
 							ComTable_SingleTimeDispatch[com_sdisi] =
-							    Jkr.Components
-							    .Abstract
-							    .Dispatchable
-							    :New(
-								    function()
-									    Obj:Bind()
-									    Obj:PaintByPosition(m,
-										    vec4(pdi.x, pdi.y, 1, 1),
-										    vec4(cc.x, cc.y, cc.z, cc.w))
-								    end
-							    )
+								Jkr.Components
+								.Abstract
+								.Dispatchable
+								:New(
+									function()
+										Obj:Bind()
+										Obj:PaintByPosition(m,
+											vec4(pdi.x, pdi.y, 1, 1),
+											vec4(cc.x, cc.y, cc.z, cc.w))
+									end
+								)
 						else
 							Com.NewComponent_SingleTimeDispatch()
 							ComTable_SingleTimeDispatch[com_sdisi] =
-							    Jkr.Components
-							    .Abstract
-							    .Dispatchable
-							    :New(
-								    function()
-									    Obj:BindBrush()
-									    Obj:PaintByPosition(
-										    m,
-										    vec4(pdi.x, pdi.y, Obj.mCurrentPainterBrushDimension.x, Obj.mCurrentPainterBrushDimension.y),
-										    vec4(curc.x, curc.y, curc.z, curc.w))
-								    end
-							    )
+								Jkr.Components
+								.Abstract
+								.Dispatchable
+								:New(
+									function()
+										Obj:BindBrush()
+										Obj:PaintByPosition(
+											m,
+											vec4(pdi.x, pdi.y, Obj.mCurrentPainterBrushDimension.x,
+												Obj.mCurrentPainterBrushDimension.y),
+											vec4(curc.x, curc.y, curc.z, curc.w))
+									end
+								)
 						end
 					end
 				end
@@ -160,7 +161,7 @@ Com.DrawableArea = {
 		self.mIpClear:BindImage()
 		self.mIpClear:BindPainter()
 	end,
-	BindBrush = function (self)
+	BindBrush = function(self)
 		self.mIpClear:BindImage()
 		self.mPainterBrushes[self.mCurrentPainterBrushIndex]:BindPainter()
 	end,
@@ -175,7 +176,9 @@ Com.DrawableArea = {
 		local imageSize = vec2(self.mDimension_3f.x, self.mDimension_3f.y)
 		local factor = vec2(imageSize.x / canvasSize.x, imageSize.y / canvasSize.y)
 		local x, y = localPos.x / factor.x, localPos.y / factor.y
-		self.mPainterBrushes[self.mCurrentPainterBrushIndex]:PaintEXT(vec4(x - inBrushDimension_2f.x / 2, y - inBrushDimension_2f.y / 2, inBrushDimension_2f.x, inBrushDimension_2f.y), inColor_4f,
+		self.mPainterBrushes[self.mCurrentPainterBrushIndex]:PaintEXT(
+			vec4(x - inBrushDimension_2f.x / 2, y - inBrushDimension_2f.y / 2, inBrushDimension_2f.x,
+				inBrushDimension_2f.y), inColor_4f,
 			self.mCurrentParams, self.mImage, self.mIpClear, Int(inBrushDimension_2f.x),
 			Int(inBrushDimension_2f.y), 1)
 	end,

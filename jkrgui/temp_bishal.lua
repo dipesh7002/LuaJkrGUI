@@ -2,6 +2,7 @@ require "jkrgui.PrimitiveComponents"
 require "jkrgui.MaterialComponents"
 require "jkrgui.LayoutComponents"
 LoadMaterialComponents()
+
 Com.FileMenuBarObject_Duplicate = {
     mMainArea = nil,
     mHeight = nil,
