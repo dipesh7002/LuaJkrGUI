@@ -14,42 +14,36 @@ Com.HLayout = {
 		setmetatable(Obj, self)
 		self.__index = self
 
-		return Obj
-	end,
-	AddComponents = function(self, inComponentListTable, inRatioTable)
-		self.mComponents = inComponentListTable
-		self.mRatioTable = inRatioTable
-	end,
-	Update = function(self, inPosition_3f, inDimension_3f)
-		local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
-		local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
-		self.mPosition_3f = inPosition_3f
-		self.mDimension_3f = inDimension_3f
+        return Obj
+    end,
+    AddComponents = function(self, inComponentListTable, inRatioTable)
+        self.mComponents = inComponentListTable
+        self.mRatioTable = inRatioTable
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        local paddingX = self.mPadding
 
-		local paddingX = self.mPadding
-
-		if self.mRatioTable then
-			for index, value in ipairs(self.mComponents) do
-				value:Update(vec3(position.x, position.y, position.z),
-					vec3(dimension.x * self.mRatioTable[index],
-						dimension.y, dimension.z),
-					self.mComponents[index].mText)
-				position.x = position.x +
-				dimension.x * self.mRatioTable[index] + paddingX
-			end
-		end
-	end,
-	GetComponentPosition = function(self)
-		local position = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z)
-		local dimension = vec3(self.mDimension_3f.x, self.mDimension_3f.y, self.mDimension_3f.z)
-		local ComponentsPosition = {}
-		for index, value in ipairs(self.mComponents) do
-			ComponentsPosition[index] = vec3(position.x, position.y, position.z)
-			position.x = position.x + dimension.x * self.mRatioTable[index] +
-			self.mPadding
-		end
-		return ComponentsPosition
-	end
+        if self.mRatioTable then
+            for index, value in ipairs(self.mComponents) do
+                value:Update(vec3(position.x, position.y, position.z),
+                    vec3(dimension.x * self.mRatioTable[index], dimension.y, dimension.z),
+                    self.mComponents[index].mText)
+                position.x = position.x + dimension.x * self.mRatioTable[index] + paddingX
+            end
+        end 
+    end,
+    GetComponentPosition = function(self)
+        local position = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z)
+        local dimension = vec3(self.mDimension_3f.x, self.mDimension_3f.y, self.mDimension_3f.z)
+        local ComponentsPosition = {}
+        for index, value in ipairs(self.mComponents) do
+            ComponentsPosition[index] = vec3(position.x, position.y, position.z)
+            position.x = position.x + dimension.x * self.mRatioTable[index] + self.mPadding
+        end
+        return ComponentsPosition
+    end
 }
 
 Com.VLayout = {
@@ -103,30 +97,30 @@ Com.VLayout = {
 	end
 }
 Com.StackLayout = {
-	mComponents = nil,
-	New = function(self, inChangingZvalue)
-		local Obj = {
-			mChangingZvalue = inChangingZvalue
-		}
-		setmetatable(Obj, self)
-		self.__index = self
-		return Obj
-	end,
-	AddComponents = function(self, inComponentListTable)
-		self.mComponents = inComponentListTable
-	end,
-	Update = function(self, inPosition_3f, inDimension_3f)
-		local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
-		local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
-		self.mPosition_3f = inPosition_3f
-		self.mDimension_3f = inDimension_3f
-		for index, value in ipairs(self.mComponents) do
-			value:Update(vec3(position.x, position.y, position.z),
-				vec3(dimension.x, dimension.y, dimension.z),
-				self.mComponents[index].mText)
-			position.z = position.z - self.mChangingZvalue
-		end
-	end
+    mComponents = nil,
+    New = function(self, inChangingZvalue)
+        local Obj = {
+            mChangingZvalue = inChangingZvalue
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        return Obj
+    end,
+    AddComponents = function(self, inComponentListTable)
+        self.mComponents = inComponentListTable
+    end,
+    Update = function(self, inPosition_3f, inDimension_3f)
+        local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local dimension = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        for index, value in ipairs(self.mComponents) do
+            value:Update(vec3(position.x, position.y, position.z),
+                vec3(dimension.x, dimension.y, dimension.z),
+                self.mComponents[index].mText)
+            position.z = position.z - self.mChangingZvalue
+        end
+    end
 }
 
 
@@ -378,6 +372,60 @@ Com.ScrollbarLayout = {
                 end
             end
         )
+    end,
+    
+    Update = function(self, inPosition_3f, inDimension_3f, inHitArea_2f)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+        if inHitArea_2f then
+            self.mHitArea_2f = inHitArea_2f
+        end
+        self.mComponentObject:Update(self.mPosition_3f, vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
+        self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
+    end
+}
+
+
+Com.ButtonProxy = {
+    mComponentObject = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
+    mHoverFunction = nil,
+    mClickedFunction = nil,
+    mClickedOutfunction = nil,
+
+    New = function(self, inPosition_3f, inDimension_3f)
+        local Obj = {
+            mComponentObject = Jkr.ComponentObject:New(inPosition_3f, inDimension_3f),
+            mPosition_3f = inPosition_3f,
+            mDimension_3f = inDimension_3f,
+            mHoverFunction = function() end,
+            mClickedFunction = function() end,
+            mHoverOutFunction = function() end,
+        }
+        setmetatable(Obj, self)
+        self.__index = self
+        Com.NewComponent_Event()
+        ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+            function()
+                Obj.mComponentObject:Event()
+                if Obj.mComponentObject.mHovered_b then
+                    Obj.mHoverFunction()
+                else
+                    Obj.mHoverOutFunction()
+                end
+
+                if Obj.mComponentObject.mClicked_b then
+                    Obj.mClickedFunction()
+                end
+            end
+        )
+        return Obj
+    end,
+    SetFunctions = function(self, inHoverFunction, inHoverOutFunction, inClickedFunction)
+        self.mHoverFunction = inHoverFunction
+        self.mHoverOutFunction = inHoverOutFunction
+        self.mClickedFunction = inClickedFunction
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mPosition_3f = inPosition_3f

@@ -13,6 +13,7 @@ Com.AreaObject = {
             mDimension_3f = vec3(0, 0, 0),
             mAreaId = 0,
         }
+        
         -- "AreaObject Construction")
         setmetatable(Obj, self)
         self.__index = self
@@ -30,6 +31,7 @@ Com.AreaObject = {
         Obj.mAreaId = com_i
         return Obj
     end,
+    
     Update = function(self, inPosition_3f, inDimension_3f)
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
@@ -37,9 +39,6 @@ Com.AreaObject = {
         local AreaPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
         local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
         ComTable[self.mAreaId]:Update(AreaPos, AreaDimen)
-    end,
-    SetFillColor = function (self, inColor_4f)
-	ComTable[self.mIds.y].mFillColor = vec4(inColor_4f.x, inColor_4f.y, inColor_4f.z, inColor_4f.w)	
     end
 }
 
@@ -122,6 +121,7 @@ Com.ImageLabelObject = {
             end
         )
     end,
+    
     PaintByComputeDispatch = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
         local ip = inPainterWithPainterParameters
         inPainterWithRegisteredImage:BindImage()

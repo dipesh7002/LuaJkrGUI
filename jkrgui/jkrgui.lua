@@ -148,8 +148,8 @@ uvec2 = uvec2
 vec3 = vec3
 vec4 = vec4
 
-Print_vec3 = function (inVec3)
-	print(string.format("v(%f, %f, %f)", inVec3.x, inVec3.y, inVec3.z))	
+Print_vec3 = function(inVec3)
+	print(string.format("v(%f, %f, %f)", inVec3.x, inVec3.y, inVec3.z))
 end
 
 
@@ -166,22 +166,23 @@ require "jkrgui.Config" -- #include "Config" vane jastai C ma
 Time = 0                                -- Increments each frame
 WindowDimension = GetWindowDimensions() -- Can get Window dimensions just by doing WindowDimension.x, WindowDimension.y
 DisplayDimension = get_display_dimensions()
+print(DisplayDimension.x, DisplayDimension.y)
 local fY = DisplayDimension.y / 1080
 local fX = DisplayDimension.x / 1920
-local f = 0
+local f = 1
 
-if fX > fY then
-	f = fX
-else
-	f = fY
-end
+-- if fX > fY then
+-- 	f = fX
+-- else
+-- 	f = fY
+-- end
+
 -- To be called at Update Callback
 function FrameUpdate()
 	Time = Time + 1
 	WindowDimension = GetWindowDimensions()
 	-- WindowDimension = vec2()
 end
-
 
 function FontSize(inSize)
 	return Int(inSize * f)
@@ -204,6 +205,7 @@ function D(inx, iny, inz)
 	iny = iny * f
 	return vec3(inx, iny, 1)
 end
+
 --[[
         This is a fontObject, which holds a certain font of certain size
 ]]
@@ -220,7 +222,7 @@ Jkr.FontObject = {
 		}
 		setmetatable(Object, self)
 		self.__index =
-		    self -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
+			self -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
 		Object.mPath = inPath
 		Object.mSize = inSize
 		Object.mId = T.AddFontFace(Object.mPath, Object.mSize)
@@ -468,7 +470,7 @@ Jkr.Components.Static.TextObject = {
 			T.Update(Int(self.mId.x), self.mString, self.mPosition_3f)
 		else
 			r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self
-			.mString)
+				.mString)
 		end
 	end,
 	-- TODO Remove this function
@@ -527,7 +529,12 @@ Jkr.Components.Util.ImagePainter = {
 		S.CopyImage(Int(inImageObject.mId),
 			inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
 	end,
+<<<<<<< HEAD
 	PaintEXT = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inImage, inX, inY, inZ)
+=======
+	PaintEXT = function(self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inPainterWithRegisteredImage, inX,
+						inY, inZ)
+>>>>>>> 20aeace68974a416cd8da898e66908ad53d2e9c7
 		self.mPainter:paintext(inPosDimen_4f, inColor_4f, inParam_4f, Int(inX), Int(inY), Int(inZ))
 		S.CopyImage(Int(inImageObject.mId),
 			inImage.mImage)

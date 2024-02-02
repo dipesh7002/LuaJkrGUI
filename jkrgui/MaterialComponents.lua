@@ -477,293 +477,66 @@ In event
 		end,
 	}
 
-	--[[
-		Material Veritcal Scroll bar-- Can Scroll a component Vertically
-			-- inComponentDimension_3f refers to the dimension of component, scroll garne area ma dimension lai scissor le kaatne ho,
-				tei vaera, purai component kok dimension chae elle dine. Like euta text ma 1000 lines xa, ani scroll area ma 100
-				lines scissor garya xa vane, tyo 1000 lines wala dimension chae yo ho
-			-- inScrollbarArea_2f Scrollbar ko motapa (width) linxa, 2f vae pani y value le garne kei haina, just x value linxa
-			-- inScrollbarSizeFactor vaneko scrollbar ma tyo scroll garne rectangle ko purai vertical area ko kati percent area hunxa vanne ho
-				(normalized matlab 0.0 dekhi 1.0 samma hunxa yo value)
-			-- inMaxYDisplacement, tyo scrollbar purai scrolled huda kheri (like sapse tala huda kheri) component lai kati le displace garne ho mathi tira
-				that is this
-		===================================================================================================
-		-- Example (In Load Callback)
-
-		LoadMaterialComponents()
-		Font = Jkr.FontObject:New("font.ttf", 4)
-		ImagePreload = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/4k/outline.png")
-
-		local Window = Com.MaterialWindow:New(vec3(400, 100, 80), vec3(200, 10, 1), vec2(200, 20), "Fuck You",
-			Font)
-		local str =
-		"There are many peoople in this world who\nWill kill their selves for world\nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\n"
-		local from = { mPosition_3f = vec3(0, 400, 80), mDimension_3f = vec3(200, 200, 1) }
-		local to = { mPosition_3f = vec3(400, 100, 80), mDimension_3f = vec3(200, 100, 1) }
-		Window:Start()
-		local Inside = function()
-			local TextObj = Com.PlainTextEditObject:New(vec3(0), vec3(0), Font, 4, 30, 30)
-			TextObj:Update(vec3(0), vec3(200, 500, 1), str, 20, 1)
-			local materialVerticalScrollArea = Com.MaterialVerticalScrollArea:New(vec3(200, 200, 5),
-				vec3(200, 200, 1), vec3(200, 200, 1), 20, vec2(20, 200), 0.1, 0.3)
-			materialVerticalScrollArea:SetScrollableComponent(TextObj)
-			Window:SetCentralComponent(materialVerticalScrollArea)
-		end
-		Inside()
-		Window:End()
-
-		Com.AnimateSingleTimePosDimen(Window, from, to, 0.1)
-	]]
-	Com.MaterialVerticalScrollArea = {
-		mScrollableComponent = nil,
-		mScrollerComponentObject = nil,
-		mScrolling = nil,
-		mComponentDimension_3f = nil,
-		mMaxYDisplacement = nil,
-		New = function(self, inPosition_3f, inDimension_3f, inComponentDimension_3f, inMaxYDisplacement,
-			     inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
-			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f,
-				inScrollbarSensitivity, inScrollbarSizeFactor)
-			setmetatable(self, Com.ScrollProxy)
-			setmetatable(Obj, self)
-			self.__index = self
-			Obj.mScrollerComponentObject = Jkr.ComponentObject:New(vec3(0), vec3(0))
-			Obj.mScrolling = false
-			Obj.mComponentDimension_3f = inComponentDimension_3f
-			Obj.mMaxYDisplacement = inMaxYDisplacement
-			return Obj
-		end,
-		SetScrollableComponent = function(self, inComponent)
-			local IconUp = Com.IconButton:New(vec3(0), vec3(0), DropUp)
-			local IconDown = Com.IconButton:New(vec3(0), vec3(0), DropDown)
-			local scrollArea = Com.AreaObject:New(vec3(0), vec3(0))
-			local NewColorArea = vec4(Theme.Colors.Area.Border.x, Theme.Colors.Area.Border.y,
-				Theme.Colors.Area.Border.z, Theme.Colors.Area.Border.w)
-			scrollArea:SetFillColor(NewColorArea)
-			local scrollbarV = Com.VLayout:New(0)
-			local horizontalArea = Com.HLayout:New(0)
-			scrollbarV:AddComponents({ IconUp, scrollArea, IconDown }, { 0.1, 0.8, 0.1 })
-			horizontalArea:AddComponents({ inComponent, scrollbarV }, { 0.9, 0.1 })
-			local Scroller = Com.AreaObject:New(vec3(0), vec3(0))
-			Scroller:SetFillColor(vec4(1, 0, 0, 1))
-
-			local This = self
-			horizontalArea.Update = function(self, inPosition_3f, inDimension_3f)
-				local scrollArea_3f = vec3(This.mScrollbarArea_2f.x, inDimension_3f.y, 1)
-				local componentArea_3f = vec3(inDimension_3f.x - scrollArea_3f.x,
-					inDimension_3f.y, inDimension_3f.z)
-				local scrollAreaPosition_3f = vec3(inPosition_3f.x + componentArea_3f.x,
-					inPosition_3f.y, inPosition_3f.z)
-
-				local componentDisplacePosition = Lerp(0, This.mMaxYDisplacement,
-					This.mScrollbarPositionNormalized)
-				local componentPosition = vec3(inPosition_3f.x,
-					inPosition_3f.y - componentDisplacePosition, inPosition_3f.z)
-				if This.mComponentDimension_3f then
-					componentArea_3f.y = This.mComponentDimension_3f.y
-				end
-
-				self.mComponents[1]:Update(componentPosition, componentArea_3f)
-				self.mComponents[2]:Update(scrollAreaPosition_3f, scrollArea_3f)
-			end
-
-			scrollbarV.Update = function(self, inPosition_3f, inDimension_3f)
-				local upDownArea_3f = vec3(This.mScrollbarArea_2f.x, This.mScrollbarArea_2f.x,
-					inDimension_3f.z)
-				local iconUpPosition_3f = inPosition_3f
-				local areaPos_3f = vec3(iconUpPosition_3f.x,
-					iconUpPosition_3f.y + upDownArea_3f.y, iconUpPosition_3f.z)
-				local areaDimension_3f = vec3(inDimension_3f.x,
-					inDimension_3f.y - 2 * upDownArea_3f.y, inDimension_3f.z)
-				local iconDownPosition_3f = vec3(areaPos_3f.x, areaPos_3f.y + areaDimension_3f.y,
-					areaPos_3f.z)
-				self.mComponents[1]:Update(iconUpPosition_3f, upDownArea_3f)
-				self.mComponents[2]:Update(areaPos_3f, areaDimension_3f)
-				self.mComponents[3]:Update(iconDownPosition_3f, upDownArea_3f)
-
-				-- Scrollbar Position Calculation
-				local Ypos = Lerp(areaPos_3f.y,
-					areaPos_3f.y +
-					(areaDimension_3f.y - This.mScrollbarSizeFactor * areaDimension_3f.y),
-					This.mScrollbarPositionNormalized)
-				local scrollerPosition = vec3(areaPos_3f.x, Ypos, areaPos_3f.z)
-				local scrollerDimension = vec3(areaDimension_3f.x,
-					areaDimension_3f.y * This.mScrollbarSizeFactor, areaDimension_3f.z)
-				Scroller:Update(scrollerPosition, scrollerDimension)
-				This.mScrollerComponentObject:Update(scrollerPosition, scrollerDimension)
-			end
-			self.mCentralComponent = horizontalArea
-
-			Com.NewComponent_Event()
-			ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
-				function()
-					self.mScrollerComponentObject:Event()
-					if self.mScrollerComponentObject.mClicked_b or (self.mScrolling and E.is_left_button_pressed()) then
-						local relpos = E.get_relative_mouse_pos()
-						This.mScrollbarPositionNormalized = This
-						    .mScrollbarPositionNormalized + relpos.y / 30
-						local sn = This.mScrollbarPositionNormalized
-						if This.mScrollbarPositionNormalized >= 1 then
-							This.mScrollbarPositionNormalized = 1
-						elseif This.mScrollbarPositionNormalized <= 0 then
-							This.mScrollbarPositionNormalized = 0
-						end
-						This:Update(This.mPosition_3f, This.mDimension_3f)
-						self.mScrolling = true
-					else
-						self.mScrolling = false
-					end
-				end
-			)
-		end,
-		Update = function(self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inComponentDimension_3f,
-			        inMaxYDisplacement)
-			self.mPosition_3f = inPosition_3f
-			self.mDimension_3f = inDimension_3f
-			if inComponentDimension_3f then
-				self.mComponentDimension_3f = inComponentDimension_3f
-			end
-			if inMaxYDisplacement then
-				self.mMaxYDisplacement = inMaxYDisplacement
-			end
-			self.mCentralComponent:Update(inPosition_3f, inDimension_3f, inScrollbarArea_2f)
-		end
-	}
+    Com.SpinnerWidget = {
+        New = function(self, inPosition_3f, inDimension_3f, inFont, inLowerLimit, inHigherLimit)
+            local Obj = {
+                mPosition_3f = inPosition_3f,
+                mDimension_3f = inDimension_3f,
+                mCurrentNumberObject = nil
+            }
+            setmetatable(Obj, self)
+            self.__index = self
+            Obj.mArea = Com.AreaObject:New(inPosition_3f, inDimension_3f)
+            local currentNumber = inLowerLimit
+            Obj.mCurrentNumberObject = Com.TextLabelObject:New(tostring(currentNumber),
+                vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z), inFont)
+            local iconUp = Com.IconButton:New(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0), DropUp)
+            local iconDown = Com.IconButton:New(vec3(0, 0, inPosition_3f.z), vec3(0, 0, 0), DropDown)
+            local verticalLayout = Com.VLayout:New(3)
+            verticalLayout:AddComponents({ iconUp, iconDown }, { 0.5, 0.5 })
+            verticalLayout:Update(
+                vec3(inPosition_3f.x + inDimension_3f.x - inDimension_3f.y, inPosition_3f.y, inPosition_3f.z - 3),
+                vec3(inDimension_3f.y, inDimension_3f.y, inDimension_3f.z))
+			
+            iconUp:SetFunctions(
+                function()
+    
+                end,
+                function()
+    
+                end,
+                function()
+                    if currentNumber < inHigherLimit then
+                        currentNumber = currentNumber + 1
+                        Obj.mCurrentNumberObject:Update(
+                            vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z),
+                            inDimension_3f,
+                            tostring(currentNumber))
+                    end
+                end
+            )
+    
+            iconDown:SetFunctions(
+                function()
+    
+                end,
+                function()
+    
+                end,
+                function()
+                    if currentNumber > inLowerLimit then
+                        currentNumber = currentNumber - 1
+                        Obj.mCurrentNumberObject:Update(
+                            vec3(inPosition_3f.x + 10, inPosition_3f.y + inDimension_3f.y / 2, inPosition_3f.z),
+                            inDimension_3f,
+                            tostring(currentNumber))
+                    end
+                end
+            )
+    
+            return Obj
+        end
+    }
 
 
-	Com.ContextMenu = {
-		mMainArea = nil,
-		mCellDimension_3f = vec3(0, 0, 0),
-		mPosition_3f = nil,
-		mButtons = nil,
-		mMaxNoOfEntries = nil,
-		New = function(self, inPosition_3f, inCellDimension_3f, inFontObject, inNoOfEntries,
-			     inMaxStringLength)
-			local Obj = {
-				mPosition_3f = inPosition_3f,
-				mCellDimension_3f = inCellDimension_3f,
-				mButtons = {},
-				mMaxNoOfEntries = inNoOfEntries,
-				mCurrentContextMenu = {}
-			}
-			setmetatable(Obj, self)
-			self.__index = self
-			local MainAreaDimen = vec3(0, 0, 1)
-			Obj.mMainArea = Com.AreaObject:New(inPosition_3f, MainAreaDimen)
-			local button_dimension = vec3(0, 0, 0)
-			for i = 1, inNoOfEntries, 1 do
-				local pos = vec3(inPosition_3f.x,
-					inPosition_3f.y + inCellDimension_3f.y * (i - 1),
-					inPosition_3f.z - 3)
-				Obj.mButtons[i] = Com.TextButton:New(pos,
-					button_dimension, inFontObject,
-					string.rep(" ", inMaxStringLength))
-			end
-			Obj.mCellDimension_3f = inCellDimension_3f
-			return Obj
-		end,
-		Update = function(self, inPosition_3f, inDimension_3f, inCellDimension_3f, inContextMenuTable)
-			if inContextMenuTable then
-				self.mCurrentContextMenu = inContextMenuTable
-			end
-			if inCellDimension_3f then
-				self.mCellDimension_3f = inCellDimension_3f
-			end
-
-			self.mMainArea:Update(vec3(0, 0, self.mMainArea.mPosition_3f.z), vec3(0, 0, 0))
-			for index, value in ipairs(self.mButtons) do
-				value:Update(vec3(0, 0, value.mPosition_3f.z), vec3(0, 0, 0), " ")
-			end
-			local inNoOfEntries = #self.mCurrentContextMenu
-			local MainAreaDimension = vec3(self.mCellDimension_3f.x, self.mCellDimension_3f.y * inNoOfEntries,
-				1)
-			local mainareapos = vec3(inPosition_3f.x, inPosition_3f.y, self.mMainArea.mPosition_3f.z)
-			self.mMainArea:Update(mainareapos, MainAreaDimension)
-			for i = 1, inNoOfEntries, 1 do
-				local pos = vec3(inPosition_3f.x,
-					inPosition_3f.y + self.mCellDimension_3f.y * (i - 1),
-					self.mButtons[i].mPosition_3f.z)
-				self.mButtons[i]:Update(pos, self.mCellDimension_3f, self.mCurrentContextMenu[i].name)
-			end
-			for i = 1, inNoOfEntries, 1 do
-				self.mButtons[i]:SetFunctions(
-					function()
-						local nc = Theme.Colors.Area.Border
-						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(nc.x, nc.y, nc.z, nc.w)
-					end,
-					function()
-						local nc = Theme.Colors.Area.Normal
-						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(nc.x, nc.y, nc.z, nc.w)
-						-- if E.is_left_button_pressed() then
-						-- 	self:Update(vec3(0, 0, 0), nil, vec3(0, 0, 0), {})
-						-- end
-					end,
-					function()
-					end
-				)
-			end
-		end,
-
-	}
-
-
-	Com.FileMenuBarObject = {
-		mMainArea = nil,
-		mHeight = nil,
-		mFileMenu = nil,
-		mDimension_3f = nil,
-		New = function(self, inFileMenu, inHeight, inFontObject, inDepth)
-			local Obj = {}
-			setmetatable(Obj, self)
-			self.__index = self
-			local mainareapos = vec3(0, 0, inDepth)
-			local mainareadimen = vec3(WindowDimension.x, inHeight, 1)
-			Obj.mMainArea = Com.AreaObject:New(mainareapos, mainareadimen)
-			Obj.mHeight = inHeight
-			Obj.mDepth = inDepth
-			Obj.mButtons = {}
-			Obj.mFileMenu = inFileMenu
-			Obj.mNoOfEntries = #inFileMenu
-			Obj.mDimension_3f = nil
-			for i = 1, #inFileMenu, 1 do
-				Obj.mButtons[i] = Com.TextButton:New(mainareapos, vec3(0, 0, 0),
-					inFontObject, inFileMenu[i].name)
-			end
-			return Obj
-		end,
-		Update = function(self, inPosition_3f, inDimension_3f)
-			self.mDimension_3f = inDimension_3f
-			local ratiotable = {}
-
-			for i = 1, self.mNoOfEntries, 1 do
-				ratiotable[i] = 1 / self.mNoOfEntries
-			end
-			local horizontalcomponents = Com.HLayout:New(0)
-			horizontalcomponents:AddComponents(self.mButtons, ratiotable)
-			horizontalcomponents:Update(vec3(0, 0, self.mDepth), inDimension_3f)
-			local position = horizontalcomponents:GetComponentPosition()
-			for i = 1, self.mNoOfEntries, 1 do
-				self.mButtons[i]:SetFunctions(
-					function()
-						local c = Theme.Colors.Area.Border
-						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(c.x, c.y, c.z, c.w)
-					end,
-					function()
-						local nc = Theme.Colors.Area.Normal
-						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(nc.x, nc.y, nc.z, nc.w)
-					end,
-					function()
-						local pos = vec3(position[i].x,
-							position[i].y + self.mHeight,
-							position[i].z)
-						self.mFileMenu[i].action(pos)
-					end
-				)
-			end
-		end
-	}
 end
