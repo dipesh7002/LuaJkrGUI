@@ -301,16 +301,18 @@ Darshan.SanskritDictionary = function()
 	}
 
 
+	local SearchBarPos = vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 80)
+	local SearchBarDimen = vec3(WindowDimension.x, WindowDimension.y * 0.05, 30)
 	local RoundedCircle = Com.Canvas:New(P(0, 0, 80), vec3(WindowDimension.x, WindowDimension.y, 1))
 	local circlePImageSize = vec2(40, 40)
 	local function searchBar()
-		local ha = Com.VLayout:New(0)
+		local searchTextEdit = Com.VLayout:New(0)
 		local area = Com.AreaObject:New(vec3(10, 10, 10), vec3(10, 10, 1))
 		local searchBar = Com.PlainTextLineEditObject:New(vec3(200, 400, 20), vec3(100, 100, 1),
 			Com.GetFont("font", "Large"), 100)
 		searchBar:Update(vec3(200, 400, 20), vec3(100, 100, 1), "\n", 20, 1)
-		ha:AddComponents({ searchBar, area }, { 0.9, 0.05 })
-		ha:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 30),
+		searchTextEdit:AddComponents({ searchBar, area }, { 0.9, 0.05 })
+		searchTextEdit:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 30),
 			vec3(WindowDimension.x * 0.8, WindowDimension.y * 0.05, 30))
 		RoundedCircle:AddPainterBrush(Com.GetCanvasPainter("Clear", false))
 		RoundedCircle:AddPainterBrush(Com.GetCanvasPainter("Circle", true))
@@ -318,7 +320,7 @@ Darshan.SanskritDictionary = function()
 
 		local Image = Jkr.Components.Abstract.ImageObject:New(0, 0, "icons_material/search/outline.png")
 		local Icon = Com.ImageLabelObject:NewExisting(Image, vec3(30, 10, 9), vec3(100, 100, 1))
-		Icon:TintColor(vec4(1, 0, 0, 1))
+		Icon:TintColor(vec4(0, 0, 0, 1))
 
 		local HLayout = Com.HLayout:New(5)
 		HLayout.Update = function (self, inPosition_3f, inDimension_3f)
@@ -326,18 +328,16 @@ Darshan.SanskritDictionary = function()
 			local pos = vec3(inPosition_3f.x, inPosition_3f.y - inDimension_3f.y / 4, inPosition_3f.z)
 			self.mComponents[1]:Update(pos, vec3(40, 40, 1))
 			local ipos = vec3(pos.x, pos.y, pos.z - 1)
-			Icon:Update(vec3(pos.x, pos.y, 25), vec3(circlePImageSize.x / 2, circlePImageSize.y / 2, 1))
+			local idimen = vec3(circlePImageSize.x / 2, circlePImageSize.y / 2, 1)
+			Icon:Update(vec3(pos.x + idimen.x / 2, pos.y + idimen.y / 2, 25), idimen)
 		end
 
-
-
-
-		HLayout:AddComponents({ RoundedCircle.mImageLabel, ha, Com.HLayout:New(0) }, { 0.1, 0.8, 0.1 })
-		HLayout:Update(vec3(WindowDimension.x * 0.02, WindowDimension.y * 0.1, 80),
-			vec3(WindowDimension.x, WindowDimension.y * 0.05, 30))
+		HLayout:AddComponents({ RoundedCircle.mImageLabel, searchTextEdit, Com.HLayout:New(0) }, { 0.1, 0.8, 0.1 })
+		HLayout:Update(SearchBarPos, SearchBarDimen)
 	end
 	searchBar()
 
+	local ScrollAreaPos = SearchBarPos + SearchBarDimen
 	local function scrollArea()
 		local sc = Com.MaterialVerticalScrollArea:New(P(200, 200, 50), P(200, 200, 1), D(200, 200, 1), 20,
 			P2(20, 200), 0.1, 0.3)

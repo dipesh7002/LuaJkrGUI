@@ -294,8 +294,6 @@ Jkr.ComponentObject = {
 		end
 	end,
 
-	-- Mouse le maathi gayo vane focus hune nahune
-	-- Jastai, mTransparentToMouse_b = true vayo vane, kunai element ko muntira vae pani focus hunxa
 	Event = function(self)
 		if self.TransparentToMouse_b then
 			self.mHovered_b = E.is_mouse_within(Int(self.mBoundedRectId_i),
@@ -405,7 +403,7 @@ Jkr.Components.Static.TextObject = {
 	mId = nil,
 	mDimension_2f = nil,
 	mColor = Theme.Colors.Text.Normal,
-	New = function(self, inText, inPosition_3f, inFontObject)
+	New = function(self, inText, inPosition_3f, inFontObject, inShouldAlignBottom)
 		local Obj = {
 			mScissorPosition_2f = nil,
 			mScissorDimension_2f = nil,
@@ -423,6 +421,7 @@ Jkr.Components.Static.TextObject = {
 		Obj.mString = inText
 		Obj.mPosition_3f = inPosition_3f
 
+
 		if not Obj.mAlt then
 			T.SetCurrentFace(inFontObject.mId)
 			T.SetTextProperty(TextH.left, TextV.top)
@@ -430,8 +429,13 @@ Jkr.Components.Static.TextObject = {
 				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z))
 			Obj.mDimension_2f = inFontObject:GetDimension(Obj.mString)
 		else
+			local should_align_button = true
+			if inShouldAlignBottom ~= nil then
+				should_align_button = inShouldAlignBottom
+				print(should_align_button)
+			end
 			Obj.mId = r.balt.add(inFontObject.mId, Obj.mString,
-				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z))
+				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z), should_align_button)
 		end
 
 		Obj.mFont = inFontObject
@@ -457,7 +461,7 @@ Jkr.Components.Static.TextObject = {
 				GetIdentityMatrix())
 		end
 	end,
-	Update = function(self, inPosition_3f, inDimension_3f, inString)
+	Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
 		self.mPosition_3f = inPosition_3f
 		if (inString) then
 			self.mString = inString
@@ -467,8 +471,12 @@ Jkr.Components.Static.TextObject = {
 			T.Update(Int(self.mId.x), str, self.mPosition_3f)
 			T.Update(Int(self.mId.x), self.mString, self.mPosition_3f)
 		else
+			local should_align_button = true
+			if inShouldAlignBottom ~= nil then
+				should_align_button = inShouldAlignBottom	
+			end
 			r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self
-			.mString)
+			.mString, should_align_button)
 		end
 	end,
 	-- TODO Remove this function

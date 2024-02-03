@@ -663,6 +663,9 @@ In event
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inCellDimension_3f, inContextMenuTable)
+			if not inContextMenuTable then
+				self:Update(inPosition_3f, inDimension_3f, inDimension_3f, {})
+			end
 			if inContextMenuTable then
 				self.mCurrentContextMenu = inContextMenuTable
 			end

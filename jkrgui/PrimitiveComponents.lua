@@ -47,7 +47,7 @@ Com.TextLabelObject = {
     mIds = vec2(0, 0),
     mPosition_3f = vec3(0, 0, 0),
     mDimension_3f = vec3(0, 0, 0),
-    New = function(self, inText, inPosition_3f, inFontObject)
+    New = function(self, inText, inPosition_3f, inFontObject, inShouldAlignBottom)
         -- "TextLabelObject Construction")
         local Obj = {
             mIds = vec2(0, 0),
@@ -59,16 +59,16 @@ Com.TextLabelObject = {
         Obj.mPosition_3f = inPosition_3f
         Com.NewComponent()
         Obj.mIds.x = com_i
-        ComTable[com_i] = Jkr.Components.Static.TextObject:New(inText, inPosition_3f, inFontObject)
+        ComTable[com_i] = Jkr.Components.Static.TextObject:New(inText, inPosition_3f, inFontObject, inShouldAlignBottom)
         -- "TextLabelObject Construction Finished")
         return Obj
     end,
-    Update = function(self, inPosition_3f, inDimension_3f, inString)
+    Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
         self.mPosition_3f = inPosition_3f
         if inString then
             ComTable[self.mIds.x].mString = inString
         end
-        ComTable[self.mIds.x]:Update(inPosition_3f)
+        ComTable[self.mIds.x]:Update(inPosition_3f, inShouldAlignBottom)
     end
 }
 

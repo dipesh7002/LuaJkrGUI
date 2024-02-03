@@ -45,14 +45,14 @@ Com.VisualLineObject = {
 		Com.NewComponent()
 		ComTable[com_i] = Jkr.Components.Static.TextObject:New(string.rep(" ", inMaxChars),
 			inPosition_3f,
-			inFontObject)
+			inFontObject, false)
 		Obj.mTextObjectId = com_i
 		Obj.mEndsWithNewLine = false
 		Obj.mFontObject = inFontObject
 		return Obj
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inString, inIndex, inEndsWithNewLine)
-		ComTable[self.mTextObjectId]:Update(inPosition_3f, inDimension_3f, inString)
+		ComTable[self.mTextObjectId]:Update(inPosition_3f, inDimension_3f, inString, false)
 		self.mIndex = inIndex
 		self.mEndsWithNewLine = inEndsWithNewLine
 		self.mVisualDimension_2f = self.mFontObject:GetDimension(inString)
@@ -96,7 +96,7 @@ Com.VisualLineWrapperObject = {
 		end
 		self:EraseAll()
 		local linePosition = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
-		linePosition.y = linePosition.y + self.mVerticalDrawSpacing
+		-- linePosition.y = linePosition.y + self.mVerticalDrawSpacing
 
 		local lineIndex = 1
 		local visualCharsIndex = 1

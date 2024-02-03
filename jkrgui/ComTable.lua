@@ -52,6 +52,10 @@ Com.Dispatches = function()
 	gDispatchesLoadedIndex = 1
 	com_sdisi = 0
     end
+
+    for _, com in ipairs(ComTable_Dispatch) do
+	com:Dispatch()
+    end
 end
 
 Com.Draws = function()
