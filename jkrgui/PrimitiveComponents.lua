@@ -65,10 +65,7 @@ Com.TextLabelObject = {
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
         self.mPosition_3f = inPosition_3f
-        if inString then
-            ComTable[self.mIds.x].mString = inString
-        end
-        ComTable[self.mIds.x]:Update(inPosition_3f, inShouldAlignBottom)
+        ComTable[self.mIds.x]:Update(inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
     end
 }
 
@@ -148,18 +145,14 @@ Com.TextButtonObject = {
         Obj.mPressed = {}
         Obj.mPressed = false
         Obj.mPadding = 5
-        local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + inDimension_3f.y - Obj.mPadding,
-            inPosition_3f.z - 3)
-        Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject)
+        local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + Obj.mPadding, inPosition_3f.z - 3)
+        Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject, true)
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inString)
         Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
-        local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + inDimension_3f.y - self.mPadding,
-            inPosition_3f.z - 3)
-        if inString then
-            self.mTextObject:Update(Position, nil, inString)
-        end
+        local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + self.mPadding, inPosition_3f.z - 3)
+	self.mTextObject:Update(Position, nil, inString, false)
     end,
     Event = function(self)
     end,

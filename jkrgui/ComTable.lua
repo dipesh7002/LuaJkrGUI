@@ -85,9 +85,6 @@ end
 
 
 
-
-
-
 Com.NewSingleTimeDispatch = function (inFunction)
 	Com.NewComponent_SingleTimeDispatch()
 	ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(

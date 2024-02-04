@@ -446,5 +446,8 @@ Com.PlainTextLineEditObject = {
 		   inCursorWidth)
 		self.mComponentObject:Update(inPosition_3f, inDimension_3f)
 		Com.VisualTextEditObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
+	end,
+	IsClickedEvent = function(self)
+		return self.mComponentObject.mClicked_b
 	end
 }

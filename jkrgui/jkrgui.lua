@@ -315,6 +315,7 @@ Jkr.ComponentObject = {
 				self.mClicked_b = false
 			end
 		end
+		self.mHovered_b = self.mHovered_b and not E.is_left_button_pressed_continous()
 	end,
 
 	GetTranslationMatrix = function(self)
@@ -432,7 +433,6 @@ Jkr.Components.Static.TextObject = {
 			local should_align_button = true
 			if inShouldAlignBottom ~= nil then
 				should_align_button = inShouldAlignBottom
-				print(should_align_button)
 			end
 			Obj.mId = r.balt.add(inFontObject.mId, Obj.mString,
 				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z), should_align_button)

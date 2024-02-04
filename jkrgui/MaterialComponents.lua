@@ -589,6 +589,7 @@ In event
 				local scrollerPosition = vec3(areaPos_3f.x, Ypos, areaPos_3f.z)
 				local scrollerDimension = vec3(areaDimension_3f.x,
 					areaDimension_3f.y * This.mScrollbarSizeFactor, areaDimension_3f.z)
+
 				Scroller:Update(scrollerPosition, scrollerDimension)
 				This.mScrollerComponentObject:Update(scrollerPosition, scrollerDimension)
 			end
@@ -626,7 +627,7 @@ In event
 			if inMaxYDisplacement then
 				self.mMaxYDisplacement = inMaxYDisplacement
 			end
-			self.mCentralComponent:Update(inPosition_3f, inDimension_3f, inScrollbarArea_2f)
+			self.mCentralComponent:Update(inPosition_3f, inDimension_3f)
 		end
 	}
 
@@ -660,12 +661,21 @@ In event
 					string.rep(" ", inMaxStringLength))
 			end
 			Obj.mCellDimension_3f = inCellDimension_3f
+			Obj.mShouldNullifyContextMenuTableOnUpdate = true
 			return Obj
 		end,
+		NullifyContextMenuTableOnUpdate = function(self, inBool)
+			self.mShouldNullifyContextMenuTableOnUpdate = inBool
+		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inCellDimension_3f, inContextMenuTable)
-			if not inContextMenuTable then
-				self:Update(inPosition_3f, inDimension_3f, inDimension_3f, {})
+			if self.mShouldNullifyContextMenuTableOnUpdate then
+				self.mCurrentContextMenu = {}
 			end
+
+			if not inContextMenuTable then
+				self:Update(inPosition_3f, inDimension_3f, inCellDimension_3f, self.mCurrentContextMenu)
+			end
+
 			if inContextMenuTable then
 				self.mCurrentContextMenu = inContextMenuTable
 			end
@@ -699,9 +709,6 @@ In event
 						local nc = Theme.Colors.Area.Normal
 						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
 						    vec4(nc.x, nc.y, nc.z, nc.w)
-						-- if E.is_left_button_pressed() then
-						-- 	self:Update(vec3(0, 0, 0), nil, vec3(0, 0, 0), {})
-						-- end
 					end,
 					function()
 					end

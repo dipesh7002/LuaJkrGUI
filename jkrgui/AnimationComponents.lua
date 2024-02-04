@@ -9,7 +9,7 @@ local lerp_3f = function(a, b, t)
 	return vec3(lerp(a.x, b.x, t), lerp(a.y, b.y, t), lerp(a.z, b.z, t))
 end
 
-Com.AnimateSingleTimePosDimen = function (inComponent, inFrom, inTo, inInverseSpeed)
+Com.AnimateSingleTimePosDimen = function (inComponent, inFrom, inTo, inInverseSpeed, inEndFunction)
 	local inverseSpeed = 0.01
 	if inInverseSpeed then
 		inverseSpeed = inInverseSpeed
@@ -29,5 +29,10 @@ Com.AnimateSingleTimePosDimen = function (inComponent, inFrom, inTo, inInverseSp
 			end
 		)
 		t = t + inverseSpeed
+	end
+	if inEndFunction then
+		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
+			inEndFunction
+		)
 	end
 end
