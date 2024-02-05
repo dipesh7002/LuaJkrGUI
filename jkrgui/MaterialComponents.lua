@@ -363,6 +363,9 @@ In event
 		Update = function(self, inPosition_3f, inDimension_3f)
 			self.mImageButton:Update(inPosition_3f, inDimension_3f)
 			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+		end,
+		TintColor = function (self, inColor)
+			self.mImageButton:TintColor(inColor)
 		end
 	}
 

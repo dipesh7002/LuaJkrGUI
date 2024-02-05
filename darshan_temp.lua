@@ -381,3 +381,4 @@ LoadDarshan = function()
 	-- LoadMainH()
 	-- Darshan.TextEditor()
 end
+

@@ -1,7 +1,6 @@
 require "jkrgui.jkrgui"
 
 Com.Fonts = {}
-
 Com.GetFont = function(inFontName, inSize)
 	local size = inSize
 	if size == "large" then

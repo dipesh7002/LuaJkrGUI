@@ -276,9 +276,15 @@ Com.ButtonProxy = {
 		return Obj
 	end,
 	SetFunctions = function(self, inHoverFunction, inHoverOutFunction, inClickedFunction)
-		self.mHoverFunction = inHoverFunction
-		self.mHoverOutFunction = inHoverOutFunction
-		self.mClickedFunction = inClickedFunction
+		if inHoverFunction then
+			self.mHoverFunction = inHoverFunction
+		end
+		if inHoverOutFunction then
+			self.mHoverOutFunction = inHoverOutFunction
+		end
+		if inClickedFunction then
+			self.mClickedFunction = inClickedFunction
+		end
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f)
 		self.mPosition_3f = inPosition_3f
