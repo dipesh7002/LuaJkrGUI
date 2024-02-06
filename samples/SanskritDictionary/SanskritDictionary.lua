@@ -1,6 +1,91 @@
 require "jkrgui.all"
 require "samples.SanskritDictionary.database"
 
+Com.NavigationBar = {
+	mLayout = nil,
+	mNavBarIndicator = nil,
+	mCurrentNavBarSelection = nil,
+	mCurrentNavBarIndicatorDimension = nil,
+	mNavBarIndicatorDimension = nil,
+	mCurrentComponentCount = nil,
+	mPosition_3f = nil,
+	mDimension_3f = nil,
+	New = function (self, inPosition_3f, inDimension_3f, inComponents)
+		local Obj = {}	
+		setmetatable(Obj, self)
+		self.__index = self
+		Obj.mCurrentNavBarSelection = 2
+		Obj.mPosition_3f = inPosition_3f
+		Obj.mDimension_3f = inDimension_3f
+
+		Obj.mLayout = Com.HLayout:New(0)	
+		local noOfComp = #inComponents
+		local equalRatio = 1 / noOfComp
+		local ratioTable = {}
+		for i = 1, noOfComp, 1 do
+			ratioTable[#ratioTable+1] = equalRatio	
+		end
+		Com.HLayout.AddComponents(Obj.mLayout, inComponents, ratioTable)
+		Obj.mCurrentComponentCount = inComponents
+
+		local NavBarPosition = Obj.mPosition_3f
+		local NavBarDimension = Obj.mDimension_3f
+		local NavBarIndicatorDimension = vec3(1 / #inComponents * NavBarDimension.x, 14, 1)
+		local NavBarIndicatorPosition = vec3(
+			NavBarPosition.x + (Obj.mCurrentNavBarSelection - 1) * NavBarIndicatorDimension.x,
+			NavBarPosition.y - NavBarIndicatorDimension.y,
+			NavBarPosition.z)
+		Obj.mNavBarIndicator = Com.Canvas:New(NavBarIndicatorPosition, NavBarIndicatorDimension)
+		Com.Canvas.AddPainterBrush(Obj.mNavBarIndicator, Com.GetCanvasPainter("Clear", false))
+		Com.Canvas.AddPainterBrush(Obj.mNavBarIndicator, Com.GetCanvasPainter("RoundedRectangle", false))
+		Com.Canvas.MakeCanvasImage(Obj.mNavBarIndicator, NavBarIndicatorDimension.x, NavBarIndicatorDimension.y)
+		Obj.mCurrentNavBarIndicatorDimension = vec3(NavBarIndicatorDimension.x, NavBarIndicatorDimension.y, NavBarIndicatorDimension.z)
+
+		Com.HLayout.Update(Obj.mLayout, Obj.mPosition_3f, Obj.mDimension_3f)
+		return Obj
+	end,
+	Update = function (self, inPosition_3f, inDimension_3f, inCurrentNavBarPosition)
+		if inCurrentNavBarPosition then
+			self.mCurrentNavBarSelection = inCurrentNavBarPosition
+		end
+		local NavBarIndicatorPosition = vec3(
+			inPosition_3f.x + (self.mCurrentNavBarSelection - 1) * self.mCurrentNavBarIndicatorDimension.x,
+			inPosition_3f.y - self.mCurrentNavBarIndicatorDimension.y,
+			inPosition_3f.z)
+		local NavBarIndicatorDimension = vec3(1 / #self.mLayout.mComponents * inDimension_3f.x, 14, 1)
+		Com.Canvas.Update(self.mNavBarIndicator, NavBarIndicatorPosition, NavBarIndicatorDimension)
+		print("NavBarIndicatorPs:", NavBarIndicatorPosition.x, NavBarIndicatorPosition.y, NavBarIndicatorPosition.z)
+		print("NavBarIndicatorPs:", NavBarIndicatorDimension.x, NavBarIndicatorDimension.y, NavBarIndicatorDimension.z)
+		self.mCurrentNavBarIndicatorDimension = NavBarIndicatorDimension
+	end,
+	Animate = function (self, inPosition_3f, inDimension_3f, inNavBarSelection)
+		local getNavBarIndicatorPos = function (self)
+			return vec3(
+			inPosition_3f.x + (self.mCurrentNavBarSelection - 1) * self.mCurrentNavBarIndicatorDimension.x,
+			inPosition_3f.y - self.mCurrentNavBarIndicatorDimension.y,
+			inPosition_3f.z
+		)
+		end
+
+		local from_pos = getNavBarIndicatorPos(self)
+		if inNavBarSelection ~= self.mCurrentNavBarSelection then
+			self.mCurrentNavBarIndicatorDimension = inNavBarSelection
+			local to_pos = getNavBarIndicatorPos(self)
+			local from = {mPosition_3f = from_pos, mDimension_3f = self.mCurrentNavBarIndicatorDimension}
+			local to = {mPosition_3f = to_pos, mDimension_3f = self.mCurrentNavBarIndicatorDimension}
+			Com.AnimateSingleTimePosDimen(self.mCurrentNavBarIndicatorDimension, from, to, 0.1)
+		end
+	end,
+	Dispatch = function (self, inColor_4f)
+		self.mNavBarIndicator.CurrentBrushId = 2
+		self.mNavBarIndicator:Bind()
+		Com.Canvas.Paint(self.mNavBarIndicator,
+			vec4( -0.2 * self.mCurrentNavBarIndicatorDimension.x, 0, self.mCurrentNavBarIndicatorDimension.x * 1.4, self.mCurrentNavBarIndicatorDimension.y),
+			inColor_4f, vec4(1.2, 0.5, 0.8, 0.9), self.mCurrentNavBarIndicatorDimension.x * 1.4,
+			self.mCurrentNavBarIndicatorDimension.y, 1)
+	end
+}
+
 local ComponentDimension = WindowDimension
 
 local function ConfigureTopBar(TopBar, TopBarSizeFactor, hsizeTabBar)
@@ -107,27 +192,23 @@ function SanskritDictionaryLoad()
 	SuggestionArea:Update(vec3(0), vec3(0))
 
 
-	local NavBarDimension = vec3(WindowDimension.x, WindowDimension.y * 0.1, 1)
-	local NavBarPosition = vec3(0, WindowDimension.y - NavBarDimension.y, 50)
-	local NavBar = Com.HLayout:New(0)
-	local A = Com.AreaObject
+	-- local NavBar = Com.HLayout:New(0)
+	-- local A = Com.AreaObject
 
-	local NavBarIndicatorDimension = vec3(1 / 3 * NavBarDimension.x, 14, 1)
-	local NavBarIndicatorPosition = vec3(NavBarPosition.x + 0 * NavBarIndicatorDimension.x, NavBarPosition.y - NavBarIndicatorDimension.y,
-		NavBarPosition.z)
-	local NavBarIndicator = Com.Canvas:New(NavBarIndicatorPosition, NavBarIndicatorDimension)
-	Com.Canvas.AddPainterBrush(NavBarIndicator, Com.GetCanvasPainter("Clear", false))
-	Com.Canvas.AddPainterBrush(NavBarIndicator, Com.GetCanvasPainter("RoundedRectangle", false))
-	Com.Canvas.MakeCanvasImage(NavBarIndicator, NavBarIndicatorDimension.x, NavBarIndicatorDimension.y)
+	-- local NavBarIndicatorDimension = vec3(1 / 3 * NavBarDimension.x, 14, 1)
+	-- local NavBarIndicatorPosition = vec3(NavBarPosition.x + 0 * NavBarIndicatorDimension.x, NavBarPosition.y - NavBarIndicatorDimension.y,
+	-- 	NavBarPosition.z)
+	-- local NavBarIndicator = Com.Canvas:New(NavBarIndicatorPosition, NavBarIndicatorDimension)
+	-- Com.Canvas.AddPainterBrush(NavBarIndicator, Com.GetCanvasPainter("Clear", false))
+	-- Com.Canvas.AddPainterBrush(NavBarIndicator, Com.GetCanvasPainter("RoundedRectangle", false))
+	-- Com.Canvas.MakeCanvasImage(NavBarIndicator, NavBarIndicatorDimension.x, NavBarIndicatorDimension.y)
 
-	local MoveNavBarIndicatorToPos = function (inPos)
-		local from = {mPosition_3f = NavBarIndicator.mPosition_3f, mDimension_3f = NavBarIndicatorDimension}
-		local NavBarIndicatorPosition = vec3(NavBarPosition.x + inPos * NavBarIndicatorDimension.x, NavBarPosition.y - NavBarIndicatorDimension.y,
-			NavBarPosition.z)
-		local to = {mPosition_3f = NavBarIndicatorPosition, mDimension_3f = NavBarIndicatorDimension}
-		Com.AnimateSingleTimePosDimen(NavBarIndicator, from, to, 0.1)
-		-- Com.Canvas.Update(NavBarIndicator, NavBarIndicatorPosition, NavBarIndicatorDimension)
-	end
+	-- local MoveNavBarIndicatorToPos = function (inPos)
+	-- 	local from = {mPosition_3f = NavBarIndicator.mPosition_3f, mDimension_3f = NavBarIndicatorDimension}
+	-- 	local NavBarIndicatorPosition = vec3(NavBarPosition.x + inPos * NavBarIndicatorDimension.x, NavBarPosition.y - NavBarIndicatorDimension.y,
+	-- 		NavBarPosition.z)
+	-- 	local to = {mPosition_3f = NavBarIndicatorPosition, mDimension_3f = NavBarIndicatorDimension}
+	-- end
 
 
 	local Image = Jkr.Components.Abstract.ImageObject:New(0, 0, "PNG_transparency_demonstration_1.png")
@@ -138,13 +219,17 @@ function SanskritDictionaryLoad()
 	local NavBarElem3 = Com.IconButton:New(vec3(0), vec3(0), Image)
 	NavBarElem3:TintColor(vec4(0, 0, 1, 1))
 
-	NavBarElem1:SetFunctions( nil, nil, function () MoveNavBarIndicatorToPos(0) end)
-	NavBarElem2:SetFunctions( nil, nil, function () MoveNavBarIndicatorToPos(1) end)
-	NavBarElem3:SetFunctions( nil, nil, function () MoveNavBarIndicatorToPos(2) end)
+	local NavBarDimension = vec3(WindowDimension.x, WindowDimension.y * 0.1, 1)
+	local NavBarPosition = vec3(0, WindowDimension.y - NavBarDimension.y, 50)
+	local NavBar = Com.NavigationBar:New(NavBarPosition, NavBarDimension, {NavBarElem1, NavBarElem2, NavBarElem3})
+	NavBarElem1:SetFunctions( nil, nil, function () Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 1) end)
+	NavBarElem2:SetFunctions( nil, nil, function () Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 2) end)
+	NavBarElem3:SetFunctions( nil, nil, function () Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 3) end)
+	Com.NavigationBar.Update(NavBar, NavBarPosition, NavBarDimension, 1)
 
-	NavBar:AddComponents({NavBarElem1, NavBarElem2, NavBarElem3},
-		{ 1 / 3, 1 / 3, 1 / 3 })
-	NavBar:Update(NavBarPosition, NavBarDimension)
+	-- NavBar:AddComponents({NavBarElem1, NavBarElem2, NavBarElem3},
+	-- 	{ 1 / 3, 1 / 3, 1 / 3 })
+	-- NavBar:Update(NavBarPosition, NavBarDimension)
 
 	Com.NewComponent_Event()
 	ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
@@ -209,12 +294,13 @@ function SanskritDictionaryLoad()
 			RoundedCircle:Paint(vec4(0, 0, circlePImageSize.x, circlePImageSize.y), apricot_color,
 				vec4(1.8, 1, 1, 0.8), circlePImageSize.x, circlePImageSize.y, 1)
 
-			NavBarIndicator.CurrentBrushId = 2
-			NavBarIndicator:Bind()
-			Com.Canvas.Paint(NavBarIndicator,
-				vec4( -0.2 * NavBarIndicatorDimension.x, 0, NavBarIndicatorDimension.x * 1.4, NavBarIndicatorDimension.y),
-				apricot_color, vec4(1.2, 0.5, 0.8, 0.9), NavBarIndicatorDimension.x * 1.4,
-				NavBarIndicatorDimension.y, 1)
+			-- NavBarIndicator.CurrentBrushId = 2
+			-- NavBarIndicator:Bind()
+			-- Com.Canvas.Paint(NavBarIndicator,
+			-- 	vec4( -0.2 * NavBarIndicatorDimension.x, 0, NavBarIndicatorDimension.x * 1.4, NavBarIndicatorDimension.y),
+			-- 	apricot_color, vec4(1.2, 0.5, 0.8, 0.9), NavBarIndicatorDimension.x * 1.4,
+			-- 	NavBarIndicatorDimension.y, 1)
+			NavBar:Dispatch(apricot_color)
 		end
 	)
 end
