@@ -57,7 +57,6 @@ Com.NavigationBar = {
 		self.mCurrentNavBarIndicatorDimension = NavBarIndicatorDimension
 	end,
 	Animate = function (self, inPosition_3f, inDimension_3f, inNavBarSelection)
-
 		local getNavBarIndicatorPos = function (inNavBar)
 			return vec3(
 			inPosition_3f.x + (inNavBar.mCurrentNavBarSelection - 1) * inNavBar.mCurrentNavBarIndicatorDimension.x,
@@ -190,22 +189,42 @@ function SanskritDictionaryLoad()
 	SuggestionArea:End()
 	SuggestionArea:Update(vec3(0), vec3(0))
 
-	local Image = Jkr.Components.Abstract.ImageObject:New(0, 0, "PNG_transparency_demonstration_1.png")
-	local NavBarElem1 = Com.IconButton:New(vec3(0), vec3(0), Image)
-	NavBarElem1:TintColor(vec4(1, 0, 0, 1))
-	local NavBarElem2 = Com.IconButton:New(vec3(0), vec3(0), Image)
-	NavBarElem2:TintColor(vec4(0, 1, 0, 1))
-	local NavBarElem3 = Com.IconButton:New(vec3(0), vec3(0), Image)
-	NavBarElem3:TintColor(vec4(0, 0, 1, 1))
+	local Image1 = Jkr.Components.Abstract.ImageObject:New(0, 0, "book1.png")
+	local Image2 = Jkr.Components.Abstract.ImageObject:New(0, 0, "book2.png")
+	local Image3 = Jkr.Components.Abstract.ImageObject:New(0, 0, "PNG_transparency_demonstration_1.png")
+	local NavBarElem1 = Com.IconButton:New(vec3(0), vec3(0), Image1)
+	local NavBarElem2 = Com.IconButton:New(vec3(0), vec3(0), Image2)
+	local NavBarElem3 = Com.IconButton:New(vec3(0), vec3(0), Image3)
 
 	local NavBarDimension = vec3(WindowDimension.x, WindowDimension.y * 0.1, 1)
 	local NavBarPosition = vec3(0, WindowDimension.y - NavBarDimension.y, 50)
 	local NavBar = Com.NavigationBar:New(NavBarPosition, NavBarDimension, {NavBarElem1, NavBarElem2, NavBarElem3})
-	NavBarElem1:SetFunctions( nil, nil, function () Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 1) end)
-	NavBarElem2:SetFunctions( nil, nil, function () Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 2) end)
-	NavBarElem3:SetFunctions( nil, nil, function () Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 3) end)
+	local ClearNavBarColor = function ()
+		 NavBarElem1:TintColor(vec4(1))
+		 NavBarElem2:TintColor(vec4(1))
+		 NavBarElem3:TintColor(vec4(1))
+	end
+
+	ClearNavBarColor()
+	NavBarElem1:SetFunctions( nil, nil, 
+	function ()
+		ClearNavBarColor()
+		 Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 1)
+		 NavBarElem1:TintColor(apricot_color)
+	end)
+	NavBarElem2:SetFunctions( nil, nil,
+	 function ()
+		ClearNavBarColor()
+		 Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 2) 
+		NavBarElem2:TintColor(apricot_color)
+	end)
+	NavBarElem3:SetFunctions( nil, nil,
+	 function ()
+		ClearNavBarColor()
+		 Com.NavigationBar.Animate(NavBar, NavBarPosition, NavBarDimension, 3) 
+		 NavBarElem3:TintColor(apricot_color)
+		end)
 	Com.NavigationBar.Update(NavBar, NavBarPosition, NavBarDimension, 1)
-	print(NavBar.mCurrentNavBarIndicatorDimension.x)
 
 	Com.NewComponent_Event()
 	ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
