@@ -38,68 +38,100 @@ SN.Graphics = {}
 
 SN.Graphics.CircularGraph = {
     mCanvas = nil,
-    New = function (self, inPosition_3f, inDimension_3f)
-       local Obj = {} 
-       setmetatable(Obj, self)
-       self.__index = self
+    New = function(self, inPosition_3f, inDimension_3f)
+        local Obj = {}
+        setmetatable(Obj, self)
+        self.__index = self
         Obj.mCanvas = Com.Canvas:New(inPosition_3f, inDimension_3f)
         Com.Canvas.AddPainterBrush(Obj.mCanvas, Com.GetCanvasPainter("Clear", false))
         Com.Canvas.AddPainterBrush(Obj.mCanvas, Com.GetCanvasPainter("SimulatedAnnealingCircleGraph", false))
         Com.Canvas.MakeCanvasImage(Obj.mCanvas, inDimension_3f.x, inDimension_3f.y)
 
-        Com.NewSingleTimeDispatch(function ()
+        Com.NewSingleTimeDispatch(function()
             Obj.mCanvas.CurrentBrushId = 1
             Com.Canvas.Bind(Obj.mCanvas)
-            Com.Canvas.Paint(Obj.mCanvas, vec4(0, 0, inDimension_3f.x, inDimension_3f.y), vec4(1, 1, 1, 1), vec4(1.2, 0, 0, 1), inDimension_3f.x, inDimension_3f.y, 1)
+            Com.Canvas.Paint(Obj.mCanvas, vec4(0, 0, inDimension_3f.x, inDimension_3f.y), vec4(1, 1, 1, 1),
+                vec4(1.2, 0, 0, 1), inDimension_3f.x, inDimension_3f.y, 1)
         end)
-       return Obj
+        return Obj
     end,
-    Update = function (self, inPosition_3f, inDimension_3f)
+    Update = function(self, inPosition_3f, inDimension_3f)
         self.mCanvas:Update(inPosition_3f, inDimension_3f)
     end,
-    PlotAt = function (self, inX, inY, inW, inH, inColor_4f, inBrushId)
-        Com.NewSingleTimeDispatch(function ()
+    PlotAt = function(self, inX, inY, inW, inH, inColor_4f, inBrushId)
+        Com.NewSingleTimeDispatch(function()
             self.mCanvas.CurrentBrushId = inBrushId
             Com.Canvas.Bind(self.mCanvas)
             Com.Canvas.Paint(self.mCanvas, vec4(inX, inY, inW, inH), inColor_4f, vec4(1.2, 0, 0, 1), inW, inH, 1)
-        end) 
+        end)
     end
 }
 
-SN.Graphics.CreateNumberSumSolverWindow = function ()
-   local Window =  Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
-        vec2(350, 30), "Sum Two Numbers", Com.GetFont("font", "large"))
+SN.Graphics.CreateNumberSumSolverWindow = function()
+    local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(400, 30), "Sum Two Numbers", Com.GetFont("font", "large"))
 
     Window:SetCentralComponent(Com.VLayout:New(0))
     return Window
 end
 
-SN.Graphics.CreateProblem2SolverWindow = function ()
-   local Window =  Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
-        vec2(350, 30), "Problem 1", Com.GetFont("font", "large"))
+SN.Graphics.CreateProblem2SolverWindow = function()
+    local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(400, 30), "Problem 1", Com.GetFont("font", "large"))
 
     Window:SetCentralComponent(Com.VLayout:New(0))
     return Window
 end
 
-SN.Graphics.CreateProblem3SolverWindow = function ()
-   local Window =  Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
-        vec2(350, 30), "Problem 2", Com.GetFont("font", "large"))
+SN.Graphics.CreateProblem3SolverWindow = function()
+    local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(400, 30), "Problem 2", Com.GetFont("font", "large"))
 
     Window:SetCentralComponent(Com.VLayout:New(0))
     return Window
 end
 
-SN.Graphics.CreateProblemWindowsLayout = function ()
+SN.Graphics.CreateProblemWindowsLayout = function(inPosition_3f, inDimension_3f)
     local problemWindows = Com.HLayout:New(0)
+    problemWindows.mCurrentWindow = 1
     local Window1 = SN.Graphics.CreateNumberSumSolverWindow()
-    local Window2 = SN.Graphics.CreateNumberSumSolverWindow()
-    local Window3 = SN.Graphics.CreateNumberSumSolverWindow()
-    problemWindows:AddComponents({Window1, Window2, Window3}, {1/3, 1/3, 1/3})
+    local Window2 = SN.Graphics.CreateProblem2SolverWindow()
+    local Window3 = SN.Graphics.CreateProblem3SolverWindow()
+    problemWindows.Update = function(self, inPosition_3f, inDimension_3f, inWindowNo)
+        local oldPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+        local oldDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+        if inWindowNo then
+            self.mCurrentWindow = inWindowNo
+        end
+
+        local newPos = vec3(inPosition_3f.x - (inDimension_3f.x) * (self.mCurrentWindow - 1), inPosition_3f.y,
+            inPosition_3f.z)
+        local newDimen = vec3(inDimension_3f.x * 3, inDimension_3f.y, inDimension_3f.z)
+
+
+        if inWindowNo then
+            local from = {mPosition_3f = oldPos, mDimension_3f = oldDimen}
+            local to = {mPosition_3f = newPos, mDimension_3f = newDimen}
+            Com.AnimateSingleTimePosDimenCallback(from, to, 0.1, function (pos, dimen)
+                Com.HLayout.Update(self, pos, dimen)
+            end, function ()
+                self.mPosition_3f = inPosition_3f
+                self.mDimension_3f = inDimension_3f
+            end)    
+        else
+            Com.HLayout.Update(self, newPos, newDimen)
+        end
+
+
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
+    end
+
+    problemWindows:AddComponents({ Window1, Window2, Window3 }, { 1 / 3, 1 / 3, 1 / 3 })
     return problemWindows
 end
 
-SN.Graphics.CreateGUI = function ()
+SN.Graphics.CreateGUI = function()
     LoadMaterialComponents(true)
     local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x, WindowDimension.y, 1))
     local CallbackFunction = function(inS, inT)
@@ -133,7 +165,8 @@ SN.Graphics.CreateGUI = function ()
 
         local NavBarDimension = vec3(WindowDimension.x, WindowDimension.y * 0.1, 1)
         local NavBarPosition = vec3(0, WindowDimension.y - NavBarDimension.y, 50)
-        local NavBar = Com.NavigationBar:New(NavBarPosition, NavBarDimension, { NavBarElem1, NavBarElem2, NavBarElem3 }, true)
+        local NavBar = Com.NavigationBar:New(NavBarPosition, NavBarDimension, { NavBarElem1, NavBarElem2, NavBarElem3 },
+            true)
 
         local ClearNavBarColor = function()
             NavBarElem1:TintColor(vec4(1))
@@ -150,33 +183,35 @@ SN.Graphics.CreateGUI = function ()
         Com.NavigationBar.Update(NavBar, NavBarPosition, NavBarDimension, 1)
         local vlayout = Com.VLayout:New(0)
         local stack = Com.StackLayout:New(0)
-        vlayout:AddComponents({NavBar, problemWindows}, {0.05, 0.9})
-        stack:AddComponents({area, vlayout})
+        vlayout:AddComponents({ NavBar, problemWindows }, { 0.05, 0.9 })
+        stack:AddComponents({ area, vlayout })
         Window:SetCentralComponent(stack)
-
 
         NavBarElem1:SetFunctions(nil, nil,
             function()
                 ClearNavBarColor()
+                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 1)
                 Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 1)
                 NavBarElem1:TintColor(color_tint)
             end)
         NavBarElem2:SetFunctions(nil, nil,
             function()
                 ClearNavBarColor()
+                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 2)
                 Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 2)
                 NavBarElem2:TintColor(color_tint)
             end)
         NavBarElem3:SetFunctions(nil, nil,
             function()
                 ClearNavBarColor()
+                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 3)
                 Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 3)
                 NavBarElem3:TintColor(color_tint)
             end)
 
         Com.NewSingleTimeDispatch(
-            function ()
-                Com.NavigationBar.Dispatch(NavBar, color_navbarind) 
+            function()
+                Com.NavigationBar.Dispatch(NavBar, color_navbarind)
             end
         )
     end

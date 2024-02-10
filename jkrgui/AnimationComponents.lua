@@ -36,3 +36,32 @@ Com.AnimateSingleTimePosDimen = function (inComponent, inFrom, inTo, inInverseSp
 		)
 	end
 end
+
+
+Com.AnimateSingleTimePosDimenCallback = function (inFrom, inTo, inInverseSpeed, inCallback_3f3f, inEndFunction)
+	local inverseSpeed = 0.01
+	if inInverseSpeed then
+		inverseSpeed = inInverseSpeed
+	end
+	local t = 0
+	while t <= 1 do
+		local from_pos = inFrom.mPosition_3f
+		local to_pos = inTo.mPosition_3f
+		local from_dimen  = inFrom.mDimension_3f
+		local to_dimen = inTo.mDimension_3f
+		local current_pos = lerp_3f(from_pos, to_pos, t)
+		local current_dimen = lerp_3f(from_dimen, to_dimen, t)
+		Com.NewComponent_SingleTimeUpdate()
+		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
+			function ()
+				inCallback_3f3f(current_pos, current_dimen)	
+			end
+		)
+		t = t + inverseSpeed
+	end
+	if inEndFunction then
+		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
+			inEndFunction
+		)
+	end
+end
