@@ -57,7 +57,7 @@ imageStore(storageImage, to_draw_at, vec4(0, 0, 0, 0));
 
 -- /* ForCanvas */
 -- /* These are for the Canvas */
-local CanvasHeader = [[
+CanvasHeader = [[
 	int xx = int(push.mPosDimen.x);
 	int yy = int(push.mPosDimen.y);
 	to_draw_at.x = to_draw_at.x + xx;

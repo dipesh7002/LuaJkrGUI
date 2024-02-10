@@ -25,9 +25,10 @@ function LoadMaterialComponents(inLoadCompute)
 	else
 		-- These are ought to be cleaned up, but for now, this is it.
 		local Painter_Image = Jkr.Components.Abstract.PainterImageObject:New(40, 40)
-		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 1, 1, 1)
+		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", true, Jkr.GLSL.Clear, 1, 1, 1)
 		Ip_Clear:RegisterImage(Painter_Image)
-		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false, Jkr.GLSL.RoundedCircle, 256, 256, 1)
+		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", true,
+			Jkr.GLSL.RoundedCircle, 16, 16, 1)
 		local ImagePrev = Jkr.Components.Abstract.ImageObject:New(40, 40)
 		Com.NewComponent_SingleTimeDispatch()
 		ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
@@ -47,7 +48,7 @@ function LoadMaterialComponents(inLoadCompute)
 
 	Com.CheckButtonList = {
 		New = function(self, inMaxNoOfEntries, inFontObject, inPadding, inLengthCellDimension,
-			     inMaxStringLength)
+					   inMaxStringLength)
 			local Obj = {
 				mMaxNoOfEntries = inMaxNoOfEntries,
 				mTableObjectForDescription = {},
@@ -90,14 +91,14 @@ function LoadMaterialComponents(inLoadCompute)
 								position.z),
 							inDimension_3f)
 						self.mButtonUnchecked[i]
-						    :Update(vec3(0, 0, 0),
-							    vec3(0, 0, 0))
+							:Update(vec3(0, 0, 0),
+								vec3(0, 0, 0))
 					else
 						self.mButtonUnchecked[i]
-						    :Update(
-							    vec3(position.x, position
-								    .y, position.z),
-							    inDimension_3f)
+							:Update(
+								vec3(position.x, position
+									.y, position.z),
+								inDimension_3f)
 						self.mButtonChecked[i]:Update(
 							vec3(0, 0, 0), vec3(0, 0, 0))
 					end
@@ -128,11 +129,11 @@ function LoadMaterialComponents(inLoadCompute)
 			for i = 1, inNoOfEntries, 1 do
 				if E.is_left_button_pressed() then
 					if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
-					    (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
-					    MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
+						(self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
+						MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
 						self.mCurrentStringTable[i].mFirst = not
-						    self.mCurrentStringTable[i]
-						    .mFirst
+							self.mCurrentStringTable[i]
+							.mFirst
 						self.mIndex = i
 						self:Update(
 							self.mPosition_3f[1],
@@ -198,7 +199,7 @@ In event
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inOneCellDimension_3f, inComboContent,
-			        inDefaultString, inHeadString)
+						  inDefaultString, inHeadString)
 			self.mCurrentComboContent = inComboContent
 			self.mHeadString = inHeadString
 			local inNoOfEntries = #inComboContent
@@ -268,10 +269,10 @@ In event
 			if E.is_left_button_pressed() then
 				for i = 2, inNoOfEntries + 1, 1 do
 					if MousePos.x > self.mPosition_3f[i].x and MousePos.x <
-					    (self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
-					    MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
+						(self.mPosition_3f[i].x + self.mDimension_3f[i].x) and MousePos.y > self.mPosition_3f[i].y and
+						MousePos.y < (self.mPosition_3f[i].y + self.mDimension_3f[i].y) then
 						self.ChoosenChoice = self
-						    .mCurrentComboContent[i - 1]
+							.mCurrentComboContent[i - 1]
 						self:Update(
 							self.mPosition_3f
 							[1],
@@ -283,12 +284,12 @@ In event
 					end
 				end
 				if not (MousePos.x > self.mPosition_3f[1].x and MousePos.x <
-					    (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.y > self.mPosition_3f[1].y and
-					    MousePos.y < (self.mPosition_3f[inNoOfEntries + 1].y + self.mDimension_3f[1].y)) then
+						(self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.y > self.mPosition_3f[1].y and
+						MousePos.y < (self.mPosition_3f[inNoOfEntries + 1].y + self.mDimension_3f[1].y)) then
 					if MousePos.x > (self.mPosition_3f[1].x + self.mDimension_3f[1].x) and MousePos.x < (self.mPosition_3f[1].x + self.mDimension_3f[1].x + self.mDimension_3f[1].y + 5) and MousePos.y > self.mPosition_3f[1].y and
-					    MousePos.y < (self.mPosition_3f[1].y + self.mDimension_3f[1].y) then
+						MousePos.y < (self.mPosition_3f[1].y + self.mDimension_3f[1].y) then
 						self.isDropDown = not self
-						    .isDropDown
+							.isDropDown
 						if self.isDropDown then
 							self.Flag = false
 
@@ -325,7 +326,6 @@ In event
 					end
 				end
 			end
-
 		end
 	}
 
@@ -364,7 +364,7 @@ In event
 			self.mImageButton:Update(inPosition_3f, inDimension_3f)
 			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
 		end,
-		TintColor = function (self, inColor)
+		TintColor = function(self, inColor)
 			self.mImageButton:TintColor(inColor)
 		end
 	}
@@ -524,7 +524,7 @@ In event
 		mComponentDimension_3f = nil,
 		mMaxYDisplacement = nil,
 		New = function(self, inPosition_3f, inDimension_3f, inComponentDimension_3f, inMaxYDisplacement,
-			     inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
+					   inScrollbarArea_2f, inScrollbarSensitivity, inScrollbarSizeFactor)
 			local Obj = Com.ScrollProxy:New(inPosition_3f, inDimension_3f, inScrollbarArea_2f,
 				inScrollbarSensitivity, inScrollbarSizeFactor)
 			setmetatable(self, Com.ScrollProxy)
@@ -605,7 +605,7 @@ In event
 					if self.mScrollerComponentObject.mClicked_b or (self.mScrolling and E.is_left_button_pressed()) then
 						local relpos = E.get_relative_mouse_pos()
 						This.mScrollbarPositionNormalized = This
-						    .mScrollbarPositionNormalized + relpos.y / 30
+							.mScrollbarPositionNormalized + relpos.y / 30
 						local sn = This.mScrollbarPositionNormalized
 						if This.mScrollbarPositionNormalized >= 1 then
 							This.mScrollbarPositionNormalized = 1
@@ -621,7 +621,7 @@ In event
 			)
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inScrollbarArea_2f, inComponentDimension_3f,
-			        inMaxYDisplacement)
+						  inMaxYDisplacement)
 			self.mPosition_3f = inPosition_3f
 			self.mDimension_3f = inDimension_3f
 			if inComponentDimension_3f then
@@ -642,7 +642,7 @@ In event
 		mButtons = nil,
 		mMaxNoOfEntries = nil,
 		New = function(self, inPosition_3f, inCellDimension_3f, inFontObject, inNoOfEntries,
-			     inMaxStringLength)
+					   inMaxStringLength)
 			local Obj = {
 				mPosition_3f = inPosition_3f,
 				mCellDimension_3f = inCellDimension_3f,
@@ -706,12 +706,12 @@ In event
 					function()
 						local nc = Theme.Colors.Area.Border
 						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(nc.x, nc.y, nc.z, nc.w)
+							vec4(nc.x, nc.y, nc.z, nc.w)
 					end,
 					function()
 						local nc = Theme.Colors.Area.Normal
 						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(nc.x, nc.y, nc.z, nc.w)
+							vec4(nc.x, nc.y, nc.z, nc.w)
 					end,
 					function()
 					end
@@ -762,12 +762,12 @@ In event
 					function()
 						local c = Theme.Colors.Area.Border
 						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(c.x, c.y, c.z, c.w)
+							vec4(c.x, c.y, c.z, c.w)
 					end,
 					function()
 						local nc = Theme.Colors.Area.Normal
 						ComTable[self.mButtons[i].mTextButton.mIds.y].mFillColor =
-						    vec4(nc.x, nc.y, nc.z, nc.w)
+							vec4(nc.x, nc.y, nc.z, nc.w)
 					end,
 					function()
 						local pos = vec3(position[i].x,
@@ -777,6 +777,125 @@ In event
 					end
 				)
 			end
+		end
+	}
+
+	Com.NavigationBar = {
+		mLayout = nil,
+		mNavBarIndicator = nil,
+		mCurrentNavBarSelection = nil,
+		mCurrentNavBarIndicatorDimension = nil,
+		mNavBarIndicatorDimension = nil,
+		mCurrentComponentCount = nil,
+		mPosition_3f = nil,
+		mDimension_3f = nil,
+		New = function(self, inPosition_3f, inDimension_3f, inComponents, inPutIndicatorAtBottom)
+			local Obj = {}
+			setmetatable(Obj, self)
+			self.__index = self
+			Obj.mCurrentNavBarSelection = 2
+			Obj.mPosition_3f = inPosition_3f
+			Obj.mDimension_3f = inDimension_3f
+			Obj.mIsIndicatorAtBottom = false
+			if inPutIndicatorAtBottom then
+				Obj.mIsIndicatorAtBottom = true
+			end
+
+			Obj.mLayout = Com.HLayout:New(0)
+			local noOfComp = #inComponents
+			local equalRatio = 1 / noOfComp
+			local ratioTable = {}
+			for i = 1, noOfComp, 1 do
+				ratioTable[#ratioTable + 1] = equalRatio
+			end
+			Com.HLayout.AddComponents(Obj.mLayout, inComponents, ratioTable)
+			Obj.mCurrentComponentCount = inComponents
+
+			local NavBarPosition = Obj.mPosition_3f
+			local NavBarDimension = Obj.mDimension_3f
+			local NavBarIndicatorDimension = vec3(1 / #inComponents * NavBarDimension.x, 14, 1)
+			local NavBarIndicatorPosition = vec3(
+				NavBarPosition.x + (Obj.mCurrentNavBarSelection - 1) * NavBarIndicatorDimension.x,
+				NavBarPosition.y - NavBarIndicatorDimension.y,
+				NavBarPosition.z)
+			Obj.mNavBarIndicator = Com.Canvas:New(NavBarIndicatorPosition, NavBarIndicatorDimension)
+			Com.Canvas.AddPainterBrush(Obj.mNavBarIndicator, Com.GetCanvasPainter("Clear", false))
+			Com.Canvas.AddPainterBrush(Obj.mNavBarIndicator, Com.GetCanvasPainter("RoundedRectangle", false))
+			Com.Canvas.MakeCanvasImage(Obj.mNavBarIndicator, NavBarIndicatorDimension.x, NavBarIndicatorDimension.y)
+			Obj.mCurrentNavBarIndicatorDimension = vec3(NavBarIndicatorDimension.x, NavBarIndicatorDimension.y,
+				NavBarIndicatorDimension.z)
+			Obj.mNavBarIndicatorInitialDimension = vec3(NavBarIndicatorDimension.x, NavBarIndicatorDimension.y,
+				NavBarIndicatorDimension.z)
+
+			Com.HLayout.Update(Obj.mLayout, Obj.mPosition_3f, Obj.mDimension_3f)
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inCurrentNavBarPosition)
+			print(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+			self.mPosition_3f = inPosition_3f
+			self.mDimension_3f = inDimension_3f
+			self.mLayout:Update(inPosition_3f, inDimension_3f)
+			if inCurrentNavBarPosition then
+				self.mCurrentNavBarSelection = inCurrentNavBarPosition
+			end
+			local NavBarIndicatorPosition = vec3(
+				inPosition_3f.x + (self.mCurrentNavBarSelection - 1) * self.mCurrentNavBarIndicatorDimension.x,
+				inPosition_3f.y - self.mCurrentNavBarIndicatorDimension.y,
+				inPosition_3f.z)
+			if self.mIsIndicatorAtBottom then
+				NavBarIndicatorPosition = vec3(
+					inPosition_3f.x + (self.mCurrentNavBarSelection - 1) * self.mCurrentNavBarIndicatorDimension.x,
+					inPosition_3f.y + inDimension_3f.y - self.mCurrentNavBarIndicatorDimension.y,
+					inPosition_3f.z)
+			end
+
+			self.mCurrentNavBarIndicatorDimension = vec3(1.0 / #self.mLayout.mComponents * inDimension_3f.x, 14, 1)
+			print("inDimension:", inDimension_3f.x, inDimension_3f.y)
+			Com.Canvas.Update(self.mNavBarIndicator, NavBarIndicatorPosition, self.mCurrentNavBarIndicatorDimension)
+			self.mCurrentNavBarIndicatorDimension = self.mCurrentNavBarIndicatorDimension
+		end,
+		Animate = function(self, inPosition_3f, inDimension_3f, inNavBarSelection)
+			local getNavBarIndicatorPos = function(inNavBar)
+				if not self.mIsIndicatorAtBottom then
+					return vec3(
+						inPosition_3f.x +
+						(inNavBar.mCurrentNavBarSelection - 1) * inNavBar.mCurrentNavBarIndicatorDimension.x,
+						inPosition_3f.y - self.mCurrentNavBarIndicatorDimension.y,
+						inPosition_3f.z)
+				else
+					return vec3(
+						inPosition_3f.x +
+						(inNavBar.mCurrentNavBarSelection - 1) * inNavBar.mCurrentNavBarIndicatorDimension.x,
+						inPosition_3f.y + inDimension_3f.y - self.mCurrentNavBarIndicatorDimension.y,
+						inPosition_3f.z)
+				end
+			end
+
+			local from_pos = getNavBarIndicatorPos(self)
+			if inNavBarSelection ~= self.mCurrentNavBarSelection then
+				self.mCurrentNavBarSelection = inNavBarSelection
+				local to_pos = getNavBarIndicatorPos(self)
+				local from = { mPosition_3f = from_pos, mDimension_3f = self.mCurrentNavBarIndicatorDimension }
+				local to = { mPosition_3f = to_pos, mDimension_3f = self.mCurrentNavBarIndicatorDimension }
+				Com.AnimateSingleTimePosDimen(self.mNavBarIndicator, from, to, 0.1)
+			end
+		end,
+		-- This doesn't work good, to be tested to the best
+		Dispatch = function(self, inColor_4f)
+			self.mNavBarIndicatorColor = inColor_4f
+			self.mNavBarIndicator.CurrentBrushId = 2
+			self.mNavBarIndicator:Bind()
+			Com.Canvas.Paint(self.mNavBarIndicator,
+				vec4(-0.2 * self.mNavBarIndicatorInitialDimension.x, 0, self.mNavBarIndicatorInitialDimension.x * 1.4,
+					self.mNavBarIndicatorInitialDimension.y),
+				inColor_4f, vec4(1.2, 0.5, 0.8, 0.9), self.mNavBarIndicatorInitialDimension.x * 1.4,
+				self.mNavBarIndicatorInitialDimension.y, 1)
+		end,
+		ClearDispatch = function (self, inColor_4f)
+			self.mNavBarIndicatorColor = inColor_4f	
+			self.mNavBarIndicator.CurrentBrushId = 1
+			self.mNavBarIndicator:Bind()
+			Com.Canvas.Paint(self.mNavBarIndicator, vec4(0, 0, self.mCurrentNavBarIndicatorDimension.x, self.mCurrentNavBarIndicatorDimension.y), inColor_4f, vec4(0), self.mNavBarIndicatorInitialDimension.x, self.mNavBarIndicatorInitialDimension.y, 1)
 		end
 	}
 end
