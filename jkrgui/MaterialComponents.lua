@@ -25,9 +25,9 @@ function LoadMaterialComponents(inLoadCompute)
 	else
 		-- These are ought to be cleaned up, but for now, this is it.
 		local Painter_Image = Jkr.Components.Abstract.PainterImageObject:New(40, 40)
-		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", true, Jkr.GLSL.Clear, 1, 1, 1)
+		local Ip_Clear = Jkr.Components.Util.ImagePainter:New("cache/Clear.Compute", false, Jkr.GLSL.Clear, 1, 1, 1)
 		Ip_Clear:RegisterImage(Painter_Image)
-		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", true,
+		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false,
 			Jkr.GLSL.RoundedCircle, 16, 16, 1)
 		local ImagePrev = Jkr.Components.Abstract.ImageObject:New(40, 40)
 		Com.NewComponent_SingleTimeDispatch()

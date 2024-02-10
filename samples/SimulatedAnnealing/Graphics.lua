@@ -44,7 +44,7 @@ SN.Graphics.CircularGraph = {
        self.__index = self
         Obj.mCanvas = Com.Canvas:New(inPosition_3f, inDimension_3f)
         Com.Canvas.AddPainterBrush(Obj.mCanvas, Com.GetCanvasPainter("Clear", false))
-        Com.Canvas.AddPainterBrush(Obj.mCanvas, Com.GetCanvasPainter("SimulatedAnnealingCircleGraph", true))
+        Com.Canvas.AddPainterBrush(Obj.mCanvas, Com.GetCanvasPainter("SimulatedAnnealingCircleGraph", false))
         Com.Canvas.MakeCanvasImage(Obj.mCanvas, inDimension_3f.x, inDimension_3f.y)
 
         Com.NewSingleTimeDispatch(function ()
@@ -66,8 +66,37 @@ SN.Graphics.CircularGraph = {
     end
 }
 
-SN.Graphics.CreateNumberSumSolverButton = function ()
-    
+SN.Graphics.CreateNumberSumSolverWindow = function ()
+   local Window =  Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(350, 30), "Sum Two Numbers", Com.GetFont("font", "large"))
+
+    Window:SetCentralComponent(Com.VLayout:New(0))
+    return Window
+end
+
+SN.Graphics.CreateProblem2SolverWindow = function ()
+   local Window =  Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(350, 30), "Problem 1", Com.GetFont("font", "large"))
+
+    Window:SetCentralComponent(Com.VLayout:New(0))
+    return Window
+end
+
+SN.Graphics.CreateProblem3SolverWindow = function ()
+   local Window =  Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(350, 30), "Problem 2", Com.GetFont("font", "large"))
+
+    Window:SetCentralComponent(Com.VLayout:New(0))
+    return Window
+end
+
+SN.Graphics.CreateProblemWindowsLayout = function ()
+    local problemWindows = Com.HLayout:New(0)
+    local Window1 = SN.Graphics.CreateNumberSumSolverWindow()
+    local Window2 = SN.Graphics.CreateNumberSumSolverWindow()
+    local Window3 = SN.Graphics.CreateNumberSumSolverWindow()
+    problemWindows:AddComponents({Window1, Window2, Window3}, {1/3, 1/3, 1/3})
+    return problemWindows
 end
 
 SN.Graphics.CreateGUI = function ()
@@ -79,10 +108,11 @@ SN.Graphics.CreateGUI = function ()
         local EnergyVisualFactor = 3
         local i = inS.i
         local j = inS.j
-        local rand_color = vec4(Temperature, math.random(), math.random(), 1)
+        local rand_color = vec4(1 - Temperature, math.random(), math.random(), 1)
         SN.Graphics.CircularGraph.PlotAt(Graph, i, j, Energy * EnergyVisualFactor, Energy * EnergyVisualFactor,
             rand_color, 2)
     end
+
     Graph:Update(vec3(0, 0, 90), vec3(WindowDimension.x, WindowDimension.y, 1))
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
         vec2(350, 30), "Simulated Annealing", Com.GetFont("font", "large"))
@@ -96,9 +126,11 @@ SN.Graphics.CreateGUI = function ()
         local Image1 = Jkr.Components.Abstract.ImageObject:New(0, 0, "book1.png")
         local Image2 = Jkr.Components.Abstract.ImageObject:New(0, 0, "book2.png")
         local Image3 = Jkr.Components.Abstract.ImageObject:New(0, 0, "PNG_transparency_demonstration_1.png")
+
         local NavBarElem1 = Com.IconButton:New(vec3(0), vec3(0), Image1)
         local NavBarElem2 = Com.IconButton:New(vec3(0), vec3(0), Image2)
         local NavBarElem3 = Com.IconButton:New(vec3(0), vec3(0), Image3)
+
         local NavBarDimension = vec3(WindowDimension.x, WindowDimension.y * 0.1, 1)
         local NavBarPosition = vec3(0, WindowDimension.y - NavBarDimension.y, 50)
         local NavBar = Com.NavigationBar:New(NavBarPosition, NavBarDimension, { NavBarElem1, NavBarElem2, NavBarElem3 }, true)
@@ -110,6 +142,19 @@ SN.Graphics.CreateGUI = function ()
         end
 
         ClearNavBarColor()
+
+
+
+        local problemWindows = SN.Graphics.CreateProblemWindowsLayout()
+
+        Com.NavigationBar.Update(NavBar, NavBarPosition, NavBarDimension, 1)
+        local vlayout = Com.VLayout:New(0)
+        local stack = Com.StackLayout:New(0)
+        vlayout:AddComponents({NavBar, problemWindows}, {0.05, 0.9})
+        stack:AddComponents({area, vlayout})
+        Window:SetCentralComponent(stack)
+
+
         NavBarElem1:SetFunctions(nil, nil,
             function()
                 ClearNavBarColor()
@@ -134,19 +179,9 @@ SN.Graphics.CreateGUI = function ()
                 Com.NavigationBar.Dispatch(NavBar, color_navbarind) 
             end
         )
-
-        Com.NavigationBar.Update(NavBar, NavBarPosition, NavBarDimension, 1)
-
-
-        local vlayout = Com.VLayout:New(0)
-        local stack = Com.StackLayout:New(0)
-        vlayout:AddComponents({NavBar, Com.VLayout:New(0)}, {0.05, 0.9})
-        stack:AddComponents({area, vlayout})
-        Window:SetCentralComponent(stack)
     end
     insideWindow()
     Window:End()
     Window:Update(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1))
-    SN.Solve(SN.State:New(2, 1), 3000, CallbackFunction)
-
+    SN.Solve(SN.State:New(150, 0), 3000, CallbackFunction)
 end

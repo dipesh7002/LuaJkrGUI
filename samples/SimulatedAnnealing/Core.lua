@@ -53,7 +53,7 @@ SN.Core.SetProblem_SumOfTwoNumbers = function ()
         end
     }
 
-    SN.InitialTemperature = 1000000
+    SN.InitialTemperature = 10
     SN.CurrentTemperature = SN.InitialTemperature -- Initial Temperature
     SN.temperature = function(inK)
         SN.CurrentTemperature = SN.CurrentTemperature * inK
