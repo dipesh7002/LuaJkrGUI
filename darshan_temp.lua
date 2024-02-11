@@ -1,4 +1,9 @@
-require "mainh"
+require "jkrgui.PrimitiveComponents"
+require "jkrgui.MaterialComponents"
+require "jkrgui.LayoutComponents"
+require "jkrgui.ExtraComponents"
+require "jkrgui.Resources"
+require "jkrgui.TextEditorComponents"
 
 
 -- LoadMainH()
