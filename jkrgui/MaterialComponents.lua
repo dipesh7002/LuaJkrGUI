@@ -865,16 +865,19 @@ function LoadMaterialComponents(inLoadCompute)
 		mLineEdit = nil,
 		mLineIndicatorArea = nil,
 		mLayout = nil,
-		New = function(self, inPosition_3f, inDimension_3f, inFont)
+		New = function(self, inPosition_3f, inDimension_3f, inFont, inInitialString)
 			local Obj = {}
 			setmetatable(Obj, self)
 			self.__index = self
 			Obj.mLineEdit = Com.PlainTextLineEditObject:New(inPosition_3f, inDimension_3f, inFont, 100)
 			Obj.mLineIndicatorArea = Com.AreaObject:New(vec3(0), vec3(0))
-			Com.PlainTextLineEditObject.Update(Obj.mLineEdit, vec3(200, 200, 1), vec3(200, 200, 1), "\n", 20, 2)
+			Com.PlainTextLineEditObject.Update(Obj.mLineEdit, inPosition_3f, vec3(2000, 2000, 1), "\n", 20, 2)
+			if inInitialString then
+				Com.VisualTextEditObject.CursorInsert(Obj.mLineEdit, inInitialString)
+			end
 			Obj.mLayout = Com.VLayout:New(0)
 			Obj.mLayout:AddComponents({Com.VLayout:New(0), Obj.mLineEdit, Obj.mLineIndicatorArea}, {0.20, 0.7, 0.10})
-			Obj.mLayout:Update(inPosition_3f, inDimension_3f)
+			Obj.mLayout:Update(vec3(200, 200, 1), vec3(2000, 2000, 1))
 			Obj.turnedOn = false
 			Com.NewEvent(
 				function ()
@@ -882,7 +885,7 @@ function LoadMaterialComponents(inLoadCompute)
 						Obj.turnedOn = not Obj.turnedOn
 					end
 
-					if E.is_mousepress_event() and E.is_left_button_pressed() and not Obj.mLineEdit:IsClickedEvent() then
+				if E.is_mousepress_event() and E.is_left_button_pressed() and not Obj.mLineEdit:IsClickedEvent() then
 						Obj.turnedOn = false
 					end
 

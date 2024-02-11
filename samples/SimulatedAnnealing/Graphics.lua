@@ -85,9 +85,8 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
 
     local TemperatureHLayout = Com.HLayout:New(0)
     local TemperatureText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Temperature")
-    local TemperatureTextLineEdit = Com.MaterialLineEdit:New(vec3(10), vec3(10), large_font)
+    local TemperatureTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1000")
     TemperatureHLayout:AddComponents({TemperatureText, TemperatureTextLineEdit}, {0.5, 1 - 0.5})
-
 
     local VLayout = Com.VLayout:New(0)
     VLayout:AddComponents({RunButtonHLayout, ClearButtonHLayout, Com.HLayout:New(0), TemperatureHLayout, Com.HLayout:New(0)}, {0.04, 0.04, 0.04, 0.04, 1 - (0.04 * 4)})

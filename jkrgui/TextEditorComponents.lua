@@ -391,31 +391,41 @@ Com.PlainTextLineEditObject = {
 		Obj.mTextInputStarted = false
 		Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
 
-		Com.NewComponent_Event()
-		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
-			function ()
-				Obj.mComponentObject:Event()
-				if Obj.mComponentObject.mClicked_b then
-					if not Obj.mTextInputStarted then
+		local start_text = function ()
 						E.start_text_input()
 						Obj.mCursor:SetColor(vec4(1, 0, 0, 1))
 						Obj.mTextInputStarted = true
-					else
+		end
+
+		local stop_text = function ()
 						E.stop_text_input()
 						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
 						Obj.mTextInputStarted = false
-					end
-				else
-					if E.is_mousepress_event() and E.is_left_button_pressed() then
-						E.stop_text_input()	
-						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
-						Obj.mTextInputStarted = false
-					end
-				end
+		end
 
+		Com.NewComponent_Event()
+		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
+			function ()
 				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
 				local is_left = E.is_key_pressed(Key.SDLK_LEFT)
 				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
+				local is_enter_pressed = E.is_key_pressed(Key.SDLK_RETURN)
+
+				Obj.mComponentObject:Event()
+				if Obj.mComponentObject.mClicked_b then
+					if not Obj.mTextInputStarted then
+						start_text()
+					else
+						stop_text()
+					end
+				else
+					if E.is_mousepress_event() and E.is_left_button_pressed() then
+						stop_text()
+					end
+				end
+
+
+
 				local shouldUpdate = false
 				if E.is_text_being_input() and not is_backspace then
 					local input = E.get_input_text()
@@ -433,6 +443,11 @@ Com.PlainTextLineEditObject = {
 					elseif is_backspace then
 						Obj:CursorRemove()
 						shouldUpdate = true
+					elseif is_enter_pressed then
+						stop_text()
+						-- This is for IsClickedEvent to respond TODO replace this with
+						-- good heuristic
+						Obj.mComponentObject.mClicked_b = true
 					end	
 				end
 				if shouldUpdate then
