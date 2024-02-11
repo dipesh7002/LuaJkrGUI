@@ -80,8 +80,9 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     RunButtonHLayout:AddComponents({RunButton, IterationsText}, {0.5, 1 - 0.5})
 
     local ClearButtonHLayout = Com.HLayout:New(0)
-    local ClearButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Clear")
-    ClearButtonHLayout:AddComponents({ClearButton, Com.VLayout:New(0)}, {0.5, 1 - 0.5})
+    local StopButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Stop")
+    local ClearAllButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Clear")
+    ClearButtonHLayout:AddComponents({StopButton, ClearAllButton}, {0.5, 1 - 0.5})
 
     local TemperatureHLayout = Com.HLayout:New(0)
     local TemperatureText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Temperature")
@@ -169,12 +170,24 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
         end
     )
 
-    ClearButton:SetFunctions(
+    StopButton:SetFunctions(
         function ()
-            ClearButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+            StopButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
         end, 
         function ()
-            ClearButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+            StopButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            Com.ClearSingleTimes()
+        end
+    )
+
+    ClearAllButton:SetFunctions(
+        function ()
+            ClearAllButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end, 
+        function ()
+            ClearAllButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
         end,
         function()
             Com.ClearSingleTimes()

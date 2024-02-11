@@ -398,7 +398,7 @@ Com.PlainTextLineEditObject = {
 		end
 
 		local stop_text = function ()
-						E.stop_text_input()
+						-- E.stop_text_input()
 						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
 						Obj.mTextInputStarted = false
 		end
