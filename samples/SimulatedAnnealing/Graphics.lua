@@ -41,6 +41,8 @@ SN.Graphics = {}
 
 SN.Graphics.CircularGraph = {
     mCanvas = nil,
+    mPosition_3f = nil,
+    mDimension_3f = nil,
     New = function(self, inPosition_3f, inDimension_3f)
         local Obj = {}
         setmetatable(Obj, self)
@@ -56,6 +58,9 @@ SN.Graphics.CircularGraph = {
             Com.Canvas.Paint(Obj.mCanvas, vec4(0, 0, inDimension_3f.x, inDimension_3f.y), vec4(1, 1, 1, 1),
                 vec4(1.2, 0, 0, 1), inDimension_3f.x, inDimension_3f.y, 1)
         end)
+
+        Obj.mPosition_3f = inPosition_3f
+        Obj.mDimension_3f = inDimension_3f
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
@@ -66,6 +71,13 @@ SN.Graphics.CircularGraph = {
             self.mCanvas.CurrentBrushId = inBrushId
             Com.Canvas.Bind(self.mCanvas)
             Com.Canvas.Paint(self.mCanvas, vec4(inX, inY, inW, inH), inColor_4f, vec4(1.2, 0, 0, 1), inW, inH, 1)
+        end)
+    end,
+    Clear = function (self, inColor_4f)
+        Com.NewSingleTimeDispatch(function()
+            self.mCanvas.CurrentBrushId = 1
+            Com.Canvas.Bind(self.mCanvas)
+            Com.Canvas.Paint(self.mCanvas, vec4(0, 0, self.mDimension_3f.x, self.mDimension_3f.y), inColor_4f, vec4(1.2, 0, 0, 1), self.mDimension_3f.x, self.mDimension_3f.y, 1)
         end)
     end
 }
@@ -109,6 +121,18 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     local NumJTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "4")
     NumJHLayout:AddComponents({NumJText, NumJTextLineEdit}, {0.5, 1 - 0.5})
 
+    local SizeFactorHLayout = Com.HLayout:New(0)
+    local SizeFactorText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "SizeFactor:")
+    local SizeFactorTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "3")
+    SizeFactorHLayout:AddComponents({SizeFactorText, SizeFactorTextLineEdit}, {0.5, 1 - 0.5})
+
+    local StatusText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Status")
+    local StatusText1 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
+    local StatusText2 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
+    local StatusText3 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
+    local StatusText4 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
+    local StatusText5 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
+
     local HComponents = {
         RunButtonHLayout,
         ClearButtonHLayout,
@@ -119,6 +143,14 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
         Com.HLayout:New(0),
         NumIHLayout,
         NumJHLayout,
+        SizeFactorHLayout,
+        Com.HLayout:New(0),
+        StatusText,
+        StatusText1,
+        StatusText2,
+        StatusText3,
+        StatusText4,
+        StatusText5,
         Com.HLayout:New(0)
     }
 
@@ -137,13 +169,16 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
 
     -- Note, not a good name, not a good heuristic
     local IterationsMax__ = 1000
+    local SizeFactor__ = 3
     local gcg = SN.Graphics.CircularGraph
-    local CallbackFunction = function(inS, inT, inK)
+    local CallbackFunction = function(inS, inT, inK, inS_new)
         local Energy = SN.E(inS)
         local Temperature = inT / SN.InitialTemperature
         IterationsText:Update(IterationsText.mPosition_3f, IterationsText.mDimension_3f, tostring(Int(IterationsMax__ - inK)))
+        StatusText1:Update(StatusText1.mPosition_3f, StatusText1.mDimension_3f, string.format("Accepted(%d, %d)", inS.i, inS.j))
+        StatusText2:Update(StatusText2.mPosition_3f, StatusText2.mDimension_3f, string.format("New(%d, %d)", inS_new.i, inS_new.j))
         local rand_color = vec4(1 - Temperature, math.random(), math.random(), 1)
-        gcg.PlotAt(CircularGraph, inS.i, inS.j, Energy * 3, Energy * 3,
+        gcg.PlotAt(CircularGraph, inS.i, inS.j, Energy * SizeFactor__, Energy * SizeFactor__,
             rand_color, 2)
     end
     RunButton:SetFunctions(
@@ -159,8 +194,12 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
             local Temperature = tonumber(TemperatureTextLineEdit:GetText())
             local I = tonumber(NumITextLineEdit:GetText())
             local J = tonumber(NumJTextLineEdit:GetText())
+            local SizeFactor = tonumber(SizeFactorTextLineEdit:GetText())
             if Iterations then
                 IterationsMax__ = Iterations
+            end
+            if SizeFactor then
+                SizeFactor__ = SizeFactor
             end
 
             print(Iterations)
@@ -191,6 +230,7 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
         end,
         function()
             Com.ClearSingleTimes()
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 1) )
         end
     )
     return Window

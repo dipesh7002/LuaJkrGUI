@@ -33,7 +33,7 @@ SN.Solve = function(inStartingState, inK_max, inCallbackFunction)
                     s = s_new
                 end
                 if inCallbackFunction then
-                    inCallbackFunction(s, T, k)
+                    inCallbackFunction(s, T, k, s_new)
                 end
             end
         )
