@@ -69,7 +69,7 @@ local gUpdatesSingleTimeSimultaneous_Id = 1
 local gUpdatesLoadedIndex               = 1
 Com.Updates                             = function()
     if gUpdatesLoadedIndex <= #ComTable_SingleTimeUpdate then
-        for i = 1, #ComTable_SingleTimeUpdate[gUpdatesLoadedIndex] , 1 do
+        for i = 1, #ComTable_SingleTimeUpdate[gUpdatesLoadedIndex], 1 do
             ComTable_SingleTimeUpdate[gUpdatesLoadedIndex][i]:Update()
         end
         gUpdatesLoadedIndex = gUpdatesLoadedIndex + 1
@@ -85,13 +85,20 @@ Com.Updates                             = function()
     end
 end
 
-Com.NewSingleTimeDispatch               = function(inFunction)
+
+Com.NewEvent              = function(inFunction)
+    Com.NewComponent_Event()
+    ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(inFunction)
+    return com_evi
+end
+
+Com.NewSingleTimeDispatch = function(inFunction)
     Com.NewComponent_SingleTimeDispatch()
     ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(inFunction)
     return com_sdisi
 end
 
-Com.NewSingleTimeUpdate                 = function(inFunction)
+Com.NewSingleTimeUpdate   = function(inFunction)
     Com.NewComponent_SingleTimeUpdate()
     ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(inFunction)
     return com_upds
@@ -108,7 +115,7 @@ Com.NewSimultaneousSingleTimeUpdate = function(inFunction)
         table.insert(ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id], NewUpdatable)
     end
 
-    gUpdatesSingleTimeSimultaneous_Id                            = gUpdatesSingleTimeSimultaneous_Id + 1
+    gUpdatesSingleTimeSimultaneous_Id = gUpdatesSingleTimeSimultaneous_Id + 1
 end
 
 

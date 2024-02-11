@@ -1,6 +1,7 @@
 require "jkrgui.all"
-local normal_color = Theme.Colors.Button.Normal * 4
+local normal_color = Theme.Colors.Button.Normal * 8
 local hover_color = Theme.Colors.Button.Hover * 1.4
+local large_font = Com.GetFont("font", "large")
 
 Jkr.GLSL["SimulatedAnnealingCircleGraphCanvas"] = CanvasHeader .. [[
 	vec2 center = vec2(0, 0);
@@ -71,19 +72,25 @@ SN.Graphics.CircularGraph = {
 
 SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
-        vec2(400, 30), "Sum Two Numbers", Com.GetFont("font", "large"))
+        vec2(400, 30), "Sum Two Numbers", large_font)
 
     local RunButtonHLayout = Com.HLayout:New(0)
-    local RunButton = Com.TextButton:New(vec3(0), vec3(0), Com.GetFont("font", "large"), "Run")
-    local IterationsText = Com.TextButton:New(vec3(0), vec3(0), Com.GetFont("font", "large"), "Run")
+    local RunButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Run")
+    local IterationsText = Com.TextButton:New(vec3(0), vec3(0), large_font, "Iterations")
     RunButtonHLayout:AddComponents({RunButton, IterationsText}, {0.5, 1 - 0.5})
 
     local ClearButtonHLayout = Com.HLayout:New(0)
-    local ClearButton = Com.TextButton:New(vec3(0), vec3(0), Com.GetFont("font", "large"), "Clear")
+    local ClearButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Clear")
     ClearButtonHLayout:AddComponents({ClearButton, Com.VLayout:New(0)}, {0.5, 1 - 0.5})
 
+    local TemperatureHLayout = Com.HLayout:New(0)
+    local TemperatureText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Temperature")
+    local TemperatureTextLineEdit = Com.MaterialLineEdit:New(vec3(10), vec3(10), large_font)
+    TemperatureHLayout:AddComponents({TemperatureText, TemperatureTextLineEdit}, {0.5, 1 - 0.5})
+
+
     local VLayout = Com.VLayout:New(0)
-    VLayout:AddComponents({RunButtonHLayout, ClearButtonHLayout, Com.HLayout:New(0)}, {0.04, 0.04, 1 - (0.04 + 0.04)})
+    VLayout:AddComponents({RunButtonHLayout, ClearButtonHLayout, Com.HLayout:New(0), TemperatureHLayout, Com.HLayout:New(0)}, {0.04, 0.04, 0.04, 0.04, 1 - (0.04 * 4)})
     Window:SetCentralComponent(VLayout)
 
     local gcg = SN.Graphics.CircularGraph
@@ -170,7 +177,6 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
             Com.HLayout.Update(self, newPos, newDimen)
         end
 
-
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
     end
@@ -252,4 +258,12 @@ SN.Graphics.CreateGUI = function()
     insideWindow()
     Window:End()
     Window:Update(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1))
+
+    Com.NewEvent(
+        function ()
+           if E.is_keypress_event() and E.is_key_pressed(Key.SDLK_SPACE) then 
+            Window:Update(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1))
+           end
+        end
+    )
 end
