@@ -88,15 +88,59 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     local TemperatureTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1000")
     TemperatureHLayout:AddComponents({TemperatureText, TemperatureTextLineEdit}, {0.5, 1 - 0.5})
 
+    local IterationCountHLayout = Com.HLayout:New(0)
+    local IterationCountText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Iterations")
+    local IterationCountTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "500")
+    IterationCountHLayout:AddComponents({IterationCountText, IterationCountTextLineEdit}, {0.5, 1 - 0.5})
+
+    local SumOfCountHLayout = Com.HLayout:New(0)
+    local SumOfCountText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Sum of Count")
+    local SumOfCountTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "500")
+    SumOfCountHLayout:AddComponents({SumOfCountText, SumOfCountTextLineEdit}, {0.5, 1 - 0.5})
+
+    local NumIHLayout = Com.HLayout:New(0)
+    local NumIText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "State:I")
+    local NumITextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "3")
+    NumIHLayout:AddComponents({NumIText, NumITextLineEdit}, {0.5, 1 - 0.5})
+
+    local NumJHLayout = Com.HLayout:New(0)
+    local NumJText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "State:J")
+    local NumJTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "4")
+    NumJHLayout:AddComponents({NumJText, NumJTextLineEdit}, {0.5, 1 - 0.5})
+
+    local HComponents = {
+        RunButtonHLayout,
+        ClearButtonHLayout,
+        Com.HLayout:New(0),
+        TemperatureHLayout,
+        IterationCountHLayout,
+        SumOfCountHLayout,
+        Com.HLayout:New(0),
+        NumIHLayout,
+        NumJHLayout,
+        Com.HLayout:New(0)
+    }
+
+    -- local HComponentsRatio = {0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 1 - (0.04 * (#HComponents - 1))}
+    local HComponentsRatio = {}
+    for i = 1, #HComponents, 1 do
+       HComponentsRatio[i] = 0.04
+    end
+    HComponentsRatio[#HComponentsRatio] = 1 - (0.04 * (#HComponents - 1))
+
+
+
     local VLayout = Com.VLayout:New(0)
-    VLayout:AddComponents({RunButtonHLayout, ClearButtonHLayout, Com.HLayout:New(0), TemperatureHLayout, Com.HLayout:New(0)}, {0.04, 0.04, 0.04, 0.04, 1 - (0.04 * 4)})
+    VLayout:AddComponents(HComponents, HComponentsRatio)
     Window:SetCentralComponent(VLayout)
 
+    -- Note, not a good name, not a good heuristic
+    local IterationsMax__ = 1000
     local gcg = SN.Graphics.CircularGraph
     local CallbackFunction = function(inS, inT, inK)
         local Energy = SN.E(inS)
         local Temperature = inT / SN.InitialTemperature
-        IterationsText:Update(IterationsText.mPosition_3f, IterationsText.mDimension_3f, tostring(Int(1000 - inK)))
+        IterationsText:Update(IterationsText.mPosition_3f, IterationsText.mDimension_3f, tostring(Int(IterationsMax__ - inK)))
         local rand_color = vec4(1 - Temperature, math.random(), math.random(), 1)
         gcg.PlotAt(CircularGraph, inS.i, inS.j, Energy * 3, Energy * 3,
             rand_color, 2)
@@ -109,9 +153,19 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
             RunButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
         end,
         function()
+            local Iterations = tonumber(IterationCountTextLineEdit:GetText())
+            local SumTo = tonumber(SumOfCountTextLineEdit:GetText())
+            local Temperature = tonumber(TemperatureTextLineEdit:GetText())
+            local I = tonumber(NumITextLineEdit:GetText())
+            local J = tonumber(NumJTextLineEdit:GetText())
+            if Iterations then
+                IterationsMax__ = Iterations
+            end
+
+            print(Iterations)
             Com.ClearSingleTimes()
-            SN.Core.SetProblem_SumOfTwoNumbers(1000, 200)
-            SN.Solve(SN.State:New(3, 4), 1000, CallbackFunction)
+            SN.Core.SetProblem_SumOfTwoNumbers(Temperature, SumTo)
+            SN.Solve(SN.State:New(I, J), Iterations, CallbackFunction)
         end
     )
 

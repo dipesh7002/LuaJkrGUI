@@ -424,16 +424,14 @@ Com.PlainTextLineEditObject = {
 					end
 				end
 
-
-
 				local shouldUpdate = false
-				if E.is_text_being_input() and not is_backspace then
+				if E.is_text_being_input() and Obj.mTextInputStarted and not is_backspace then
 					local input = E.get_input_text()
 					Obj:CursorInsert(input)			
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
 					shouldUpdate = true
 				end
-				if E.is_keypress_event() then
+				if E.is_keypress_event() and Obj.mTextInputStarted then
 					if is_left then
 						Obj:CursorMoveLeft()
 						shouldUpdate = true
