@@ -344,6 +344,9 @@ In event
 			self.mText = inString
 			self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
 			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+		end,
+		SetFillColor = function (self, inColor_4f)
+			self.mTextButton:SetFillColor(inColor_4f)	
 		end
 	}
 
@@ -369,6 +372,26 @@ In event
 		end
 	}
 
+	Com.AreaButton = {
+		mImageButton = nil,
+		New = function(self, inPosition_3f, inDimension_3f, inIconName)
+			local Obj = Com.ButtonProxy:New(inPosition_3f, inDimension_3f)
+			setmetatable(self, Com.ButtonProxy) -- inherits Com.ButtonProxy
+			setmetatable(Obj, self)
+			self.__index = self
+			Obj.mArea = Com.AreaObject:New(inPosition_3f, inDimension_3f)
+			-- Obj.mArea = Com.ImageLabelObject:NewExisting(inIconName, vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z), inDimension_3f)
+			Obj.mArea:SetFillColor(vec4(0, 0, 0, 1))
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f)
+			self.mArea:Update(inPosition_3f, inDimension_3f)
+			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+		end,
+		TintColor = function(self, inColor)
+			self.mArea:SetFillColor(inColor)
+		end
+	}
 
 	Com.MaterialWindow = {
 		mVerticalLayout = nil,

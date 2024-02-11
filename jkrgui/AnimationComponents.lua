@@ -10,6 +10,7 @@ local lerp_3f = function(a, b, t)
 end
 
 Com.AnimateSingleTimePosDimen = function (inComponent, inFrom, inTo, inInverseSpeed, inEndFunction)
+	Com.NewSimultaneousUpdate()
 	local inverseSpeed = 0.01
 	if inInverseSpeed then
 		inverseSpeed = inInverseSpeed
@@ -22,23 +23,23 @@ Com.AnimateSingleTimePosDimen = function (inComponent, inFrom, inTo, inInverseSp
 		local to_dimen = inTo.mDimension_3f
 		local current_pos = lerp_3f(from_pos, to_pos, t)
 		local current_dimen = lerp_3f(from_dimen, to_dimen, t)
-		Com.NewComponent_SingleTimeUpdate()
-		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
+
+		Com.NewSimultaneousSingleTimeUpdate(
 			function ()
 				inComponent:Update(current_pos, current_dimen)	
 			end
 		)
+
 		t = t + inverseSpeed
 	end
 	if inEndFunction then
-		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
-			inEndFunction
-		)
+		Com.NewSimultaneousSingleTimeUpdate(inEndFunction)
 	end
 end
 
 
 Com.AnimateSingleTimePosDimenCallback = function (inFrom, inTo, inInverseSpeed, inCallback_3f3f, inEndFunction)
+	Com.NewSimultaneousUpdate()
 	local inverseSpeed = 0.01
 	if inInverseSpeed then
 		inverseSpeed = inInverseSpeed
@@ -51,17 +52,16 @@ Com.AnimateSingleTimePosDimenCallback = function (inFrom, inTo, inInverseSpeed, 
 		local to_dimen = inTo.mDimension_3f
 		local current_pos = lerp_3f(from_pos, to_pos, t)
 		local current_dimen = lerp_3f(from_dimen, to_dimen, t)
-		Com.NewComponent_SingleTimeUpdate()
-		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
+
+		Com.NewSimultaneousSingleTimeUpdate(
 			function ()
-				inCallback_3f3f(current_pos, current_dimen)	
+		 		inCallback_3f3f(current_pos, current_dimen)	
 			end
 		)
+
 		t = t + inverseSpeed
 	end
 	if inEndFunction then
-		ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(
-			inEndFunction
-		)
+		Com.NewSimultaneousSingleTimeUpdate(inEndFunction)
 	end
 end

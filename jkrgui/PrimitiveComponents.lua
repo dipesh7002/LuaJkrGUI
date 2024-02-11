@@ -38,8 +38,8 @@ Com.AreaObject = {
         local AreaDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
         ComTable[self.mAreaId]:Update(AreaPos, AreaDimen)
     end,
-    SetFillColor = function (self, inColor_4f)
-        ComTable[self.mIds.y].mFillColor = vec4(inColor_4f.x, inColor_4f.y, inColor_4f.z, inColor_4f.w)	
+    SetFillColor = function(self, inColor_4f)
+        ComTable[self.mIds.y].mFillColor = vec4(inColor_4f.x, inColor_4f.y, inColor_4f.z, inColor_4f.w)
     end
 }
 
@@ -59,6 +59,8 @@ Com.TextLabelObject = {
         Obj.mPosition_3f = inPosition_3f
         Com.NewComponent()
         Obj.mIds.x = com_i
+
+        Obj.mShouldAlignBottom = false
         ComTable[com_i] = Jkr.Components.Static.TextObject:New(inText, inPosition_3f, inFontObject, inShouldAlignBottom)
         -- "TextLabelObject Construction Finished")
         return Obj
@@ -70,20 +72,20 @@ Com.TextLabelObject = {
 }
 
 Com.ImageLabelObject = {
-    mImageObjectAbs = nil,
-    mShapeId = nil,
-    New = function (self, inFileName, inPosition_3f, inDimension_3f)
+    mImageObjectAbs          = nil,
+    mShapeId                 = nil,
+    New                      = function(self, inFileName, inPosition_3f, inDimension_3f)
         local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
         Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(0, 0, inFileName)
-        Com.NewComponent() 
+        Com.NewComponent()
         ComTable[com_i] = Jkr.Components.Static.ShapeObject:New(inPosition_3f, inDimension_3f, Obj.mImageObjectAbs)
         Obj.mShapeId = com_i
         return Obj
     end,
-    NewEmpty  = function (self, inWidth, inHeight, inPosition_3f, inDimension_3f)
-        local Obj = {} 
+    NewEmpty                 = function(self, inWidth, inHeight, inPosition_3f, inDimension_3f)
+        local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
         Obj.mImageObjectAbs = Jkr.Components.Abstract.ImageObject:New(inWidth, inHeight, nil)
@@ -92,8 +94,8 @@ Com.ImageLabelObject = {
         Obj.mShapeId = com_i
         return Obj
     end,
-    NewExisting = function (self, inImageObject, inPosition_3f, inDimension_3f)
-        local Obj = {} 
+    NewExisting              = function(self, inImageObject, inPosition_3f, inDimension_3f)
+        local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
         Obj.mImageObjectAbs = inImageObject
@@ -102,28 +104,28 @@ Com.ImageLabelObject = {
         Obj.mShapeId = com_i
         return Obj
     end,
-    Update = function (self, inPosition_3f, inDimension_3f)
+    Update                   = function(self, inPosition_3f, inDimension_3f)
         ComTable[self.mShapeId]:Update(inPosition_3f, inDimension_3f)
     end,
-    TintColor = function (self, inColor_4f)
+    TintColor                = function(self, inColor_4f)
         ComTable[self.mShapeId].mFillColor = inColor_4f
     end,
     PaintByComputeSingleTime = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
         local ip = inPainterWithPainterParameters
         Com.NewComponent_SingleTimeDispatch()
         ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
-            function ()
+            function()
                 inPainterWithRegisteredImage:BindImage()
                 ip.painter:BindPainter()
-                ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage) 
+                ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage)
             end
         )
     end,
-    PaintByComputeDispatch = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
+    PaintByComputeDispatch   = function(self, inPainterWithPainterParameters, inPainterWithRegisteredImage)
         local ip = inPainterWithPainterParameters
         inPainterWithRegisteredImage:BindImage()
         ip.painter:BindPainter()
-        ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage) 
+        ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage)
     end
 }
 
@@ -152,7 +154,7 @@ Com.TextButtonObject = {
     Update = function(self, inPosition_3f, inDimension_3f, inString)
         Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
         local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + self.mPadding, inPosition_3f.z - 3)
-	self.mTextObject:Update(Position, nil, inString, false)
+        self.mTextObject:Update(Position, nil, inString, false)
     end,
     Event = function(self)
     end,
