@@ -791,7 +791,6 @@ function LoadMaterialComponents(inLoadCompute)
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inCurrentNavBarPosition)
-			print(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
 			self.mPosition_3f = inPosition_3f
 			self.mDimension_3f = inDimension_3f
 			self.mLayout:Update(inPosition_3f, inDimension_3f)
@@ -810,7 +809,6 @@ function LoadMaterialComponents(inLoadCompute)
 			end
 
 			self.mCurrentNavBarIndicatorDimension = vec3(1.0 / #self.mLayout.mComponents * inDimension_3f.x, 14, 1)
-			print("inDimension:", inDimension_3f.x, inDimension_3f.y)
 			Com.Canvas.Update(self.mNavBarIndicator, NavBarIndicatorPosition, self.mCurrentNavBarIndicatorDimension)
 			self.mCurrentNavBarIndicatorDimension = self.mCurrentNavBarIndicatorDimension
 		end,

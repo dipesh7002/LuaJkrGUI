@@ -43,7 +43,8 @@ SN.Graphics.CircularGraph = {
     mCanvas = nil,
     mPosition_3f = nil,
     mDimension_3f = nil,
-    New = function(self, inPosition_3f, inDimension_3f)
+    mLines = nil,
+    New = function(self, inPosition_3f, inDimension_3f, inLineCount)
         local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
@@ -59,6 +60,19 @@ SN.Graphics.CircularGraph = {
                 vec4(1.2, 0, 0, 1), inDimension_3f.x, inDimension_3f.y, 1)
         end)
 
+        Obj.mLineCount = 1000
+        if inLineCount then
+           Obj.mLineCount = inLineCount 
+        end
+        Obj.mLines = {}
+
+        for i = 1, Obj.mLineCount, 1 do
+           Com.NewComponent()
+           ComTable[com_i] = Jkr.Components.Static.LineObject:New(vec3(0, 0, 1), vec3(0, 0, 1)) 
+           Obj.mLines[#Obj.mLines+1] = com_i
+        end
+        Obj.mCurrentLineId = 1
+
         Obj.mPosition_3f = inPosition_3f
         Obj.mDimension_3f = inDimension_3f
         return Obj
@@ -67,18 +81,35 @@ SN.Graphics.CircularGraph = {
         self.mCanvas:Update(inPosition_3f, inDimension_3f)
     end,
     PlotAt = function(self, inX, inY, inW, inH, inColor_4f, inBrushId)
-        Com.NewSingleTimeDispatch(function()
+        -- Com.NewSimulataneousDispatch()
+        Com.NewSimultaneousSingleTimeDispatch(function()
             self.mCanvas.CurrentBrushId = inBrushId
             Com.Canvas.Bind(self.mCanvas)
             Com.Canvas.Paint(self.mCanvas, vec4(inX, inY, inW, inH), inColor_4f, vec4(1.2, 0, 0, 1), inW, inH, 1)
         end)
     end,
     Clear = function (self, inColor_4f)
-        Com.NewSingleTimeDispatch(function()
+        Com.NewSimultaneousSingleTimeDispatch(function()
             self.mCanvas.CurrentBrushId = 1
             Com.Canvas.Bind(self.mCanvas)
             Com.Canvas.Paint(self.mCanvas, vec4(0, 0, self.mDimension_3f.x, self.mDimension_3f.y), inColor_4f, vec4(1.2, 0, 0, 1), self.mDimension_3f.x, self.mDimension_3f.y, 1)
         end)
+
+        for i = 1, #self.mLines, 1 do
+            ComTable[self.mLines[i]]:Update(vec3(0), vec3(0))
+        end
+        self.mCurrentLineId = 1
+    end,
+    UpdateGraphLine = function (self, inPosition1_3f, inPosition2_3f, inColor_4f)
+       local id = self.mLines[self.mCurrentLineId]
+       ComTable[id]:Update(inPosition1_3f, inPosition2_3f) 
+       if inColor_4f then
+            ComTable[id]:SetColor(inColor_4f)
+       end
+       self.mCurrentLineId = self.mCurrentLineId + 1
+    end,
+    ResetLines = function (self)
+        self.mCurrentLineId = 1
     end
 }
 
@@ -107,16 +138,18 @@ SN.Graphics.DrawNeuralNetworkToGraph = function (inNeuralNetwork, inGraph)
    end 
    inNeuralNetwork:PrintNeurons(callbackNeuronsOnly)
 
-   local callbackWeightLines = function (leftLayer, inLeftNeuron, inLeftNeuronCount, inRightLayer, inRightNeuron, inRightNeuronCount)
+   local callbackWeightLines = function (leftLayer, inLeftNeuron, inLeftNeuronCount, inRightLayer, inRightNeuron, inRightNeuronCount, inWeightValue)
         local xposl = middle_pos_x - total_layers / 2 * dis_between_layers  + dis_between_layers * leftLayer + radius / 2
         local yposl = middle_pos_y - inLeftNeuronCount / 2 * dis_between_neurons + inLeftNeuron * dis_between_neurons + radius / 2
 
         local xposr = middle_pos_x - total_layers / 2 * dis_between_layers  + dis_between_layers * inRightLayer + radius / 2
         local yposr = middle_pos_y - inRightNeuronCount / 2 * dis_between_neurons + inRightNeuron * dis_between_neurons + radius / 2
-        Com.NewComponent()
-        ComTable[com_i] = Jkr.Components.Static.LineObject:New(vec2(xposl, yposl), vec2(xposr, yposr))
+        local color = vec4(- inWeightValue, inWeightValue, 0, math.abs(inWeightValue))
+        SN.Graphics.CircularGraph.UpdateGraphLine(inGraph, vec3(xposl, yposl, 50), vec3(xposr, yposr, 50), color)
    end
    inNeuralNetwork:PrintLines(callbackWeightLines)
+
+   inGraph:ResetLines()
 end
 
 SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
@@ -258,7 +291,6 @@ SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
                 SizeFactor__ = SizeFactor
             end
 
-            print(Iterations)
             Com.ClearSingleTimes()
             SN.Core.SetProblem_PythagoreanTriplet(Temperature, SumTo)
             SN.Solve(SN.State:New(I, J), Iterations, CallbackFunction)
@@ -286,7 +318,7 @@ SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
         end,
         function()
             Com.ClearSingleTimes()
-            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 1) )
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0) )
         end
     )
     return Window
@@ -364,8 +396,15 @@ SN.Graphics.CreateProblem2SolverWindow = function(CircularGraph)
             RunButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
         end,
         function()
-            mero_NN:Train(1)
-            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph)
+            for i = 1, 50, 1 do
+                Com.NewSimultaneousUpdate()
+                Com.NewSimultaneousSingleTimeUpdate( 
+                    function ()
+                        mero_NN:Train(1)
+                        SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph)
+                    end
+                )
+            end
         end
     )
 
@@ -378,7 +417,7 @@ SN.Graphics.CreateProblem2SolverWindow = function(CircularGraph)
         end,
         function()
             Com.ClearSingleTimes()
-            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 1) )
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0) )
         end
     )
 
@@ -392,7 +431,7 @@ SN.Graphics.CreateProblem2SolverWindow = function(CircularGraph)
         function()
             mero_NN = NN.SimpleNN:New(GetTopologyByTextFieldsLayer())
             Com.ClearSingleTimes()
-            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 1))
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0))
             SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph)
         end
     )
@@ -451,7 +490,7 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
 end
 
 SN.Graphics.CreateGUI = function()
-    LoadMaterialComponents(true)
+    LoadMaterialComponents(false)
     local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x, WindowDimension.y, 1))
     Graph:Update(vec3(0, 0, 90), vec3(WindowDimension.x, WindowDimension.y, 1))
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
@@ -514,7 +553,7 @@ SN.Graphics.CreateGUI = function()
                 Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 3, 0.2)
             end)
 
-        Com.NewSingleTimeDispatch(
+        Com.NewSimultaneousSingleTimeDispatch(
             function()
                 Com.NavigationBar.Dispatch(NavBar, color_navbarind)
             end

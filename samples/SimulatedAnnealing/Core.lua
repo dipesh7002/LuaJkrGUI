@@ -26,13 +26,14 @@ NN.SimpleNN = {
             end
         end
     end,
-    PrintLines = function(self, inCallback_ffffff)
+    PrintLines = function(self, inCallback_fffffff)
         for i = 1, #self.mTopology - 1, 1 do
             local left = self.mTopology[i]
             local right = self.mTopology[i + 1]
             for x = 1, left, 1 do
                 for y = 1, right, 1 do
-                    inCallback_ffffff(i, x, self.mTopology[i], i + 1, y, self.mTopology[i + 1])
+                    local weight = self.mNN:weight_of_connection(i - 1, x - 1, y - 1)
+                    inCallback_fffffff(i, x, self.mTopology[i], i + 1, y, self.mTopology[i + 1], weight)
                 end
             end
         end

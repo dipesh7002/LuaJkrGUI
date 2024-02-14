@@ -42,14 +42,19 @@ Com.Events = function()
     end
 end
 
+local gDispatchesSingleTimeSimultaneous_Id = 1
 local gDispatchesLoadedIndex = 1
 Com.Dispatches = function()
     if gDispatchesLoadedIndex <= #ComTable_SingleTimeDispatch then
-        ComTable_SingleTimeDispatch[gDispatchesLoadedIndex]:Dispatch()
+        for i = 1, #ComTable_SingleTimeDispatch[gDispatchesLoadedIndex], 1 do
+            ComTable_SingleTimeDispatch[gDispatchesLoadedIndex][i]:Dispatch()
+        end
+        -- ComTable_SingleTimeDispatch[gDispatchesLoadedIndex]:Dispatch()
         gDispatchesLoadedIndex = gDispatchesLoadedIndex + 1
     else
         ComTable_SingleTimeDispatch = {}
         gDispatchesLoadedIndex = 1
+        gDispatchesSingleTimeSimultaneous_Id = 1
         com_sdisi = 0
     end
 
@@ -92,12 +97,33 @@ Com.NewEvent              = function(inFunction)
     return com_evi
 end
 
+
+
+
+
+-- DISPATCHES 
 Com.NewSingleTimeDispatch = function(inFunction)
     Com.NewComponent_SingleTimeDispatch()
     ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(inFunction)
     return com_sdisi
 end
 
+Com.NewSimulataneousDispatch = function () gDispatchesSingleTimeSimultaneous_Id = 1 end
+Com.NewSimultaneousSingleTimeDispatch = function (inFunction)
+    local NewDispatchable = Jkr.Components.Abstract.Dispatchable:New(inFunction)
+    if ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id] then
+        table.insert(ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id], NewDispatchable)
+    else
+        ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id] = {}
+        table.insert(ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id], NewDispatchable)
+    end
+
+    gDispatchesSingleTimeSimultaneous_Id = gDispatchesSingleTimeSimultaneous_Id + 1
+end
+
+
+
+-- UPDATES
 Com.NewSingleTimeUpdate   = function(inFunction)
     Com.NewComponent_SingleTimeUpdate()
     ComTable_SingleTimeUpdate[com_upds] = Jkr.Components.Abstract.Updatable:New(inFunction)
@@ -117,8 +143,6 @@ Com.NewSimultaneousSingleTimeUpdate = function(inFunction)
 
     gUpdatesSingleTimeSimultaneous_Id = gUpdatesSingleTimeSimultaneous_Id + 1
 end
-
-
 
 Com.ClearSingleTimes = function()
     ComTable_SingleTimeUpdate = {}

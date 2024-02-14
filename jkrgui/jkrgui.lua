@@ -335,15 +335,15 @@ Jkr.Components.Static.LineObject = {
         mPosition2 = vec2(0, 0),
         mLine_Id = nil,
 		mColor_4f = nil,
-        New = function(self, inPosition1, inPosition2)
+        New = function(self, inPosition1_3f, inPosition2_3f)
                 local Obj = {
-                        mPosition1 = inPosition1,
-                        mPosition2 = inPosition2,
+                        mPosition1 = vec2(inPosition1_3f.x, inPosition1_3f.y),
+                        mPosition2 = vec2(inPosition2_3f.x, inPosition2_3f.y),
                         mLine_Id = nil,
                 }
                 setmetatable(Obj, self)
                 self.__index = self
-                Obj.mLine_Id = L.Add(inPosition1, inPosition2, 1)
+                Obj.mLine_Id = L.Add(Obj.mPosition1, Obj.mPosition2, inPosition1_3f.z)
 				Obj.mColor_4f = vec4(0, 0, 0, 1)
                 return Obj
         end,
@@ -353,8 +353,8 @@ Jkr.Components.Static.LineObject = {
                         Int(self.mLine_Id),
                         GetIdentityMatrix())
         end,
-        Update = function(self)
-                L.Update(Int(self.mLine_Id), self.mPosition1, self.mPosition2, 1)
+        Update = function(self, inPosition1_3f, inPosition2_3f)
+                L.Update(Int(self.mLine_Id), vec2(inPosition1_3f.x, inPosition1_3f.y), vec2(inPosition2_3f.x, inPosition2_3f.y), inPosition1_3f.z)
         end, 
 		SetColor = function (self, inColor_4f)
 			self.mColor_4f = inColor_4f
