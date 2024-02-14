@@ -330,6 +330,38 @@ Jkr.Components.Static = {}
 Jkr.Components.Abstract = {}
 Jkr.Components.Util = {}
 
+Jkr.Components.Static.LineObject = {
+        mPositon1 = vec2(0, 0),
+        mPosition2 = vec2(0, 0),
+        mLine_Id = nil,
+		mColor_4f = nil,
+        New = function(self, inPosition1, inPosition2)
+                local Obj = {
+                        mPosition1 = inPosition1,
+                        mPosition2 = inPosition2,
+                        mLine_Id = nil,
+                }
+                setmetatable(Obj, self)
+                self.__index = self
+                Obj.mLine_Id = L.Add(inPosition1, inPosition2, 1)
+				Obj.mColor_4f = vec4(0, 0, 0, 1)
+                return Obj
+        end,
+        Draw = function(self)
+                L.Bind()
+                L.Draw(self.mColor_4f, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mLine_Id),
+                        Int(self.mLine_Id),
+                        GetIdentityMatrix())
+        end,
+        Update = function(self)
+                L.Update(Int(self.mLine_Id), self.mPosition1, self.mPosition2, 1)
+        end, 
+		SetColor = function (self, inColor_4f)
+			self.mColor_4f = inColor_4f
+		end
+}
+
+
 
 Jkr.Components.Abstract.ImageObject = {
 	mId = nil,

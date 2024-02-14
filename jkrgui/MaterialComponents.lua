@@ -814,7 +814,7 @@ function LoadMaterialComponents(inLoadCompute)
 			Com.Canvas.Update(self.mNavBarIndicator, NavBarIndicatorPosition, self.mCurrentNavBarIndicatorDimension)
 			self.mCurrentNavBarIndicatorDimension = self.mCurrentNavBarIndicatorDimension
 		end,
-		Animate = function(self, inPosition_3f, inDimension_3f, inNavBarSelection)
+		Animate = function(self, inPosition_3f, inDimension_3f, inNavBarSelection, inInverseSpeed)
 			local getNavBarIndicatorPos = function(inNavBar)
 				if not self.mIsIndicatorAtBottom then
 					return vec3(
@@ -837,7 +837,7 @@ function LoadMaterialComponents(inLoadCompute)
 				local to_pos = getNavBarIndicatorPos(self)
 				local from = { mPosition_3f = from_pos, mDimension_3f = self.mCurrentNavBarIndicatorDimension }
 				local to = { mPosition_3f = to_pos, mDimension_3f = self.mCurrentNavBarIndicatorDimension }
-				Com.AnimateSingleTimePosDimen(self.mNavBarIndicator, from, to, 0.1)
+				Com.AnimateSingleTimePosDimen(self.mNavBarIndicator, from, to, inInverseSpeed)
 			end
 		end,
 		-- This doesn't work good, to be tested to the best

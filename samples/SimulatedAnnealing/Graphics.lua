@@ -82,10 +82,48 @@ SN.Graphics.CircularGraph = {
     end
 }
 
-SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
-    local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
-        vec2(400, 30), "Sum Two Numbers", large_font)
+SN.Graphics.DrawNeuralNetworkToGraph = function (inNeuralNetwork, inGraph)
+   local topo = inNeuralNetwork.mTopology
 
+   local max = 0
+   for i = 1, #topo, 1 do
+        if topo[i] > max then
+            max = topo[i]
+        end  
+   end
+
+   local total_layers = #topo
+   local middle_pos_y = inGraph.mDimension_3f.y / 3
+   local middle_pos_x  = inGraph.mDimension_3f.x / 3
+   local dis_between_layers = inGraph.mDimension_3f.x / (total_layers * 2)
+   local dis_between_neurons = inGraph.mDimension_3f.y / (max * 2)
+
+   local radius = 50
+   local G =  SN.Graphics.CircularGraph 
+   local callbackNeuronsOnly = function (inPos_2f, inValue, inLayerNeuronCount)
+        local xpos = middle_pos_x - total_layers / 2 * dis_between_layers  + dis_between_layers * inPos_2f.x
+        local ypos = middle_pos_y - inLayerNeuronCount / 2 * dis_between_neurons + inPos_2f.y * dis_between_neurons
+        G.PlotAt(inGraph, xpos, ypos, radius, radius, vec4(inValue, inValue / 2 , 1, 1), 2)
+   end 
+   inNeuralNetwork:PrintNeurons(callbackNeuronsOnly)
+
+   local callbackWeightLines = function (leftLayer, inLeftNeuron, inLeftNeuronCount, inRightLayer, inRightNeuron, inRightNeuronCount)
+        local xposl = middle_pos_x - total_layers / 2 * dis_between_layers  + dis_between_layers * leftLayer + radius / 2
+        local yposl = middle_pos_y - inLeftNeuronCount / 2 * dis_between_neurons + inLeftNeuron * dis_between_neurons + radius / 2
+
+        local xposr = middle_pos_x - total_layers / 2 * dis_between_layers  + dis_between_layers * inRightLayer + radius / 2
+        local yposr = middle_pos_y - inRightNeuronCount / 2 * dis_between_neurons + inRightNeuron * dis_between_neurons + radius / 2
+        Com.NewComponent()
+        ComTable[com_i] = Jkr.Components.Static.LineObject:New(vec2(xposl, yposl), vec2(xposr, yposr))
+   end
+   inNeuralNetwork:PrintLines(callbackWeightLines)
+end
+
+SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
+    local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
+        vec2(400, 30), "Pythagorean Triplet", large_font)
+
+    -- TODO event system optimization
     local RunButtonHLayout = Com.HLayout:New(0)
     local RunButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Run")
     local IterationsText = Com.TextButton:New(vec3(0), vec3(0), large_font, "Iterations")
@@ -107,8 +145,8 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     IterationCountHLayout:AddComponents({IterationCountText, IterationCountTextLineEdit}, {0.5, 1 - 0.5})
 
     local SumOfCountHLayout = Com.HLayout:New(0)
-    local SumOfCountText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Sum of Count")
-    local SumOfCountTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "500")
+    local SumOfCountText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Third Number")
+    local SumOfCountTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "50")
     SumOfCountHLayout:AddComponents({SumOfCountText, SumOfCountTextLineEdit}, {0.5, 1 - 0.5})
 
     local NumIHLayout = Com.HLayout:New(0)
@@ -123,7 +161,7 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
 
     local SizeFactorHLayout = Com.HLayout:New(0)
     local SizeFactorText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "SizeFactor:")
-    local SizeFactorTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "3")
+    local SizeFactorTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "0")
     SizeFactorHLayout:AddComponents({SizeFactorText, SizeFactorTextLineEdit}, {0.5, 1 - 0.5})
 
     local StatusText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Status")
@@ -132,6 +170,12 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     local StatusText3 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
     local StatusText4 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
     local StatusText5 = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, " ")
+
+    StatusText1:SetFillColor(vec4(0, 0, 0, 0))
+    StatusText2:SetFillColor(vec4(0, 0, 0, 0))
+    StatusText3:SetFillColor(vec4(0, 0, 0, 0))
+    StatusText4:SetFillColor(vec4(0, 0, 0, 0))
+    StatusText5:SetFillColor(vec4(0, 0, 0, 0))
 
     local HComponents = {
         RunButtonHLayout,
@@ -177,8 +221,20 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
         IterationsText:Update(IterationsText.mPosition_3f, IterationsText.mDimension_3f, tostring(Int(IterationsMax__ - inK)))
         StatusText1:Update(StatusText1.mPosition_3f, StatusText1.mDimension_3f, string.format("Accepted(%d, %d)", inS.i, inS.j))
         StatusText2:Update(StatusText2.mPosition_3f, StatusText2.mDimension_3f, string.format("New(%d, %d)", inS_new.i, inS_new.j))
+        StatusText3:Update(StatusText3.mPosition_3f, StatusText3.mDimension_3f, string.format("(T%f, E%f)", inT, Energy))
         local rand_color = vec4(1 - Temperature, math.random(), math.random(), 1)
-        gcg.PlotAt(CircularGraph, inS.i, inS.j, Energy * SizeFactor__, Energy * SizeFactor__,
+        local visualEnergy = Energy
+        if SizeFactor__ == 0 then
+            visualEnergy = 200
+        else
+            visualEnergy = Energy * SizeFactor__
+        end
+
+        if visualEnergy >= 10000 then
+           visualEnergy = 100 
+        end
+
+        gcg.PlotAt(CircularGraph, inS.i, inS.j, visualEnergy, visualEnergy,
             rand_color, 2)
     end
     RunButton:SetFunctions(
@@ -204,7 +260,7 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
 
             print(Iterations)
             Com.ClearSingleTimes()
-            SN.Core.SetProblem_SumOfTwoNumbers(Temperature, SumTo)
+            SN.Core.SetProblem_PythagoreanTriplet(Temperature, SumTo)
             SN.Solve(SN.State:New(I, J), Iterations, CallbackFunction)
         end
     )
@@ -236,11 +292,110 @@ SN.Graphics.CreateNumberSumSolverWindow = function(CircularGraph)
     return Window
 end
 
-SN.Graphics.CreateProblem2SolverWindow = function(inTable)
+SN.Graphics.CreateProblem2SolverWindow = function(CircularGraph)
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
-        vec2(400, 30), "Problem 1", Com.GetFont("font", "large"))
+        vec2(400, 30), "NN Visualize", Com.GetFont("font", "large"))
 
-    Window:SetCentralComponent(Com.VLayout:New(0))
+    local RunButtonHLayout = Com.HLayout:New(0)
+    local RunButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Train")
+    local ClearButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Clear")
+    RunButtonHLayout:AddComponents({RunButton, ClearButton}, {0.5, 1 - 0.5})
+
+    local CreateButtonHLayout = Com.HLayout:New(0)
+    local CreateButton = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Create")
+    CreateButtonHLayout:AddComponents({CreateButton, Com.HLayout:New(0)}, {0.5, 1 - 0.5})
+
+    local Layer1HLayout = Com.HLayout:New(0)
+    local Layer1Text = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Layer1")
+    local Layer1TextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "2")
+    Layer1HLayout:AddComponents({Layer1Text, Layer1TextLineEdit}, {0.5, 1 - 0.5})
+
+    local Layer2HLayout = Com.HLayout:New(0)
+    local Layer2Text = Com.TextButton:New(vec3(200, 200, 2), vec3(300, 300, 2), large_font, "Layer2")
+    local Layer2TextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "3")
+    Layer2HLayout:AddComponents({Layer2Text, Layer2TextLineEdit}, {0.5, 2 - 0.5})
+
+    local Layer3HLayout = Com.HLayout:New(0)
+    local Layer3Text = Com.TextButton:New(vec3(300, 300, 3), vec3(300, 300, 3), large_font, "Layer3")
+    local Layer3TextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "2")
+    Layer3HLayout:AddComponents({Layer3Text, Layer3TextLineEdit}, {0.5, 3 - 0.5})
+
+    local Layer4HLayout = Com.HLayout:New(0)
+    local Layer4Text = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "Layer4")
+    local Layer4TextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1")
+    Layer4HLayout:AddComponents({Layer4Text, Layer4TextLineEdit}, {0.5, 4 - 0.5})
+
+    local HComponents = {
+        CreateButtonHLayout,
+        RunButtonHLayout,
+        Com.HLayout:New(0),
+        Layer1HLayout,
+        Layer2HLayout,
+        Layer3HLayout,
+        Layer4HLayout,
+        Com.HLayout:New(0)
+    }
+
+    local HComponentsRatio = {}
+    for i = 1, #HComponents, 1 do
+       HComponentsRatio[i] = 0.04
+    end
+    HComponentsRatio[#HComponentsRatio] = 1 - (0.04 * (#HComponents - 1))
+
+    local VLayout = Com.VLayout:New(0)
+    VLayout:AddComponents(HComponents, HComponentsRatio)
+    Window:SetCentralComponent(VLayout)
+
+
+    local mero_NN = {}
+    local GetTopologyByTextFieldsLayer = function()
+        local layer1_neurons = tonumber(Layer1TextLineEdit:GetText())
+        local layer2_neurons = tonumber(Layer2TextLineEdit:GetText())
+        local layer3_neurons = tonumber(Layer3TextLineEdit:GetText())
+        local layer4_neurons = tonumber(Layer4TextLineEdit:GetText())
+        return {layer1_neurons, layer2_neurons, layer3_neurons, layer4_neurons}
+    end
+
+    RunButton:SetFunctions(
+        function ()
+            RunButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end, 
+        function ()
+            RunButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            mero_NN:Train(1)
+            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph)
+        end
+    )
+
+    ClearButton:SetFunctions(
+        function ()
+            ClearButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end, 
+        function ()
+            ClearButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            Com.ClearSingleTimes()
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 1) )
+        end
+    )
+
+    CreateButton:SetFunctions(
+        function ()
+            CreateButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end, 
+        function ()
+            CreateButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            mero_NN = NN.SimpleNN:New(GetTopologyByTextFieldsLayer())
+            Com.ClearSingleTimes()
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 1))
+            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph)
+        end
+    )
     return Window
 end
 
@@ -255,10 +410,10 @@ end
 SN.Graphics.CreateProblemWindowsLayout = function(inTable)
     local problemWindows = Com.HLayout:New(0)
     problemWindows.mCurrentWindow = 1
-    local Window1 = SN.Graphics.CreateNumberSumSolverWindow(inTable[1])
+    local Window1 = SN.Graphics.CreateNumberPythagoreanTripletSolverWindow(inTable[1])
     local Window2 = SN.Graphics.CreateProblem2SolverWindow(inTable[2])
     local Window3 = SN.Graphics.CreateProblem3SolverWindow(inTable[3])
-    problemWindows.Update = function(self, inPosition_3f, inDimension_3f, inWindowNo)
+    problemWindows.Update = function(self, inPosition_3f, inDimension_3f, inWindowNo, inInverseSpeed)
         local oldPos = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
         local oldDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
         if inWindowNo then
@@ -269,11 +424,15 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
             inPosition_3f.z)
         local newDimen = vec3(inDimension_3f.x * 3, inDimension_3f.y, inDimension_3f.z)
 
+        local invspeed = 0.1
+        if inInverseSpeed then
+           invspeed = inInverseSpeed 
+        end
 
         if inWindowNo then
             local from = {mPosition_3f = oldPos, mDimension_3f = oldDimen}
             local to = {mPosition_3f = newPos, mDimension_3f = newDimen}
-            Com.AnimateSingleTimePosDimenCallback(from, to, 0.1, function (pos, dimen)
+            Com.AnimateSingleTimePosDimenCallback(from, to, invspeed, function (pos, dimen)
                 Com.HLayout.Update(self, pos, dimen)
             end, function ()
                 self.mPosition_3f = inPosition_3f
@@ -335,24 +494,24 @@ SN.Graphics.CreateGUI = function()
             function() NavBarElem1:TintColor(vec4(1)) end,
             function()
                 ClearNavBarColor()
-                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 1)
-                Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 1)
+                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 1, 0.2)
+                Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 1, 0.2)
             end)
         NavBarElem2:SetFunctions(
             function() NavBarElem2:TintColor(color_tint) end,
             function() NavBarElem2:TintColor(vec4(1)) end,
             function()
                 ClearNavBarColor()
-                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 2)
-                Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 2)
+                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 2, 0.2)
+                Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 2, 0.2)
             end)
         NavBarElem3:SetFunctions(
             function() NavBarElem3:TintColor(color_tint) end,
             function() NavBarElem3:TintColor(vec4(1)) end,
             function()
                 ClearNavBarColor()
-                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 3)
-                Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 3)
+                problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 3, 0.2)
+                Com.NavigationBar.Animate(NavBar, NavBar.mPosition_3f, NavBar.mDimension_3f, 3, 0.2)
             end)
 
         Com.NewSingleTimeDispatch(

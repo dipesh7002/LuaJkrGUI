@@ -1,5 +1,49 @@
-SN = {}
+require "neural" -- dll written in C++
 
+-- NEURAL NETWORK
+NN = {}
+NN.SimpleNN = {
+    mTopology = nil,
+    mNN = nil,
+    New = function(self, inTopology)
+        local Obj = {}
+        setmetatable(Obj, self)
+        self.__index = self
+        Obj.mTopology = inTopology
+
+        local topology = std_vector_int()
+        for i = 1, #inTopology, 1 do
+            topology:add(inTopology[i])
+        end
+        Obj.mNN = neur.network(topology)
+        return Obj
+    end,
+    PrintNeurons = function(self, inCallback_2fff)
+        for i = 1, #self.mTopology, 1 do
+            for j = 0, self.mTopology[i] - 1, 1 do
+                local value = self.mNN:value_of_neuron(i - 1, j)
+                inCallback_2fff(vec2(i, j + 1), value, self.mTopology[i])
+            end
+        end
+    end,
+    PrintLines = function(self, inCallback_ffffff)
+        for i = 1, #self.mTopology - 1, 1 do
+            local left = self.mTopology[i]
+            local right = self.mTopology[i + 1]
+            for x = 1, left, 1 do
+                for y = 1, right, 1 do
+                    inCallback_ffffff(i, x, self.mTopology[i], i + 1, y, self.mTopology[i + 1])
+                end
+            end
+        end
+    end,
+    Train = function(self, inDataCount)
+        self.mNN:dummy_train(inDataCount)
+    end
+}
+
+-- SIMULATED ANNEALING
+SN = {}
 
 SN.State = {
     New = function(self, i, j, index)
@@ -42,7 +86,7 @@ end
 
 SN.Core = {}
 
-SN.Core.SetProblem_SumOfTwoNumbers = function(inInitialTemperature, inSumValue)
+SN.Core.SetProblem_PythagoreanTriplet = function(inInitialTemperature, inSumValue)
     SN.State = {
         New = function(self, i, j)
             local Obj = {}
@@ -65,7 +109,7 @@ SN.Core.SetProblem_SumOfTwoNumbers = function(inInitialTemperature, inSumValue)
     end
 
     SN.E = function(inS) -- Energy Function
-        return math.abs(inS.i + inS.j - inSumValue)
+        return math.abs(inS.i ^ 2 + inS.j ^ 2 - inSumValue ^ 2)
     end
 
     SN.neighbour = function(inS)
