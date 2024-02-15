@@ -40,6 +40,13 @@ NN.SimpleNN = {
     end,
     Train = function(self, inDataCount)
         self.mNN:dummy_train(inDataCount)
+    end,
+    PropagateForward = function (self, inFloats)
+       local float_vec = std_vector_float() 
+       for i = 1, #inFloats, 1 do
+            float_vec:add(inFloats[i]) 
+       end
+       self.mNN:propagate_forward(float_vec)
     end
 }
 

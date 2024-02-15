@@ -46,10 +46,9 @@ local gDispatchesSingleTimeSimultaneous_Id = 1
 local gDispatchesLoadedIndex = 1
 Com.Dispatches = function()
     if gDispatchesLoadedIndex <= #ComTable_SingleTimeDispatch then
-        for i = 1, #ComTable_SingleTimeDispatch[gDispatchesLoadedIndex], 1 do
+        for i = 1, #ComTable_SingleTimeDispatch[gDispatchesLoadedIndex] do
             ComTable_SingleTimeDispatch[gDispatchesLoadedIndex][i]:Dispatch()
         end
-        -- ComTable_SingleTimeDispatch[gDispatchesLoadedIndex]:Dispatch()
         gDispatchesLoadedIndex = gDispatchesLoadedIndex + 1
     else
         ComTable_SingleTimeDispatch = {}
@@ -74,11 +73,11 @@ local gUpdatesSingleTimeSimultaneous_Id = 1
 local gUpdatesLoadedIndex               = 1
 Com.Updates                             = function()
     if gUpdatesLoadedIndex <= #ComTable_SingleTimeUpdate then
-        for i = 1, #ComTable_SingleTimeUpdate[gUpdatesLoadedIndex], 1 do
+        for i = 1, #ComTable_SingleTimeUpdate[gUpdatesLoadedIndex] do
             ComTable_SingleTimeUpdate[gUpdatesLoadedIndex][i]:Update()
         end
         gUpdatesLoadedIndex = gUpdatesLoadedIndex + 1
-    else
+    elseif gUpdatesLoadedIndex == #ComTable_SingleTimeUpdate + 1 then
         ComTable_SingleTimeUpdate = {}
         gUpdatesLoadedIndex = 1
         gUpdatesSingleTimeSimultaneous_Id = 1
@@ -112,12 +111,13 @@ Com.NewSimulataneousDispatch = function () gDispatchesSingleTimeSimultaneous_Id 
 Com.NewSimultaneousSingleTimeDispatch = function (inFunction)
     local NewDispatchable = Jkr.Components.Abstract.Dispatchable:New(inFunction)
     if ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id] then
-        table.insert(ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id], NewDispatchable)
+        ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id][#ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id]+1] = NewDispatchable
+        -- table.insert(ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id], NewDispatchable)
     else
         ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id] = {}
-        table.insert(ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id], NewDispatchable)
+        ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id][#ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id]+1] = NewDispatchable
+        -- table.insert(ComTable_SingleTimeDispatch[gDispatchesSingleTimeSimultaneous_Id], NewDispatchable)
     end
-
     gDispatchesSingleTimeSimultaneous_Id = gDispatchesSingleTimeSimultaneous_Id + 1
 end
 
@@ -135,10 +135,10 @@ Com.NewSimultaneousUpdate = function() gUpdatesSingleTimeSimultaneous_Id = gUpda
 Com.NewSimultaneousSingleTimeUpdate = function(inFunction)
     local NewUpdatable = Jkr.Components.Abstract.Updatable:New(inFunction)
     if ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id] then
-        table.insert(ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id], NewUpdatable)
+        ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id][#ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id]+1] = NewUpdatable
     else
         ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id] = {}
-        table.insert(ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id], NewUpdatable)
+        ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id][#ComTable_SingleTimeUpdate[gUpdatesSingleTimeSimultaneous_Id]+1] = NewUpdatable
     end
 
     gUpdatesSingleTimeSimultaneous_Id = gUpdatesSingleTimeSimultaneous_Id + 1

@@ -901,7 +901,9 @@ function LoadMaterialComponents(inLoadCompute)
 			return Obj
 		end,
 		Update = function (self, inPosition_3f, inDimension_3f)
+			tracy.ZoneBeginNS("Material Line Edit", 15)
 			self.mLayout:Update(inPosition_3f, inDimension_3f)
+			tracy.ZoneEnd()
 		end,
 		GetText = function (self)
 			return self.mLineEdit.mStringBuffer

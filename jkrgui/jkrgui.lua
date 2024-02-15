@@ -498,6 +498,7 @@ Jkr.Components.Static.TextObject = {
 		if (inString) then
 			self.mString = inString
 		end
+		-- Make this Startup Time (Separate Class kinda thing)
 		if not self.mAlt then
 			local str = string.rep(" ", self.mId.y)
 			T.Update(Int(self.mId.x), str, self.mPosition_3f)
@@ -507,8 +508,12 @@ Jkr.Components.Static.TextObject = {
 			if inShouldAlignBottom ~= nil then
 				should_align_button = inShouldAlignBottom	
 			end
-			r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self
-			.mString, should_align_button)
+			if inString then
+				r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
+			else
+				print("FUCK")
+				r.balt.update_pos_only(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
+			end
 		end
 	end,
 	-- TODO Remove this function
@@ -530,6 +535,12 @@ Jkr.Components.Abstract.PainterImageObject = {
 	end,
 	Register = function(self, inCompatibleImagePainter)
 		self.mImage:register(inCompatibleImagePainter.mPainter)
+	end,
+	GetVectorUInt = function (self)
+		return self.mImage:image_to_vector_uint()
+	end,
+	GetVectorFloatSingleChannel = function (self)
+		return self.mImage:image_to_vector_single_channel_float()
 	end
 }
 

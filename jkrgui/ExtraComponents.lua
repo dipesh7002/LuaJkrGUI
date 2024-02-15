@@ -44,6 +44,14 @@ Com.Canvas = {
 		self.mDimension_3f = inDimension_3f
 		self.mImageLabel:Update(inPosition_3f, inDimension_3f)
 	end,
+	PrintPicture = function (self)
+		local vector_image = self.mPainterImage:GetVectorFloatSingleChannel()
+		local vector_size = vector_image:size()
+		print("SIZE OF IMAGE:", vector_image:size())
+		for i = 1, vector_size, 1 do
+			io.write(vector_image[i], ",")
+		end
+	end
 }
 
 
