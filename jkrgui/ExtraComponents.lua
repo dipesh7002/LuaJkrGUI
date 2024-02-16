@@ -8,6 +8,7 @@ Com.Canvas = {
 	mPosition_3f = nil, 
 	mDimension_3f = nil,
 	CurrentBrushId = nil,
+	mCanvasSize_2f = nil,
 	New = function (self, inPosition_3f, inDimension_3f)
 		local Obj = {}	
 		setmetatable(Obj, self)
@@ -26,6 +27,7 @@ Com.Canvas = {
 	end,
 	MakeCanvasImage = function (self, inWidth, inHeight)
 		self.mPainterImage = Jkr.Components.Abstract.PainterImageObject:New(inWidth, inHeight)
+		self.mCanvasSize_2f = vec2(inWidth, inHeight)
 		self.mPainterImage:Register(self.mPainterBrushes[1])
 		-- self.mPainterBrushes[1]:RegisterImage(self.mPainterImage)	
 		self.mImage = Jkr.Components.Abstract.ImageObject:New(inWidth, inHeight)
@@ -50,6 +52,19 @@ Com.Canvas = {
 		print("SIZE OF IMAGE:", vector_image:size())
 		for i = 1, vector_size, 1 do
 			io.write(vector_image[i], ",")
+		end
+	end,
+	GetVectorFloatSingleChannel = function (self)
+		return self.mPainterImage:GetVectorFloatSingleChannel()
+	end,
+	DrawClearFromFloatSingleChannel = function (self, inFloatVec)
+		for i = 1, self.mCanvasSize_2f.x, 1 do
+			for j = 1, self.mCanvasSize_2f.y, 1 do
+				-- print("IJ:", i, j)
+				self:Bind()
+				local red_intensity = inFloatVec[(i - 1) + (j - 1) * self.mCanvasSize_2f.x + 1]
+				self:Paint(vec4(i - 1, j - 1, 1, 1), vec4(red_intensity, 0, 0, 1), vec4(0), 1, 1, 1)	
+			end
 		end
 	end
 }

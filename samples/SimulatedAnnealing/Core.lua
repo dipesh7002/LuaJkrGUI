@@ -57,9 +57,24 @@ NN.SimpleNN = {
     TrainEXT = function (self, inInput, inOutput)
        self.mNN:propagate_forward(inInput) 
        self.mNN:propagate_backward_current(inOutput) 
+    end,
+    GetOutputFloatVec = function (self, inLayerNum)
+       return self.mNN:get_layer_vector_float(inLayerNum) 
     end
 
 }
+
+NN.ImageGetRandomInputInverseOutput = function (inSize)
+    local invec = std_vector_float()
+    for i = 1, inSize, 1 do
+        invec:add(math.random())
+    end
+    local outvec = std_vector_float()
+    for i = 1, inSize, 1 do
+       outvec:add(1 - invec[i]) 
+    end
+    return {invec, outvec}
+end
 
 -- SIMULATED ANNEALING
 SN = {}

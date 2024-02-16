@@ -127,12 +127,12 @@ SN.Graphics.DrawNeuralNetworkToGraph = function(inNeuralNetwork, inGraph, inSimu
     end
 
     local total_layers        = #topo
-    local dis_between_layers  = inGraph.mDimension_3f.x / (total_layers) / 1.3
+    local dis_between_layers  = inGraph.mDimension_3f.x / (total_layers) / 1.6
     local dis_between_neurons = inGraph.mDimension_3f.y / (max) / 1.3
     local middle_pos_y        = dis_between_neurons / 2 * (max - 1)
     local middle_pos_x        = dis_between_layers / 2 * (total_layers - 1)
 
-    local radius              = dis_between_neurons / 1.3
+    local radius              = dis_between_neurons / 1.05
     local G                   = SN.Graphics.CircularGraph
     local callbackNeuronsOnly = function(inPos_2f, inValue, inLayerNeuronCount)
         local xpos = middle_pos_x - total_layers / 2 * dis_between_layers + dis_between_layers * inPos_2f.x
@@ -347,7 +347,6 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     local ClearButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Clear")
     RunButtonHLayout:AddComponents({ RunButton, ClearButton }, { 0.5, 1 - 0.5 })
 
-
     local Layer1HLayout = Com.HLayout:New(0)
     local Layer1Text = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Layer1")
     local Layer1TextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "2")
@@ -382,6 +381,23 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     local PropForwardButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Propagate Forward")
     PropForwardButtonHLayout:AddComponents({ PropForwardButton, Com.HLayout:New(0) }, { 0.5, 1 - 0.5 })
 
+    local CreateNetworkByPictureHLayout = Com.HLayout:New(0)
+    local CreateNetworkByPictureButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Create Net by Pic")
+    CreateNetworkByPictureHLayout:AddComponents({ CreateNetworkByPictureButton, Com.HLayout:New(0) }, { 0.5, 1 - 0.5 })
+
+    local PropagateForwardPictureHLayout = Com.HLayout:New(0)
+    local PropagateForwardPictureButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Propagate Forward")
+    PropagateForwardPictureHLayout:AddComponents({ PropagateForwardPictureButton, Com.HLayout:New(0) }, { 0.5, 1 - 0.5 })
+
+    local TrainInverseHLayout = Com.HLayout:New(0)
+    local TrainInverseButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Train Inverse")
+    TrainInverseHLayout:AddComponents({ TrainInverseButton, Com.HLayout:New(0) }, { 0.5, 1 - 0.5 })
+
+    local TrainingCountHLayout = Com.HLayout:New(0)
+    local TrainingCountText = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "Count")
+    local TrainingCountLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1")
+    TrainingCountHLayout:AddComponents({ TrainingCountText, TrainingCountLineEdit }, { 0.5, 4 - 0.5 })
+
     local HComponents = {
         CreateButtonHLayout,
         RunButtonHLayout,
@@ -394,7 +410,14 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         Input1HLayout,
         Input2HLayout,
         PropForwardButton,
+        Com.HLayout:New(0),
+        CreateNetworkByPictureHLayout,
+        PropagateForwardPictureHLayout,
+        Com.HLayout:New(0),
+        TrainInverseHLayout,
+        TrainingCountHLayout,
         Com.HLayout:New(0)
+        
     }
 
     local HComponentsRatio = {}
@@ -481,6 +504,88 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
         end
     )
+
+    CreateNetworkByPictureButton:SetFunctions(
+        function()
+            CreateNetworkByPictureButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            CreateNetworkByPictureButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            local c = SN.Graphics.InputPictureCanvas
+            local topByLayer = GetTopologyByTextFieldsLayer()
+            local topology = {c.mXSize * c.mYSize, topByLayer[2], topByLayer[3], c.mXSize * c.mYSize}
+            mero_NN = NN.SimpleNN:New(topology)
+            Com.ClearSingleTimes()
+            SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0))
+            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
+        end
+    )
+
+    local propForward = function ()
+                    local ImageF = Com.Canvas.GetVectorFloatSingleChannel(SN.Graphics.InputPictureCanvas)
+                    mero_NN:PropagateForwardVecFloat(ImageF)
+                    local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+                    Com.NewSimultaneousSingleTimeDispatch(
+                        function()
+                            Com.Canvas.DrawClearFromFloatSingleChannel(SN.Graphics.OutputPictureCanvas, Output)
+                        end
+                    )
+                    SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
+                end
+    local propBackward = function ()
+                    local ImageF = Com.Canvas.GetVectorFloatSingleChannel(SN.Graphics.ExpectedOutputPictureCanvas)
+                    mero_NN:PropagateBackwardVecFloat(ImageF)
+                    -- local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+                    -- Com.NewSimultaneousSingleTimeDispatch(
+                    --      function()
+                    --          Com.Canvas.DrawClearFromFloatSingleChannel(SN.Graphics.OutputPictureCanvas, Output)
+                    --      end
+                    -- )
+                    SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
+                end
+    PropagateForwardPictureButton:SetFunctions(
+        function()
+            PropagateForwardPictureButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            PropagateForwardPictureButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+                Com.NewSimultaneousSingleTimeUpdate(propForward)
+        end
+    )
+
+
+    local trainInverse = function ()
+            local i = SN.Graphics.InputPictureCanvas
+            local o = SN.Graphics.ExpectedOutputPictureCanvas
+            local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize)
+            Com.NewSimultaneousSingleTimeDispatch(
+                function()
+                    Com.Canvas.DrawClearFromFloatSingleChannel(SN.Graphics.InputPictureCanvas, InputOutputImageFloats[1])
+                    Com.Canvas.DrawClearFromFloatSingleChannel(SN.Graphics.ExpectedOutputPictureCanvas, InputOutputImageFloats[2])
+                end
+            )
+            propForward()
+            propBackward()
+    end
+
+    TrainInverseButton:SetFunctions(
+        function()
+            TrainInverseButton:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            TrainInverseButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            local Itrs = tonumber(TrainingCountLineEdit:GetText())
+            for i = 1, Itrs, 1 do
+                Com.NewSimultaneousSingleTimeUpdate(trainInverse)
+            end
+        end
+    )
     return Window
 end
 
@@ -517,14 +622,15 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
             local oldDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
             local from = { mPosition_3f = oldPos, mDimension_3f = oldDimen }
             local to = { mPosition_3f = newPos, mDimension_3f = newDimen }
-            Com.AnimateSingleTimePosDimenCallback(from, to, invspeed,
-                function(pos, dimen)
-                    Com.HLayout.Update(self, pos, dimen)
-                end,
-                function()
-                    self.mPosition_3f = inPosition_3f
-                    self.mDimension_3f = inDimension_3f
-                end)
+            -- Com.AnimateSingleTimePosDimenCallback(from, to, invspeed,
+            --     function(pos, dimen)
+            --         Com.HLayout.Update(self, pos, dimen)
+            --     end,
+            --     function()
+            --         self.mPosition_3f = inPosition_3f
+            --         self.mDimension_3f = inDimension_3f
+            --     end)
+            Com.HLayout.Update(self, newPos, newDimen)
         else
             Com.HLayout.Update(self, newPos, newDimen)
         end
@@ -542,21 +648,30 @@ local MakePictureCanvas = function(inX, inY)
     local Canvas = Com.Canvas:New(vec3(0), vec3(0))
     Com.Canvas.AddPainterBrush(Canvas, Com.GetCanvasPainter("Clear", false))
     Com.Canvas.MakeCanvasImage(Canvas, inX, inY)
+    Com.NewSimulataneousDispatch()
     Com.NewSimultaneousSingleTimeDispatch(function()
         Canvas.CurrentBrushId = 1
         Com.Canvas.Bind(Canvas)
-        Com.Canvas.Paint(Canvas, vec4(0, 0, inX, inY), vec4(1, 0, 0, 0.5), vec4(0), inX, inY, 1)
+        Com.Canvas.Paint(Canvas, vec4(0, 0, inX, inY), vec4(1, 0, 0, 1), vec4(0), inX, inY, 1)
     end)
+    Canvas.mXSize = inX
+    Canvas.mYSize = inY
     return Canvas
 end
 
-SN.Graphics.PictureCanvas = {}
+SN.Graphics.InputPictureCanvas = {}
+SN.Graphics.OutputPictureCanvas = {}
+SN.Graphics.ExpectedOutputPictureCanvas = {}
 SN.Graphics.MakePictureWindow = function()
-    local PictureWindow = Com.MaterialWindow:New(vec3(0, 0, 80), vec3(200, 200, 80), vec2(200, 30), "PD",
+    local PictureWindow = Com.MaterialWindow:New(vec3(WindowDimension.x - 600, 0, 80), vec3(200, 600, 80), vec2(200, 30), "PD",
         Com.GetFont("font", "large"))
     PictureWindow:Start()
-    SN.Graphics.PictureCanvas = MakePictureCanvas(10, 10)
-    PictureWindow:SetCentralComponent(SN.Graphics.PictureCanvas)
+    SN.Graphics.InputPictureCanvas = MakePictureCanvas(5, 5)
+    SN.Graphics.OutputPictureCanvas = MakePictureCanvas(5, 5)
+    SN.Graphics.ExpectedOutputPictureCanvas = MakePictureCanvas(5, 5)
+    local VLayout = Com.VLayout:New(5)
+    VLayout:AddComponents({SN.Graphics.InputPictureCanvas, SN.Graphics.OutputPictureCanvas, SN.Graphics.ExpectedOutputPictureCanvas}, {1/3, 1/3, 1/3})
+    PictureWindow:SetCentralComponent(VLayout)
     PictureWindow:End()
     return PictureWindow
 end
@@ -642,8 +757,10 @@ SN.Graphics.CreateGUI = function()
         function()
             if E.is_keypress_event() and E.is_key_pressed(Key.SDLK_SPACE) then
                 Window:Update(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1))
-                PictureWindow:Update(vec3(0, 0, 80), vec3(200, 200, 80))
+                PictureWindow:Update(vec3(WindowDimension.x - 600, 0, 80), vec3(200, 600, 80))
             end
         end
     )
+
+    collectgarbage("collect")
 end

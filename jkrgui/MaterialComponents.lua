@@ -30,13 +30,12 @@ function LoadMaterialComponents(inLoadCompute)
 		local Ip_RoundedCircle = Jkr.Components.Util.ImagePainter:New("cache/RoundedCircle.Compute", false,
 			Jkr.GLSL.RoundedCircle, 16, 16, 1)
 		local ImagePrev = Jkr.Components.Abstract.ImageObject:New(40, 40)
-		Com.NewComponent_SingleTimeDispatch()
-		ComTable_SingleTimeDispatch[com_sdisi] = Jkr.Components.Abstract.Dispatchable:New(
+		Com.NewSimulataneousDispatch()
+		Com.NewSimultaneousSingleTimeDispatch(
 			function()
 				Ip_Clear:BindImage()
 				Ip_RoundedCircle:BindPainter()
-				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev,
-					Ip_Clear)
+				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev, Ip_Clear)
 			end
 		)
 		CheckedImagePreload = ImagePrev
@@ -278,9 +277,11 @@ function LoadMaterialComponents(inLoadCompute)
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inString)
+			tracy.ZoneBeginN("MaterialTextButton")
 			self.mText = inString
 			self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
 			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
+			tracy.ZoneEnd()
 		end,
 		SetFillColor = function(self, inColor_4f)
 			self.mTextButton:SetFillColor(inColor_4f)
@@ -894,10 +895,6 @@ function LoadMaterialComponents(inLoadCompute)
 					end
 				end
 			)
-
-
-
-
 			return Obj
 		end,
 		Update = function (self, inPosition_3f, inDimension_3f)
