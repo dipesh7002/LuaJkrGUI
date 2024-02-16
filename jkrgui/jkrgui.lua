@@ -494,6 +494,7 @@ Jkr.Components.Static.TextObject = {
 		end
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
+		tracy.ZoneBeginN("Jkr.TextObject.Update")
 		self.mPosition_3f = inPosition_3f
 		if (inString) then
 			self.mString = inString
@@ -514,6 +515,7 @@ Jkr.Components.Static.TextObject = {
 				r.balt.update_pos_only(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
 			end
 		end
+		tracy.ZoneEnd()
 	end,
 	-- TODO Remove this function
 	SetScissor = function(self)
@@ -595,13 +597,8 @@ Jkr.Components.Abstract.Drawable = {
 	mDrawFunction = nil,
 	New = function(self, inDrawFunction)
 		local Obj = {}
-		setmetatable(Obj, self)
-		self.__index = self
-		Obj.mDrawFunction = inDrawFunction
+		Obj.Draw = inDrawFunction
 		return Obj
-	end,
-	Draw = function(self)
-		self.mDrawFunction();
 	end
 }
 
@@ -609,13 +606,8 @@ Jkr.Components.Abstract.Eventable = {
 	mEventFunction = nil,
 	New = function(self, inEventFunction)
 		local Obj = {}
-		setmetatable(Obj, self)
-		self.__index = self
-		Obj.mEventFunction = inEventFunction
+		Obj.Event = inEventFunction
 		return Obj
-	end,
-	Event = function(self)
-		self.mEventFunction();
 	end
 }
 
@@ -624,13 +616,8 @@ Jkr.Components.Abstract.Dispatchable = {
 	mDispatchFunction = nil,
 	New = function(self, indispatchfunction)
 		local Obj = {}
-		setmetatable(Obj, self)
-		self.__index = self
-		Obj.mDispatchFunction = indispatchfunction
+		Obj.Dispatch = indispatchfunction
 		return Obj
-	end,
-	Dispatch = function(self)
-		self.mDispatchFunction()
 	end
 }
 
@@ -638,12 +625,7 @@ Jkr.Components.Abstract.Updatable = {
 	mUpdateFunction = nil,
 	New = function(self, inupdateFunction)
 		local Obj = {}
-		setmetatable(Obj, self)
-		self.__index = self
-		Obj.mUpdateFunction = inupdateFunction
+		Obj.Update = inupdateFunction
 		return Obj
-	end,
-	Update = function(self)
-		self.mUpdateFunction()
 	end
 }

@@ -94,7 +94,7 @@ Com.VisualLineWrapperObject = {
 		return Obj
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing)
-		tracy.ZoneBeginN("Update")
+		tracy.ZoneBeginN("Visual Line Wrapper Object")
 		if inNewStringBuffer then
 			self.mStringBuffer = inNewStringBuffer
 		end
@@ -104,32 +104,25 @@ Com.VisualLineWrapperObject = {
 		self:EraseAll()
 		local linePosition = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
 
-		if inNewStringBuffer then
-			local lineIndex = 1
-			local visualCharsIndex = 1
-			local newLinesCount = 0
-			local stringBufferLength = utf8.len(self.mStringBuffer)
-			for Line in self.mStringBuffer:gmatch("(.-)\n") do
-				local len = utf8.len(Line)
-				local _newline = newLinesCount + 1
-				local _vischars = visualCharsIndex + len
-				local probabaleNewLinePos = _newline + _vischars - 1
-				local hasNewLine = false
-				if probabaleNewLinePos <= stringBufferLength then
-					if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
-						hasNewLine = true
-					end
+		local lineIndex = 1
+		local visualCharsIndex = 1
+		local newLinesCount = 0
+		local stringBufferLength = utf8.len(self.mStringBuffer)
+		for Line in self.mStringBuffer:gmatch("(.-)\n") do
+			local len = utf8.len(Line)
+			local _newline = newLinesCount + 1
+			local _vischars = visualCharsIndex + len
+			local probabaleNewLinePos = _newline + _vischars - 1
+			local hasNewLine = false
+			if probabaleNewLinePos <= stringBufferLength then
+				if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
+					hasNewLine = true
 				end
-				lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
-					visualCharsIndex + newLinesCount, hasNewLine)
-				newLinesCount = _newline
-				visualCharsIndex = _vischars
 			end
-		else
-			for i = 1, #self.mVisualLines, 1 do
-				self.mVisualLines[i]:Update(linePosition, inDimension_3f)	
-				linePosition.y = linePosition.y + self.mVerticalDrawSpacing
-			end
+			lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
+				visualCharsIndex + newLinesCount, hasNewLine)
+			newLinesCount = _newline
+			visualCharsIndex = _vischars
 		end
 		tracy.ZoneEnd()
 	end,
@@ -252,7 +245,7 @@ Com.VisualTextEditObject = {
 		return {
 			left = self.mVisualLines[inVisualLineNo].mIndex,
 			right = self.mVisualLines[inVisualLineNo].mIndex + self.mVisualLines[inVisualLineNo].mIndex +
-			self.mVisualLines[inVisualLineNo].mUtf8Len
+				self.mVisualLines[inVisualLineNo].mUtf8Len
 		}
 	end,
 	GetVisualExtreme = function(self)
