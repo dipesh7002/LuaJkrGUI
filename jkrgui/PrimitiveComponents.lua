@@ -66,10 +66,10 @@ Com.TextLabelObject = {
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
-        tracy.ZoneBeginNS("TextLabelObject", 15)
+        tracy.ZoneBeginN("TextLabelObject")
         self.mPosition_3f = inPosition_3f
         ComTable[self.mIds.x]:Update(inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
-        tracy.ZoneBeginNS("TextLabelObject", 15)
+        tracy.ZoneEnd()
     end
 }
 

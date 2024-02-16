@@ -47,7 +47,18 @@ NN.SimpleNN = {
             float_vec:add(inFloats[i]) 
        end
        self.mNN:propagate_forward(float_vec)
+    end,
+    PropagateForwardVecFloat = function (self, inVec)
+        self.mNN:propagate_forward(inVec) 
+    end,
+    PropagateBackwardVecFloat = function (self, inVec)
+        self.mNN:propagate_backward_current(inVec) 
+    end,
+    TrainEXT = function (self, inInput, inOutput)
+       self.mNN:propagate_forward(inInput) 
+       self.mNN:propagate_backward_current(inOutput) 
     end
+
 }
 
 -- SIMULATED ANNEALING

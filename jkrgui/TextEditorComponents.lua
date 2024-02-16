@@ -53,14 +53,20 @@ Com.VisualLineObject = {
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inString, inIndex, inEndsWithNewLine)
 		ComTable[self.mTextObjectId]:Update(inPosition_3f, inDimension_3f, inString, false)
-		self.mIndex = inIndex
-		self.mEndsWithNewLine = inEndsWithNewLine
-		self.mVisualDimension_2f = self.mFontObject:GetDimension(inString)
-		self.mString = inString
+		if inIndex then
+			self.mIndex = inIndex
+		end
 		if inEndsWithNewLine then
-			self.mUtf8Len = utf8.len(inString) + 1
-		else
-			self.mUtf8Len = utf8.len(inString)
+			self.mEndsWithNewLine = inEndsWithNewLine
+		end
+		if inString then
+			self.mString = inString
+			self.mVisualDimension_2f = self.mFontObject:GetDimension(inString)
+			if inEndsWithNewLine then
+				self.mUtf8Len = utf8.len(inString) + 1
+			else
+				self.mUtf8Len = utf8.len(inString)
+			end
 		end
 	end
 }
@@ -71,7 +77,7 @@ Com.VisualLineWrapperObject = {
 	mVerticalDrawSpacing = nil,
 	mVisualLines = nil,
 	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars,
-		inVerticalDrawSpacing)
+				   inVerticalDrawSpacing)
 		local Obj = {}
 		setmetatable(Obj, self)
 		self.__index = self
@@ -82,12 +88,13 @@ Com.VisualLineWrapperObject = {
 		Obj.mVisualLines = {}
 		for i = 1, inMaxLines, 1 do
 			Obj.mVisualLines[#Obj.mVisualLines + 1] = Com.VisualLineObject
-			    :New(linePosition, inDimension_3f, inMaxChars, inFontObject)
+				:New(linePosition, inDimension_3f, inMaxChars, inFontObject)
 			linePosition.y = linePosition.y + inVerticalDrawSpacing
 		end
 		return Obj
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing)
+		tracy.ZoneBeginN("Update")
 		if inNewStringBuffer then
 			self.mStringBuffer = inNewStringBuffer
 		end
@@ -96,28 +103,35 @@ Com.VisualLineWrapperObject = {
 		end
 		self:EraseAll()
 		local linePosition = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
-		-- linePosition.y = linePosition.y + self.mVerticalDrawSpacing
 
-		local lineIndex = 1
-		local visualCharsIndex = 1
-		local newLinesCount = 0
-		local stringBufferLength = utf8.len(self.mStringBuffer)
-		for Line in self.mStringBuffer:gmatch("(.-)\n") do
-			local len = utf8.len(Line)
-			local _newline = newLinesCount + 1
-			local _vischars = visualCharsIndex + len
-			local probabaleNewLinePos = _newline + _vischars - 1
-			local hasNewLine = false
-			if probabaleNewLinePos <= stringBufferLength then
-				if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
-					hasNewLine = true
+		if inNewStringBuffer then
+			local lineIndex = 1
+			local visualCharsIndex = 1
+			local newLinesCount = 0
+			local stringBufferLength = utf8.len(self.mStringBuffer)
+			for Line in self.mStringBuffer:gmatch("(.-)\n") do
+				local len = utf8.len(Line)
+				local _newline = newLinesCount + 1
+				local _vischars = visualCharsIndex + len
+				local probabaleNewLinePos = _newline + _vischars - 1
+				local hasNewLine = false
+				if probabaleNewLinePos <= stringBufferLength then
+					if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
+						hasNewLine = true
+					end
 				end
+				lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
+					visualCharsIndex + newLinesCount, hasNewLine)
+				newLinesCount = _newline
+				visualCharsIndex = _vischars
 			end
-			lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
-				visualCharsIndex + newLinesCount, hasNewLine)
-			newLinesCount = _newline
-			visualCharsIndex = _vischars
+		else
+			for i = 1, #self.mVisualLines, 1 do
+				self.mVisualLines[i]:Update(linePosition, inDimension_3f)	
+				linePosition.y = linePosition.y + self.mVerticalDrawSpacing
+			end
 		end
+		tracy.ZoneEnd()
 	end,
 	EraseAll = function(self)
 		for i = 1, #self.mVisualLines, 1 do
@@ -125,7 +139,8 @@ Com.VisualLineWrapperObject = {
 		end
 	end,
 	WrapWithin = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f,
-		       inVisualLineIndex, inEndsWithNewline)
+						  inVisualLineIndex, inEndsWithNewline)
+		tracy.ZoneBeginN("Wrap Within")
 		local i = inStartingIndex
 		local dimens = self.mFontObject:GetDimension(inString)
 		local visualLineIndex = inVisualLineIndex
@@ -147,6 +162,7 @@ Com.VisualLineWrapperObject = {
 			inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
 			i = i + 1
 		end
+		tracy.ZoneEnd()
 		return i
 	end
 }
@@ -158,7 +174,7 @@ Com.VisualTextEditObject = {
 	mPosition_3f = nil,
 	mDimension_3f = nil,
 	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars,
-		inVerticalDrawSpacing)
+				   inVerticalDrawSpacing)
 		local Obj = Com.VisualLineWrapperObject:New(inPosition_3f, inDimension_3f, inFontObject,
 			inMaxLines, inMaxChars, inVerticalDrawSpacing)
 		setmetatable(self, Com.VisualLineWrapperObject)
@@ -184,8 +200,8 @@ Com.VisualTextEditObject = {
 			end
 		end
 
-		local isLastLine = self.mVisualLines[line + 1] and self.mVisualLines[line + 1].mUtf8Len == 0 
-		--and self.mVisualLines[line + 1].mEndsWithNewLine == false 
+		local isLastLine = self.mVisualLines[line + 1] and self.mVisualLines[line + 1].mUtf8Len == 0
+		--and self.mVisualLines[line + 1].mEndsWithNewLine == false
 		if isLastLine then
 			local substr = utf8.sub(str, 1, char)
 			dimens = self.mFontObject:GetDimension(substr)
@@ -220,13 +236,13 @@ Com.VisualTextEditObject = {
 				charIndex = visualLines[lineIndex].mUtf8Len
 			else
 				charIndex = charsTraversedIndex -
-				(visualLines[lineIndex].mUtf8Len)
+					(visualLines[lineIndex].mUtf8Len)
 				charIndex = inPosition - charIndex
 			end
 		end
 		return { line = lineIndex, char = charIndex }
 	end,
-	GetNearestGraphicalCharacterPosition = function (self, inX, inY)
+	GetNearestGraphicalCharacterPosition = function(self, inX, inY)
 		-- TODO	
 	end,
 	GetVisualCursorPosition = function(self)
@@ -235,7 +251,8 @@ Com.VisualTextEditObject = {
 	GetLineExtremes = function(self, inVisualLineNo)
 		return {
 			left = self.mVisualLines[inVisualLineNo].mIndex,
-			right = self.mVisualLines[inVisualLineNo].mIndex + self.mVisualLines[inVisualLineNo].mIndex + self.mVisualLines[inVisualLineNo].mUtf8Len 
+			right = self.mVisualLines[inVisualLineNo].mIndex + self.mVisualLines[inVisualLineNo].mIndex +
+			self.mVisualLines[inVisualLineNo].mUtf8Len
 		}
 	end,
 	GetVisualExtreme = function(self)
@@ -290,7 +307,7 @@ Com.VisualTextEditObject = {
 			local moveRights = 0
 			if cursorPos.char > lineSpanOfNextLine then
 				moveRights = exNextLine.right -
-				(exCurrentLine.left + cursorPos.char)
+					(exCurrentLine.left + cursorPos.char)
 			else
 				moveRights = exNextLine.left - exCurrentLine.left
 			end
@@ -308,7 +325,7 @@ Com.VisualTextEditObject = {
 			local moveLefts = 0
 			if cursorPos.char > lineSpanOfPreviousLine then
 				moveLefts = exCurrentLine.left + cursorPos.char -
-				exPreviousLine.right
+					exPreviousLine.right
 			else
 				moveLefts = exCurrentLine.left - exPreviousLine.left
 			end
@@ -318,8 +335,10 @@ Com.VisualTextEditObject = {
 		end
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing,
-		   inCursorWidth)
-		Com.VisualLineWrapperObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing)
+					  inCursorWidth)
+		tracy.ZoneBeginN("VisualTextEditObject")
+		Com.VisualLineWrapperObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer,
+			inNewVerticalDrawSpacing)
 		local vis = self:GetVisualCursorPosition()
 		local cursorPos = self:GetGraphicalCursorPosition(vis)
 		cursorPos.x = cursorPos.x + inPosition_3f.x
@@ -332,19 +351,21 @@ Com.VisualTextEditObject = {
 		self.mCursor:Update(cursorPos, cursorDimen)
 		self.mPosition_3f = inPosition_3f
 		self.mDimension_3f = inDimension_3f
+		tracy.ZoneEnd()
 	end
 }
 
 Com.PlainTextEditObject = {
-	New = function (self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars, inVerticalDrawSpacing)
-		local Obj = Com.VisualTextEditObject:New(inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars, inVerticalDrawSpacing)
+	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars, inVerticalDrawSpacing)
+		local Obj = Com.VisualTextEditObject:New(inPosition_3f, inDimension_3f, inFontObject, inMaxLines, inMaxChars,
+			inVerticalDrawSpacing)
 		setmetatable(self, Com.VisualTextEditObject)
 		setmetatable(Obj, self)
 		self.__index = self
 		Com.NewComponent_Event()
 		E.stop_text_input()
 		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
-			function ()
+			function()
 				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
 				local is_enter = E.is_key_pressed(Key.SDLK_RETURN)
 				local is_up = E.is_key_pressed(Key.SDLK_UP)
@@ -353,7 +374,7 @@ Com.PlainTextEditObject = {
 				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
 				if E.is_text_being_input() and not is_backspace then
 					local input = E.get_input_text()
-					Obj:CursorInsert(input)			
+					Obj:CursorInsert(input)
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
 				end
 				if E.is_keypress_event() then
@@ -369,19 +390,19 @@ Com.PlainTextEditObject = {
 						Obj:CursorRemove()
 					elseif is_enter then
 						Obj:CursorInsert("\n")
-					end	
+					end
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
 				end
 			end
 		)
 		return Obj
-	end 
+	end
 }
 
 Com.PlainTextLineEditObject = {
 	mTextInputStarted = nil,
-	New = function (self, inPosition_3f, inDimension_3f, inFontObject, inMaxChars)
-		local Obj = Com.VisualTextEditObject:New(inPosition_3f, inDimension_3f, inFontObject, 2, inMaxChars, 20)	
+	New = function(self, inPosition_3f, inDimension_3f, inFontObject, inMaxChars)
+		local Obj = Com.VisualTextEditObject:New(inPosition_3f, inDimension_3f, inFontObject, 2, inMaxChars, 20)
 		setmetatable(self, Com.VisualTextEditObject)
 		setmetatable(Obj, self)
 		self.__index = self
@@ -391,21 +412,21 @@ Com.PlainTextLineEditObject = {
 		Obj.mTextInputStarted = false
 		Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
 
-		local start_text = function ()
-						E.start_text_input()
-						Obj.mCursor:SetColor(vec4(1, 0, 0, 1))
-						Obj.mTextInputStarted = true
+		local start_text = function()
+			E.start_text_input()
+			Obj.mCursor:SetColor(vec4(1, 0, 0, 1))
+			Obj.mTextInputStarted = true
 		end
 
-		local stop_text = function ()
-						-- E.stop_text_input()
-						Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
-						Obj.mTextInputStarted = false
+		local stop_text = function()
+			-- E.stop_text_input()
+			Obj.mCursor:SetColor(vec4(0, 0, 0, 1))
+			Obj.mTextInputStarted = false
 		end
 
 		Com.NewComponent_Event()
 		ComTable_Event[com_evi] = Jkr.Components.Abstract.Eventable:New(
-			function ()
+			function()
 				local is_backspace = E.is_key_pressed(Key.SDLK_BACKSPACE)
 				local is_left = E.is_key_pressed(Key.SDLK_LEFT)
 				local is_right = E.is_key_pressed(Key.SDLK_RIGHT)
@@ -427,7 +448,7 @@ Com.PlainTextLineEditObject = {
 				local shouldUpdate = false
 				if E.is_text_being_input() and Obj.mTextInputStarted and not is_backspace then
 					local input = E.get_input_text()
-					Obj:CursorInsert(input)			
+					Obj:CursorInsert(input)
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
 					shouldUpdate = true
 				end
@@ -446,7 +467,7 @@ Com.PlainTextLineEditObject = {
 						-- This is for IsClickedEvent to respond TODO replace this with
 						-- good heuristic
 						Obj.mComponentObject.mClicked_b = true
-					end	
+					end
 				end
 				if shouldUpdate then
 					Obj:Update(Obj.mPosition_3f, Obj.mDimension_3f)
@@ -456,9 +477,10 @@ Com.PlainTextLineEditObject = {
 		return Obj
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing,
-		   inCursorWidth)
+					  inCursorWidth)
 		self.mComponentObject:Update(inPosition_3f, inDimension_3f)
-		Com.VisualTextEditObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing, inCursorWidth)
+		Com.VisualTextEditObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing,
+			inCursorWidth)
 	end,
 	IsClickedEvent = function(self)
 		return self.mComponentObject.mClicked_b

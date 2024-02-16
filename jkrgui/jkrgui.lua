@@ -511,7 +511,6 @@ Jkr.Components.Static.TextObject = {
 			if inString then
 				r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
 			else
-				print("FUCK")
 				r.balt.update_pos_only(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
 			end
 		end
