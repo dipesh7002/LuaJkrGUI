@@ -148,8 +148,8 @@ uvec2 = uvec2
 vec3 = vec3
 vec4 = vec4
 
-Print_vec3 = function (inVec3)
-	print(string.format("v(%f, %f, %f)", inVec3.x, inVec3.y, inVec3.z))	
+Print_vec3 = function(inVec3)
+	print(string.format("v(%f, %f, %f)", inVec3.x, inVec3.y, inVec3.z))
 end
 
 
@@ -182,7 +182,6 @@ function FrameUpdate()
 	-- WindowDimension = vec2()
 end
 
-
 function FontSize(inSize)
 	return Int(inSize * f)
 end
@@ -204,6 +203,7 @@ function D(inx, iny, inz)
 	iny = iny * f
 	return vec3(inx, iny, 1)
 end
+
 --[[
         This is a fontObject, which holds a certain font of certain size
 ]]
@@ -220,7 +220,7 @@ Jkr.FontObject = {
 		}
 		setmetatable(Object, self)
 		self.__index =
-		    self -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
+			self -- Elle garne k ho vane Returned object bata Obj.GetDimension etc garna milxa
 		Object.mPath = inPath
 		Object.mSize = inSize
 		Object.mId = T.AddFontFace(Object.mPath, Object.mSize)
@@ -331,34 +331,35 @@ Jkr.Components.Abstract = {}
 Jkr.Components.Util = {}
 
 Jkr.Components.Static.LineObject = {
-        mPositon1 = vec2(0, 0),
-        mPosition2 = vec2(0, 0),
-        mLine_Id = nil,
-		mColor_4f = nil,
-        New = function(self, inPosition1_3f, inPosition2_3f)
-                local Obj = {
-                        mPosition1 = vec2(inPosition1_3f.x, inPosition1_3f.y),
-                        mPosition2 = vec2(inPosition2_3f.x, inPosition2_3f.y),
-                        mLine_Id = nil,
-                }
-                setmetatable(Obj, self)
-                self.__index = self
-                Obj.mLine_Id = L.Add(Obj.mPosition1, Obj.mPosition2, inPosition1_3f.z)
-				Obj.mColor_4f = vec4(0, 0, 0, 1)
-                return Obj
-        end,
-        Draw = function(self)
-                L.Bind()
-                L.Draw(self.mColor_4f, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mLine_Id),
-                        Int(self.mLine_Id),
-                        GetIdentityMatrix())
-        end,
-        Update = function(self, inPosition1_3f, inPosition2_3f)
-                L.Update(Int(self.mLine_Id), vec2(inPosition1_3f.x, inPosition1_3f.y), vec2(inPosition2_3f.x, inPosition2_3f.y), inPosition1_3f.z)
-        end, 
-		SetColor = function (self, inColor_4f)
-			self.mColor_4f = inColor_4f
-		end
+	mPositon1 = vec2(0, 0),
+	mPosition2 = vec2(0, 0),
+	mLine_Id = nil,
+	mColor_4f = nil,
+	New = function(self, inPosition1_3f, inPosition2_3f)
+		local Obj = {
+			mPosition1 = vec2(inPosition1_3f.x, inPosition1_3f.y),
+			mPosition2 = vec2(inPosition2_3f.x, inPosition2_3f.y),
+			mLine_Id = nil,
+		}
+		setmetatable(Obj, self)
+		self.__index = self
+		Obj.mLine_Id = L.Add(Obj.mPosition1, Obj.mPosition2, inPosition1_3f.z)
+		Obj.mColor_4f = vec4(0, 0, 0, 1)
+		return Obj
+	end,
+	Draw = function(self)
+		L.Bind()
+		L.Draw(self.mColor_4f, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mLine_Id),
+			Int(self.mLine_Id),
+			GetIdentityMatrix())
+	end,
+	Update = function(self, inPosition1_3f, inPosition2_3f)
+		L.Update(Int(self.mLine_Id), vec2(inPosition1_3f.x, inPosition1_3f.y), vec2(inPosition2_3f.x, inPosition2_3f.y),
+			inPosition1_3f.z)
+	end,
+	SetColor = function(self, inColor_4f)
+		self.mColor_4f = inColor_4f
+	end
 }
 
 
@@ -428,102 +429,136 @@ Jkr.Components.Static.ShapeObject = {
 	end
 }
 
-Jkr.Components.Static.TextObject = {
-	mScissorPosition_2f = nil,
-	mScissorDimension_2f = nil,
-	mString = nil,
-	mFont = nil, -- Font Object
-	mId = nil,
-	mDimension_2f = nil,
-	mColor = Theme.Colors.Text.Normal,
-	New = function(self, inText, inPosition_3f, inFontObject, inShouldAlignBottom)
-		local Obj = {
-			mScissorPosition_2f = nil,
-			mScissorDimension_2f = nil,
-			mString = nil,
-			mFont = nil, -- Font Object
-			mId = nil,
-			mDimension_2f = nil,
-			mColor = Theme.Colors.Text.Normal,
-			mAlt = AlternativeTextRenderer
-		}
+if not AlternativeTextRenderer then
+	Jkr.Components.Static.TextObject = {
+		mScissorPosition_2f = nil,
+		mScissorDimension_2f = nil,
+		mString = nil,
+		mFont = nil, -- Font Object
+		mId = nil,
+		mDimension_2f = nil,
+		mColor = Theme.Colors.Text.Normal,
+		New = function(self, inText, inPosition_3f, inFontObject, inShouldAlignBottom)
+			local Obj = {
+				mScissorPosition_2f = nil,
+				mScissorDimension_2f = nil,
+				mString = nil,
+				mFont = nil, -- Font Object
+				mId = nil,
+				mDimension_2f = nil,
+				mColor = Theme.Colors.Text.Normal,
+			}
 
-		setmetatable(Obj, self)
-		self.__index = self
+			setmetatable(Obj, self)
+			self.__index = self
 
-		Obj.mString = inText
-		Obj.mPosition_3f = inPosition_3f
+			Obj.mString = inText
+			Obj.mPosition_3f = inPosition_3f
 
-
-		if not Obj.mAlt then
 			T.SetCurrentFace(inFontObject.mId)
 			T.SetTextProperty(TextH.left, TextV.top)
 			Obj.mId = T.Add(Obj.mString,
 				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z))
 			Obj.mDimension_2f = inFontObject:GetDimension(Obj.mString)
-		else
+
+			Obj.mFont = inFontObject
+
+			return Obj
+		end,
+		GetLength = function(self)
+			return self.mId.y
+		end,
+		Event = function(self)
+		end,
+		Draw = function(self)
+			T.Bind()
+			T.Draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y),
+				Int(self.mId.x),
+				Int(self.mId.y), GetIdentityMatrix())
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
+			tracy.ZoneBeginN("Jkr.TextObject.Update")
+			self.mPosition_3f = inPosition_3f
+			if (inString) then
+				self.mString = inString
+			end
+			-- Make this Startup Time (Separate Class kinda thing)
+			local str = string.rep(" ", self.mId.y)
+			T.Update(Int(self.mId.x), str, self.mPosition_3f)
+			T.Update(Int(self.mId.x), self.mString, self.mPosition_3f)
+			tracy.ZoneEnd()
+		end
+	}
+else
+	Jkr.Components.Static.TextObject = {
+		mScissorPosition_2f = nil,
+		mScissorDimension_2f = nil,
+		mString = nil,
+		mFont = nil, -- Font Object
+		mId = nil,
+		mDimension_2f = nil,
+		mColor = Theme.Colors.Text.Normal,
+		New = function(self, inText, inPosition_3f, inFontObject, inShouldAlignBottom)
+			local Obj = {
+				mScissorPosition_2f = nil,
+				mScissorDimension_2f = nil,
+				mString = nil,
+				mFont = nil, -- Font Object
+				mId = nil,
+				mDimension_2f = nil,
+				mColor = Theme.Colors.Text.Normal,
+				mAlt = AlternativeTextRenderer
+			}
+
+			setmetatable(Obj, self)
+			self.__index = self
+
+			Obj.mString = inText
+			Obj.mPosition_3f = inPosition_3f
+
 			local should_align_button = true
 			if inShouldAlignBottom ~= nil then
 				should_align_button = inShouldAlignBottom
 			end
 			Obj.mId = r.balt.add(inFontObject.mId, Obj.mString,
 				vec3(Obj.mPosition_3f.x, Obj.mPosition_3f.y, Obj.mPosition_3f.z), should_align_button)
-		end
 
-		Obj.mFont = inFontObject
+			Obj.mFont = inFontObject
 
-		return Obj
-	end,
-	GetLength = function(self)
-		return self.mId.y
-	end,
-	Event = function(self)
-	end,
-	Draw = function(self)
-		if not self.mAlt then
-			T.Bind()
-			T.Draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y),
-				Int(self.mId.x),
-				Int(self.mId.y), GetIdentityMatrix())
-		else
+			return Obj
+		end,
+		GetLength = function(self)
+			return self.mId.y
+		end,
+		Event = function(self)
+		end,
+		Draw = function(self)
 			S.Bind()
 			S.BindFillMode(FillType.image)
 			r.balt.draw(self.mColor, Int(WindowDimension.x), Int(WindowDimension.y),
 				self.mId,
 				GetIdentityMatrix())
-		end
-	end,
-	Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
-		tracy.ZoneBeginN("Jkr.TextObject.Update")
-		self.mPosition_3f = inPosition_3f
-		if (inString) then
-			self.mString = inString
-		end
-		-- Make this Startup Time (Separate Class kinda thing)
-		if not self.mAlt then
-			local str = string.rep(" ", self.mId.y)
-			T.Update(Int(self.mId.x), str, self.mPosition_3f)
-			T.Update(Int(self.mId.x), self.mString, self.mPosition_3f)
-		else
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
+			tracy.ZoneBeginN("Jkr.TextObject.Update")
+			self.mPosition_3f = inPosition_3f
+			if (inString) then
+				self.mString = inString
+			end
 			local should_align_button = true
 			if inShouldAlignBottom ~= nil then
-				should_align_button = inShouldAlignBottom	
+				should_align_button = inShouldAlignBottom
 			end
 			if inString then
 				r.balt.update(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
 			else
-				r.balt.update_pos_only(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString, should_align_button)
+				r.balt.update_pos_only(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString,
+					should_align_button)
 			end
-		end
-		tracy.ZoneEnd()
-	end,
-	-- TODO Remove this function
-	SetScissor = function(self)
-		if self.mScissorPosition_2f and self.mScissorDimension_2f then
-			Jkr.set_scissor(self.mScissorPosition_2f, self.mScissorDimension_2f)
-		end
-	end
-}
+			tracy.ZoneEnd()
+		end,
+	}
+end
 
 Jkr.Components.Abstract.PainterImageObject = {
 	mImage = nil,
@@ -537,10 +572,10 @@ Jkr.Components.Abstract.PainterImageObject = {
 	Register = function(self, inCompatibleImagePainter)
 		self.mImage:register(inCompatibleImagePainter.mPainter)
 	end,
-	GetVectorUInt = function (self)
+	GetVectorUInt = function(self)
 		return self.mImage:image_to_vector_uint()
 	end,
-	GetVectorFloatSingleChannel = function (self)
+	GetVectorFloatSingleChannel = function(self)
 		return self.mImage:image_to_vector_single_channel_float()
 	end
 }
@@ -579,7 +614,7 @@ Jkr.Components.Util.ImagePainter = {
 		S.CopyImage(Int(inImageObject.mId),
 			inPainterWithRegisteredImage.mPainterRegisteredImageObject.mImage)
 	end,
-	PaintEXT = function (self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inImage, inX, inY, inZ)
+	PaintEXT = function(self, inPosDimen_4f, inColor_4f, inParam_4f, inImageObject, inImage, inX, inY, inZ)
 		self.mPainter:paintext(inPosDimen_4f, inColor_4f, inParam_4f, Int(inX), Int(inY), Int(inZ))
 		S.CopyImage(Int(inImageObject.mId),
 			inImage.mImage)
