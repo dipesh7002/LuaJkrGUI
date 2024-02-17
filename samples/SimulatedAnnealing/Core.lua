@@ -8,7 +8,7 @@ NN = {}
 NN.SimpleNN = {
     mTopology = nil,
     mNN = nil,
-    New = function(self, inTopology)
+    New = function(self, inTopology, inLearningRate)
         local Obj = {}
         setmetatable(Obj, self)
         self.__index = self
@@ -18,7 +18,11 @@ NN.SimpleNN = {
         for i = 1, #inTopology, 1 do
             topology:add(inTopology[i])
         end
-        Obj.mNN = neur.network(topology)
+        if inLearningRate then
+            Obj.mNN = neur.network(topology, inLearningRate)
+        else
+            Obj.mNN = neur.network(topology)
+        end
         return Obj
     end,
     PrintNeurons = function(self, inCallback_2fff)
