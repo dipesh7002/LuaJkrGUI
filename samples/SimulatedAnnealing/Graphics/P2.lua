@@ -75,6 +75,11 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     local TrainingCountLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1")
     TrainingCountHLayout:AddComponents({ TrainingCountText, TrainingCountLineEdit }, { 0.5, 4 - 0.5 })
 
+    local LearningRateHLayout = Com.HLayout:New(0)
+    local LearningRateText = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "LearningRate")
+    local LearningRateLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "0.05")
+    LearningRateHLayout:AddComponents({ LearningRateText, LearningRateLineEdit }, { 0.5, 4 - 0.5 })
+
     local HComponents = {
         CreateButtonHLayout,
         RunButtonHLayout,
@@ -86,6 +91,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         Com.HLayout:New(0),
         Input1HLayout,
         Input2HLayout,
+        Com.HLayout:New(0),
         PropForwardButton,
         Com.HLayout:New(0),
         CreateNetworkByPictureHLayout,
@@ -94,6 +100,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         UpdatePicHLayout,
         Com.HLayout:New(0),
         TrainInverseHLayout,
+        LearningRateHLayout,
         TrainingCountHLayout,
         Com.HLayout:New(0)
 
@@ -197,6 +204,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             local c = SN.Graphics.InputPictureCanvas
             local o = SN.Graphics.OutputPictureCanvas
             local topology = GetTopologyByTextFieldsLayer()
+            local learningRate = tonumber(LearningRateLineEdit:GetText())
             mero_NN = NN.SimpleNN:New(topology)
             Com.ClearSingleTimes()
             local inputSize = math.round(math.sqrt(topology[1]))
