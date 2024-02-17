@@ -1,4 +1,7 @@
 require "neural" -- dll written in C++
+math.round = function (inX)
+   return math.floor(inX + 0.5) 
+end
 
 -- NEURAL NETWORK
 NN = {}
@@ -64,14 +67,18 @@ NN.SimpleNN = {
 
 }
 
-NN.ImageGetRandomInputInverseOutput = function (inSize)
+NN.ImageGetRandomInputInverseOutput = function (inSizeInput, inSizeOutput)
     local invec = std_vector_float()
-    for i = 1, inSize, 1 do
-        invec:add(math.random())
+
+    for i = 1, inSizeInput, 1 do
+        invec:add(math.round(math.random()))
+        -- invec:add(1)
     end
+
     local outvec = std_vector_float()
-    for i = 1, inSize, 1 do
-       outvec:add(1 - invec[i]) 
+    for i = 1, inSizeOutput, 1 do
+       outvec:add(math.round(invec[i])) 
+       --outvec:add(0)
     end
     return {invec, outvec}
 end
