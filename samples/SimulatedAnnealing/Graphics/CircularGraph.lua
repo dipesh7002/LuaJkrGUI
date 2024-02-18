@@ -60,27 +60,67 @@ SN.Graphics.CircularGraph = {
                 vec4(1.2, 0, 0, 1), inDimension_3f.x, inDimension_3f.y, 1)
         end)
 
-        Obj.mLineCount = 2000
+        Obj.mLineCount = 100000
         if inLineCount then
             Obj.mLineCount = inLineCount
         end
-        Obj.mLines = {}
+        -- LINE BATCH
+        ------------------------------------------------------------------------------------
+        Obj.mLineBatch = Jkr.Components.Static.LineObject:NewBatch(Obj.mLineCount)
+        Obj.mLineBatch:SetColor(vec4(0, 1, 0, 0.1))
+        Obj.mCurrentBatchLine = Obj.mLineBatch.mStartId
+        Com.NewComponent()
+        ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(
+            function()
+                Obj.mLineBatch:Draw()
+            end
+        )
 
-        for i = 1, Obj.mLineCount, 1 do
-            Com.NewComponent()
-            ComTable[com_i] = Jkr.Components.Static.LineObject:New(vec3(0, 0, 1), vec3(0, 0, 1))
-            Obj.mLines[#Obj.mLines + 1] = com_i
+        Obj.mLinesNotCleared = 1
+
+        Obj.UpdateGraphLineBatch = function(self, inPosition1_3f, inPosition2_3f)
+            local newp1 = vec3(inPosition1_3f.x + self.mPosition_3f.x, inPosition1_3f.y + self.mPosition_3f.y, inPosition1_3f.z)
+            local newp2 = vec3(inPosition2_3f.x + self.mPosition_3f.x, inPosition2_3f.y + self.mPosition_3f.y, inPosition2_3f.z)
+            Obj.mLineBatch:Update(newp1, newp2, Obj.mCurrentBatchLine)
+            Obj.mCurrentBatchLine = Obj.mCurrentBatchLine + 1
+            Obj.mLinesNotCleared = Obj.mLinesNotCleared + 1
         end
-        Obj.mCurrentLineId = 1
+        Obj.ResetGraphLineBatch = function(self)
+            Obj.mCurrentBatchLine = Obj.mLineBatch.mStartId
+        end
+        Obj.ClearGraphLineBatch = function(self)
+            for i = Obj.mLineBatch.mStartId, Obj.mLinesNotCleared, 1 do
+                Obj.mLineBatch:Update(vec3(0), vec3(0), i)
+            end
+            Obj.mLinesNotCleared = 1
+            Obj:ResetGraphLineBatch()
+        end
+        -------------------------------------------------------------------------------------
+
+
+        -- Obj.mLines = {}
+
+
+        -- for i = 1, Obj.mLineCount, 1 do
+        --     Com.NewComponent()
+        --     ComTable[com_i] = Jkr.Components.Static.LineObject:New(vec3(0, 0, 1), vec3(0, 0, 1))
+        --     Obj.mLines[#Obj.mLines + 1] = com_i
+        -- end
+        -- Obj.mCurrentLineId = 1
+
 
         Obj.mPosition_3f = inPosition_3f
         Obj.mDimension_3f = inDimension_3f
         return Obj
     end,
     Update = function(self, inPosition_3f, inDimension_3f)
+        self.mPosition_3f = inPosition_3f
+        self.mDimension_3f = inDimension_3f
         self.mCanvas:Update(inPosition_3f, inDimension_3f)
     end,
     PlotAt = function(self, inX, inY, inW, inH, inColor_4f, inBrushId, inSimultaneous)
+        local gX = self.mPosition_3f.x
+        local gY = self.mPosition_3f.y
         if inSimultaneous then
             Com.NewSimulataneousDispatch()
         end
@@ -98,14 +138,20 @@ SN.Graphics.CircularGraph = {
                 vec4(1.2, 0, 0, 1), self.mDimension_3f.x, self.mDimension_3f.y, 1)
         end)
 
-        for i = 1, #self.mLines, 1 do
-            ComTable[self.mLines[i]]:Update(vec3(0), vec3(0))
-        end
-        self.mCurrentLineId = 1
+        -- for i = 1, #self.mLines, 1 do
+        --     ComTable[self.mLines[i]]:Update(vec3(0), vec3(0))
+        -- end
+        -- self.mCurrentLineId = 1
+
+        self:ClearGraphLineBatch()
     end,
     UpdateGraphLine = function(self, inPosition1_3f, inPosition2_3f, inColor_4f)
         local id = self.mLines[self.mCurrentLineId]
-        ComTable[id]:Update(inPosition1_3f, inPosition2_3f)
+        local linePos1 = vec3(inPosition1_3f.x + self.mPosition_3f.x, inPosition1_3f.y + self.mPosition_3f.y,
+            inPosition1_3f.z)
+        local linePos2 = vec3(inPosition2_3f.x + self.mPosition_3f.x, inPosition2_3f.y + self.mPosition_3f.y,
+            inPosition2_3f.z)
+        ComTable[id]:Update(linePos1, linePos2)
         if inColor_4f then
             ComTable[id]:SetColor(inColor_4f)
         end
@@ -127,8 +173,8 @@ SN.Graphics.DrawNeuralNetworkToGraph = function(inNeuralNetwork, inGraph, inSimu
     end
 
     local total_layers        = #topo
-    local dis_between_layers  = inGraph.mDimension_3f.x / (total_layers) / 1.6
-    local dis_between_neurons = inGraph.mDimension_3f.y / (max) / 1.3
+    local dis_between_layers  = WindowDimension.x / (total_layers) / 1.6
+    local dis_between_neurons = WindowDimension.y / (max) / 1.3
     local middle_pos_y        = dis_between_neurons / 2 * (max - 1)
     local middle_pos_x        = dis_between_layers / 2 * (total_layers - 1)
 
@@ -139,7 +185,6 @@ SN.Graphics.DrawNeuralNetworkToGraph = function(inNeuralNetwork, inGraph, inSimu
         local ypos = middle_pos_y - inLayerNeuronCount / 2 * dis_between_neurons + inPos_2f.y * dis_between_neurons
         G.PlotAt(inGraph, xpos, ypos, radius, radius, vec4(-inValue, inValue / 2, 1, 1), 2, inSimultaneousDispatch)
     end
-    inNeuralNetwork:PrintNeurons(callbackNeuronsOnly)
 
     local callbackWeightLines = function(leftLayer, inLeftNeuron, inLeftNeuronCount, inRightLayer, inRightNeuron,
                                          inRightNeuronCount, inWeightValue)
@@ -152,8 +197,15 @@ SN.Graphics.DrawNeuralNetworkToGraph = function(inNeuralNetwork, inGraph, inSimu
         local yposr = middle_pos_y - inRightNeuronCount / 2 * dis_between_neurons + inRightNeuron * dis_between_neurons +
             radius / 2
         local color = vec4(-inWeightValue, inWeightValue, 0, math.abs(inWeightValue))
-        SN.Graphics.CircularGraph.UpdateGraphLine(inGraph, vec3(xposl, yposl, 50), vec3(xposr, yposr, 50), color)
+        -- SN.Graphics.CircularGraph.UpdateGraphLine(inGraph, vec3(xposl, yposl, 50), vec3(xposr, yposr, 50), color)
+        for i = 1, math.abs(inWeightValue) * 10, 1 do
+            inGraph:UpdateGraphLineBatch(vec3(xposl, yposl, 80), vec3(xposr, yposr, 80))
+        end
     end
+
+    inGraph:ClearGraphLineBatch()
+    inNeuralNetwork:PrintNeurons(callbackNeuronsOnly) 
     inNeuralNetwork:PrintLines(callbackWeightLines)
     inGraph:ResetLines()
+    inGraph:ResetGraphLineBatch()
 end

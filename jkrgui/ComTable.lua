@@ -89,6 +89,12 @@ Com.Updates                             = function()
     end
 end
 
+Com.NewUpdate = function(inFunction)
+    Com.NewComponent_Update()
+    ComTable_Update[com_upd] = Jkr.Components.Abstract.Updatable:New(inFunction)
+    return com_upd
+end
+
 
 Com.NewEvent              = function(inFunction)
     Com.NewComponent_Event()

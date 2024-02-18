@@ -89,8 +89,8 @@ end
 
 SN.Graphics.CreateGUI = function()
     LoadMaterialComponents(false)
-    local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x, WindowDimension.y, 1))
-    Graph:Update(vec3(0, 0, 90), vec3(WindowDimension.x, WindowDimension.y, 1))
+    local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    Graph:Update(vec3(0, 0, 90), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
         vec2(350, 30), "Simulated Annealing", Com.GetFont("font", "large"))
     -- TODO Error In Canvas NavBar if initialized here IDK Why
@@ -116,7 +116,6 @@ SN.Graphics.CreateGUI = function()
             NavBarElem3:TintColor(vec4(1))
         end
         ClearNavBarColor()
-
 
         local problemWindows = SN.Graphics.CreateProblemWindowsLayout({ Graph, Graph, Graph })
 
@@ -172,6 +171,18 @@ SN.Graphics.CreateGUI = function()
                 end
             end
         end
+    )
+
+    Com.NewUpdate(
+        function ()
+           if E.is_key_pressed_continous(Key.SDL_SCANCODE_LALT) and E.is_left_button_pressed_continous() then
+                local relmousepos = E.get_relative_mouse_pos() 
+                Graph.mPosition_3f.x  = Graph.mPosition_3f.x + relmousepos.x
+                Graph.mPosition_3f.y = Graph.mPosition_3f.y + relmousepos.y
+                SN.Graphics.CircularGraph.Update(Graph, Graph.mPosition_3f, Graph.mDimension_3f)
+           end
+        end
+
     )
 
     collectgarbage("collect")

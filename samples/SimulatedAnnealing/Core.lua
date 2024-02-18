@@ -1,6 +1,6 @@
 require "neural" -- dll written in C++
-math.round = function (inX)
-   return math.floor(inX + 0.5) 
+math.round = function(inX)
+    return math.floor(inX + 0.5)
 end
 
 -- NEURAL NETWORK
@@ -27,9 +27,16 @@ NN.SimpleNN = {
     end,
     PrintNeurons = function(self, inCallback_2fff)
         for i = 1, #self.mTopology, 1 do
-            for j = 0, self.mTopology[i] - 1, 1 do
-                local value = self.mNN:value_of_neuron(i - 1, j)
-                inCallback_2fff(vec2(i, j + 1), value, self.mTopology[i])
+            if i ~= #self.mTopology then
+                for j = 0, self.mTopology[i], 1 do
+                    local value = self.mNN:value_of_neuron(i - 1, j)
+                    inCallback_2fff(vec2(i, j + 1), value, self.mTopology[i])
+                end
+            else
+                for j = 0, self.mTopology[i] - 1, 1 do
+                    local value = self.mNN:value_of_neuron(i - 1, j)
+                    inCallback_2fff(vec2(i, j + 1), value, self.mTopology[i])
+                end
             end
         end
     end,
@@ -37,10 +44,19 @@ NN.SimpleNN = {
         for i = 1, #self.mTopology - 1, 1 do
             local left = self.mTopology[i]
             local right = self.mTopology[i + 1]
-            for x = 1, left, 1 do
-                for y = 1, right, 1 do
-                    local weight = self.mNN:weight_of_connection(i - 1, x - 1, y - 1)
-                    inCallback_fffffff(i, x, self.mTopology[i], i + 1, y, self.mTopology[i + 1], weight)
+            if (i ~= 1) or (i + 1 ~= #self.mTopology) then
+                for x = 1, left + 1, 1 do
+                    for y = 1, right, 1 do
+                        local weight = self.mNN:weight_of_connection(i - 1, x - 1, y - 1)
+                        inCallback_fffffff(i, x, self.mTopology[i], i + 1, y, self.mTopology[i + 1], weight)
+                    end
+                end
+            else
+                for x = 1, left, 1 do
+                    for y = 1, right, 1 do
+                        local weight = self.mNN:weight_of_connection(i - 1, x - 1, y - 1)
+                        inCallback_fffffff(i, x, self.mTopology[i], i + 1, y, self.mTopology[i + 1], weight)
+                    end
                 end
             end
         end
@@ -48,30 +64,30 @@ NN.SimpleNN = {
     Train = function(self, inDataCount)
         self.mNN:dummy_train(inDataCount)
     end,
-    PropagateForward = function (self, inFloats)
-       local float_vec = std_vector_float() 
-       for i = 1, #inFloats, 1 do
-            float_vec:add(inFloats[i]) 
-       end
-       self.mNN:propagate_forward(float_vec)
+    PropagateForward = function(self, inFloats)
+        local float_vec = std_vector_float()
+        for i = 1, #inFloats, 1 do
+            float_vec:add(inFloats[i])
+        end
+        self.mNN:propagate_forward(float_vec)
     end,
-    PropagateForwardVecFloat = function (self, inVec)
-        self.mNN:propagate_forward(inVec) 
+    PropagateForwardVecFloat = function(self, inVec)
+        self.mNN:propagate_forward(inVec)
     end,
-    PropagateBackwardVecFloat = function (self, inVec)
-        self.mNN:propagate_backward_current(inVec) 
+    PropagateBackwardVecFloat = function(self, inVec)
+        self.mNN:propagate_backward_current(inVec)
     end,
-    TrainEXT = function (self, inInput, inOutput)
-       self.mNN:propagate_forward(inInput) 
-       self.mNN:propagate_backward_current(inOutput) 
+    TrainEXT = function(self, inInput, inOutput)
+        self.mNN:propagate_forward(inInput)
+        self.mNN:propagate_backward_current(inOutput)
     end,
-    GetOutputFloatVec = function (self, inLayerNum)
-       return self.mNN:get_layer_vector_float(inLayerNum) 
+    GetOutputFloatVec = function(self, inLayerNum)
+        return self.mNN:get_layer_vector_float(inLayerNum)
     end
 
 }
 
-NN.ImageGetRandomInputInverseOutput = function (inSizeInput, inSizeOutput)
+NN.ImageGetRandomInputInverseOutput = function(inSizeInput, inSizeOutput)
     local invec = std_vector_float()
 
     for i = 1, inSizeInput, 1 do
@@ -81,10 +97,10 @@ NN.ImageGetRandomInputInverseOutput = function (inSizeInput, inSizeOutput)
 
     local outvec = std_vector_float()
     for i = 1, inSizeOutput, 1 do
-       outvec:add(math.round(invec[i])) 
-       --outvec:add(0)
+        outvec:add(math.round(invec[i]))
+        --outvec:add(0)
     end
-    return {invec, outvec}
+    return { invec, outvec }
 end
 
 -- SIMULATED ANNEALING

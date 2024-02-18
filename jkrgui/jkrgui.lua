@@ -347,6 +347,33 @@ Jkr.Components.Static.LineObject = {
 		Obj.mColor_4f = vec4(0, 0, 0, 1)
 		return Obj
 	end,
+	NewBatch = function (self, inLineCount)
+		local Obj = {}
+		Obj.mColor_4f = vec4(0, 0, 0, 1)
+		Obj.mStartId = 0
+		Obj.mEndId = 0
+		Obj.mLines = {}
+		for i = 1, inLineCount, 1 do
+			Obj.mLines[#Obj.mLines+1] = L.Add(vec2(0), vec2(0), 0)	
+		end
+		Obj.mStartId = Obj.mLines[1]
+		Obj.mEndId = Obj.mLines[#Obj.mLines]
+
+		Obj.Draw = function (self)
+			L.Bind()			
+			L.Draw(Obj.mColor_4f, Int(WindowDimension.x), Int(WindowDimension.y), Obj.mStartId, Obj.mEndId, GetIdentityMatrix())
+		end
+
+		Obj.Update = function (self, inPosition1_3f, inPosition2_3f, inId)
+			L.Update(inId, vec2(inPosition1_3f.x, inPosition1_3f.y), vec2(inPosition2_3f.x, inPosition2_3f.y), inPosition1_3f.z)	
+		end
+		
+		Obj.SetColor = function (self, inColor_4f)
+			Obj.mColor_4f = inColor_4f
+		end
+
+		return Obj
+	end,
 	Draw = function(self)
 		L.Bind()
 		L.Draw(self.mColor_4f, Int(WindowDimension.x), Int(WindowDimension.y), Int(self.mLine_Id),

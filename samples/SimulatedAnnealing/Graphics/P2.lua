@@ -210,7 +210,6 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             local inputSize = math.round(math.sqrt(topology[1]))
             local outputSize = math.round(math.sqrt(topology[#topology]))
             if inputSize ~= SN.Graphics.InputPictureCanvas.mXSize or outputSize ~= SN.Graphics.OutputPictureCanvas.mXSize then
-                print("hi")
                 local inputCanvas = SN.Graphics.MakePictureCanvas(inputSize, inputSize)
                 local outputCanvas = SN.Graphics.MakePictureCanvas(outputSize, outputSize)
                 local expectOutCanvas = SN.Graphics.MakePictureCanvas(outputSize, outputSize)
@@ -277,7 +276,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         end
     )
 
-    local trainInverse = function()
+    local trainInverse = function(inShouldDisplay)
         local i = SN.Graphics.InputPictureCanvas
         local eo = SN.Graphics.ExpectedOutputPictureCanvas
         local o = SN.Graphics.OutputPictureCanvas
@@ -287,13 +286,15 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
 
 
-        Com.NewSimultaneousSingleTimeDispatch(
-            function()
-                Com.Canvas.DrawClearFromFloatSingleChannel(i, InputOutputImageFloats[1])
-                Com.Canvas.DrawClearFromFloatSingleChannel(eo, InputOutputImageFloats[2])
-                Com.Canvas.DrawClearFromFloatSingleChannel(o, Output)
-            end
-        )
+        if inShouldDisplay then
+            Com.NewSimultaneousSingleTimeDispatch(
+                function()
+                    Com.Canvas.DrawClearFromFloatSingleChannel(i, InputOutputImageFloats[1])
+                    Com.Canvas.DrawClearFromFloatSingleChannel(eo, InputOutputImageFloats[2])
+                    Com.Canvas.DrawClearFromFloatSingleChannel(o, Output)
+                end
+            )
+        end
         -- Com.NewSimultaneousSingleTimeUpdate(
         --     function()
         --         SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
@@ -311,8 +312,9 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         function()
             local Itrs = tonumber(TrainingCountLineEdit:GetText())
             for i = 1, Itrs, 1 do
-                trainInverse()
+                trainInverse(false)
             end
+            trainInverse(true)
         end
     )
     return Window
