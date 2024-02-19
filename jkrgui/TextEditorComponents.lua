@@ -104,25 +104,29 @@ Com.VisualLineWrapperObject = {
 		self:EraseAll()
 		local linePosition = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
 
-		local lineIndex = 1
-		local visualCharsIndex = 1
-		local newLinesCount = 0
-		local stringBufferLength = utf8.len(self.mStringBuffer)
-		for Line in self.mStringBuffer:gmatch("(.-)\n") do
-			local len = utf8.len(Line)
-			local _newline = newLinesCount + 1
-			local _vischars = visualCharsIndex + len
-			local probabaleNewLinePos = _newline + _vischars - 1
-			local hasNewLine = false
-			if probabaleNewLinePos <= stringBufferLength then
-				if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
-					hasNewLine = true
+		if inDimension_3f.x == 0 then
+			self:EraseAll()
+		else
+			local lineIndex = 1
+			local visualCharsIndex = 1
+			local newLinesCount = 0
+			local stringBufferLength = utf8.len(self.mStringBuffer)
+			for Line in self.mStringBuffer:gmatch("(.-)\n") do
+				local len = utf8.len(Line)
+				local _newline = newLinesCount + 1
+				local _vischars = visualCharsIndex + len
+				local probabaleNewLinePos = _newline + _vischars - 1
+				local hasNewLine = false
+				if probabaleNewLinePos <= stringBufferLength then
+					if utf8.sub(self.mStringBuffer, probabaleNewLinePos, probabaleNewLinePos) == "\n" then
+						hasNewLine = true
+					end
 				end
+				lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
+					visualCharsIndex + newLinesCount, hasNewLine)
+				newLinesCount = _newline
+				visualCharsIndex = _vischars
 			end
-			lineIndex = self:WrapWithin(Line, lineIndex, linePosition, inDimension_3f,
-				visualCharsIndex + newLinesCount, hasNewLine)
-			newLinesCount = _newline
-			visualCharsIndex = _vischars
 		end
 		tracy.ZoneEnd()
 	end,

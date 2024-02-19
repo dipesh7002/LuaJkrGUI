@@ -88,7 +88,6 @@ SN.Graphics.MakePictureWindow = function(InputPicCanvas, OutputPicCanvas, Expect
 end
 
 SN.Graphics.CreateGUI = function()
-    LoadMaterialComponents(false)
     local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
     Graph:Update(vec3(0, 0, 90), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),

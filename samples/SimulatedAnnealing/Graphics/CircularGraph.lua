@@ -134,8 +134,8 @@ SN.Graphics.CircularGraph = {
         Com.NewSimultaneousSingleTimeDispatch(function()
             self.mCanvas.CurrentBrushId = 1
             Com.Canvas.Bind(self.mCanvas)
-            Com.Canvas.Paint(self.mCanvas, vec4(0, 0, self.mDimension_3f.x, self.mDimension_3f.y), inColor_4f,
-                vec4(1.2, 0, 0, 1), self.mDimension_3f.x, self.mDimension_3f.y, 1)
+            Com.Canvas.Paint(self.mCanvas, vec4(0, 0, WindowDimension.x * 2, WindowDimension.y * 2), inColor_4f,
+                vec4(1.2, 0, 0, 1), WindowDimension.x * 2, WindowDimension.y * 2, 1)
         end)
 
         -- for i = 1, #self.mLines, 1 do

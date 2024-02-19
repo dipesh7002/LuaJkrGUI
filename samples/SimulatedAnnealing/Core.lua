@@ -1,4 +1,3 @@
-require "neural" -- dll written in C++
 math.round = function(inX)
     return math.floor(inX + 0.5)
 end
@@ -19,9 +18,9 @@ NN.SimpleNN = {
             topology:add(inTopology[i])
         end
         if inLearningRate then
-            Obj.mNN = neur.network(topology, inLearningRate)
+            Obj.mNN = neural.network(topology, inLearningRate)
         else
-            Obj.mNN = neur.network(topology)
+            Obj.mNN = neural.network(topology)
         end
         return Obj
     end,
@@ -62,7 +61,7 @@ NN.SimpleNN = {
         end
     end,
     Train = function(self, inDataCount)
-        self.mNN:dummy_train(inDataCount)
+        print("This function is to be removed")
     end,
     PropagateForward = function(self, inFloats)
         local float_vec = std_vector_float()
@@ -83,8 +82,15 @@ NN.SimpleNN = {
     end,
     GetOutputFloatVec = function(self, inLayerNum)
         return self.mNN:get_layer_vector_float(inLayerNum)
+    end,
+    AddSAData = function(self, inInput, inOutput)
+        self.mNN:add_sa_data(inInput, inOutput)
+    end,
+    ApplySA = function (self, inTemperature, inIterations)
+        if not inTemperature then inTemperature = 0.01 end
+        if not inIterations then inIterations = 20000 end
+        self.mNN:apply_sa(inTemperature, inIterations)
     end
-
 }
 
 NN.ImageGetRandomInputInverseOutput = function(inSizeInput, inSizeOutput)
