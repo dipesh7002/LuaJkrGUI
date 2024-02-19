@@ -1,5 +1,7 @@
 local normal_color = Theme.Colors.Button.Normal * 8
 local hover_color = Theme.Colors.Button.Hover * 1.4
+normal_color.w = 0.7
+hover_color.w = 0.5
 local large_font = Com.GetFont("font", "large")
 local area_color = vec4(0.8, 0.8, 0.8, 0.5)
 
@@ -106,10 +108,10 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
         local layer2_neurons = tonumber(Layer2TextLineEdit:GetText())
         local layer3_neurons = tonumber(Layer3TextLineEdit:GetText())
         local layer4_neurons = tonumber(Layer4TextLineEdit:GetText())
-        local layer5_neurons = tonumber(Layer4TextLineEdit:GetText())
-        local layer6_neurons = tonumber(Layer4TextLineEdit:GetText())
-        local layer7_neurons = tonumber(Layer4TextLineEdit:GetText())
-        local layer8_neurons = tonumber(Layer4TextLineEdit:GetText())
+        local layer5_neurons = tonumber(Layer5TextLineEdit:GetText())
+        local layer6_neurons = tonumber(Layer6TextLineEdit:GetText())
+        local layer7_neurons = tonumber(Layer7TextLineEdit:GetText())
+        local layer8_neurons = tonumber(Layer8TextLineEdit:GetText())
         return { layer1_neurons, layer2_neurons, layer3_neurons, layer4_neurons, layer5_neurons, layer6_neurons, layer7_neurons, layer8_neurons }
     end
 

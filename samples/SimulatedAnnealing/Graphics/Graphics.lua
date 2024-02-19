@@ -97,7 +97,7 @@ SN.Graphics.CreateGUI = function()
     local insideWindow = function()
         local area = Com.AreaObject:New(vec3(0), vec3(0))
         Com.AreaObject.SetFillColor(area, vec4(0.8, 0.8, 0.8, 0.5))
-        local color_navbarind = vec4(1, 0.4, 0.8, 1)
+        local color_navbarind = vec4(0.5, 0.1, 0.2, 1)
         local color_tint = vec4(1, 0, 0, 0.01)
 
         local NavBarElem1 = Com.AreaButton:New(vec3(0), vec3(0))
@@ -110,9 +110,9 @@ SN.Graphics.CreateGUI = function()
             true)
 
         local ClearNavBarColor = function()
-            NavBarElem1:TintColor(vec4(1))
-            NavBarElem2:TintColor(vec4(1))
-            NavBarElem3:TintColor(vec4(1))
+            NavBarElem1:TintColor(vec4(0.5))
+            NavBarElem2:TintColor(vec4(0.5))
+            NavBarElem3:TintColor(vec4(0.5))
         end
         ClearNavBarColor()
 
@@ -127,7 +127,7 @@ SN.Graphics.CreateGUI = function()
 
         NavBarElem1:SetFunctions(
             function() NavBarElem1:TintColor(color_tint) end,
-            function() NavBarElem1:TintColor(vec4(1)) end,
+            function() NavBarElem1:TintColor(vec4(0.1)) end,
             function()
                 ClearNavBarColor()
                 problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 1, 0.2)
@@ -135,7 +135,7 @@ SN.Graphics.CreateGUI = function()
             end)
         NavBarElem2:SetFunctions(
             function() NavBarElem2:TintColor(color_tint) end,
-            function() NavBarElem2:TintColor(vec4(1)) end,
+            function() NavBarElem2:TintColor(vec4(0.1)) end,
             function()
                 ClearNavBarColor()
                 problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 2, 0.2)
@@ -143,7 +143,7 @@ SN.Graphics.CreateGUI = function()
             end)
         NavBarElem3:SetFunctions(
             function() NavBarElem3:TintColor(color_tint) end,
-            function() NavBarElem3:TintColor(vec4(1)) end,
+            function() NavBarElem3:TintColor(vec4(0.1)) end,
             function()
                 ClearNavBarColor()
                 problemWindows:Update(problemWindows.mPosition_3f, problemWindows.mDimension_3f, 3, 0.2)
