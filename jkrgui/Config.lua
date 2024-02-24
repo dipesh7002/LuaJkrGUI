@@ -10,5 +10,5 @@ Theme.Colors.Text.Cursor = {}
 Theme.Colors.Text.Cursor.Normal = vec4(0.5, 0.5, 0.5, 1)
 Theme.Colors.Text.Cursor.Active = vec4(1, 0, 0, 1)
 Theme.Colors.Area = {}
-Theme.Colors.Area.Normal = vec4(237 / 255, 237 / 255, 235 / 255, 0.8)
-Theme.Colors.Area.Border = vec4(230 / 255, 230 / 255, 220 / 255, 0.7)
+Theme.Colors.Area.Normal = vec4(255 / 255, 237 / 255, 235 / 255, 0.7)
+Theme.Colors.Area.Border = vec4(255 / 255, 230 / 255, 220 / 255, 0.6)

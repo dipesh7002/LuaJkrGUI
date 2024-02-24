@@ -67,7 +67,7 @@ SN.Graphics.CircularGraph = {
         -- LINE BATCH
         ------------------------------------------------------------------------------------
         Obj.mLineBatch = Jkr.Components.Static.LineObject:NewBatch(Obj.mLineCount)
-        Obj.mLineBatch:SetColor(vec4(0, 1, 0, 0.1))
+        Obj.mLineBatch:SetColor(vec4(0, 0, 0, 0.1))
         Obj.mCurrentBatchLine = Obj.mLineBatch.mStartId
         Com.NewComponent()
         ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(
@@ -96,11 +96,7 @@ SN.Graphics.CircularGraph = {
             Obj:ResetGraphLineBatch()
         end
         -------------------------------------------------------------------------------------
-
-
         -- Obj.mLines = {}
-
-
         -- for i = 1, Obj.mLineCount, 1 do
         --     Com.NewComponent()
         --     ComTable[com_i] = Jkr.Components.Static.LineObject:New(vec3(0, 0, 1), vec3(0, 0, 1))
@@ -196,10 +192,9 @@ SN.Graphics.DrawNeuralNetworkToGraph = function(inNeuralNetwork, inGraph, inSimu
             radius / 2
         local yposr = middle_pos_y - inRightNeuronCount / 2 * dis_between_neurons + inRightNeuron * dis_between_neurons +
             radius / 2
-        local color = vec4(-inWeightValue, inWeightValue, 0, math.abs(inWeightValue))
         -- SN.Graphics.CircularGraph.UpdateGraphLine(inGraph, vec3(xposl, yposl, 50), vec3(xposr, yposr, 50), color)
         for i = 1, math.abs(inWeightValue) * 10, 1 do
-            inGraph:UpdateGraphLineBatch(vec3(xposl, yposl, 80), vec3(xposr, yposr, 80))
+            inGraph:UpdateGraphLineBatch(vec3(xposl, yposl, 90), vec3(xposr, yposr, 90))
         end
     end
 

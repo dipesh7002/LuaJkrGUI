@@ -28,14 +28,19 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
             local oldDimen = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
             local from = { mPosition_3f = oldPos, mDimension_3f = oldDimen }
             local to = { mPosition_3f = newPos, mDimension_3f = newDimen }
-            -- Com.AnimateSingleTimePosDimenCallback(from, to, invspeed,
-            --     function(pos, dimen)
-            --         Com.HLayout.Update(self, pos, dimen)
-            --     end,
-            --     function()
-            --         self.mPosition_3f = inPosition_3f
-            --         self.mDimension_3f = inDimension_3f
-            --     end)
+            Com.AnimateSingleTimePosDimenCallback(from, to, invspeed,
+                function(pos, dimen)
+                    Com.HLayout.Update(self, pos, dimen)
+                end,
+                function()
+                    self.mPosition_3f = inPosition_3f
+                    self.mDimension_3f = inDimension_3f
+                    for i=1, #self.mComponents do
+                        if i ~= inWindowNo then
+                            self.mComponents[i]:Update(vec3(0), vec3(0))
+                        end
+                    end
+                end)
             Com.HLayout.Update(self, newPos, newDimen)
         else
             Com.HLayout.Update(self, newPos, newDimen)

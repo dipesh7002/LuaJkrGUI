@@ -1,115 +1,21 @@
---[[
-JkrGUI lua
-]]
-
-
 local AlternativeTextRenderer = true
-
--- this is for utf8 strings (the string that supports कखग), ignore it
-
 function utf8.sub(s, i, j)
 	i = utf8.offset(s, i)
 	j = utf8.offset(s, j + 1) - 1
 	return string.sub(s, i, j)
 end
-
--- These are aliases (Same name for an identifier), the Lua Bindings that is generated has snake case (snake_case), trying to convert into
--- CamelCase (words separated by Capital letters).
-
-
---[[
-returns vec2 that gives window's width and height, local dimen = GetWindowDimensions()
-dimen.x ani dimen.y garna milxa
-]]
 GetWindowDimensions = get_window_dimensions
-
-
---[[
-        returns identity matrix mat4 = {
-                1, 0, 0, 0
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-        }
-]]
 GetIdentityMatrix = get_identity_matrix
-
---[[
-        This is a Usertype, It represents Shapes OR generates shapes
-]]
 Generator = generator
-
---[[
-        ENUM VANEKO K HO VANNE KURO
-        enum class state = {
-                running,
-                stopped,
-                started
-        };
-        auto variable = state::running;
-        if(variable == state::stopped)
-        {
-                stop_program();
-        }
-
-
-       THIS is an enum that stores type of shape object
-       shapes.rectangle, shapes.bezier2_8, shapes.circle
-]]
-
 Shapes = shapes
-
---[[
-        This is the function that translates a matrix by vec3
-        local translated_matrix = translate(get_identity_matrix(), vec3(5, 5, 10))
-]]
 Translate = translate
-
---[[
-        This is also an enum
-        fill_type.image
-        fill_type.fill
-        fill_type.continous_line
-]]
 FillType = fill_type
-
---[[
-        lua has only number as types of number, not int, float, double, nothing like that
-
-        to convert float to int, we should do math.floor(number)
-        local x = 5.0
-        x = math.floor(x)
-        If a function expects an integer, we should do math.floor(number)
-        After this alias, we can do Int(x)
-]]
-
 Int = math.floor
-
---[[
-        Jkr is basically a namespace "Renderer" namespace to be precise
-]]
 Jkr = r;
 Jkr3d = r3d;
 Jmath3D = jmath3D
-
---[[
-       This is the entity that can give information about mouse keyboard etc,
-       E.is_left_button_pressed() -- return bool
-       E.is_right_button_pressed() -- return bool
-]]
 E = event_manager -- EventManager
-
-local text_bound = false
-local line_bound = false
-
---[[
-        This is the shape renderer, we can do S.something
-]]
-
 S = Jkr.sh -- Shape Renderer
---[[
-        We can add shapes with S.Add()
-]]
 S.Add = S.add
 S.AddImage = S.add_image
 S.CopyImage = S.copy_image
@@ -118,18 +24,11 @@ S.BindFillMode = S.bind_fill_mode
 S.Draw = S.draw
 S.BindImage = S.bind_image
 S.Update = S.update
-
---[[
-        This is the line renderer
-]]
 L = Jkr.ln -- Line Renderer
 L.Add = L.add
 L.Update = L.update
 L.Draw = L.draw
 L.Bind = L.bind
---[[
-        This is shape renderer
-]]
 T = Jkr.bt -- Text Renderer
 T.SetCurrentFace = T.set_current_face
 T.Add = T.add
@@ -141,28 +40,15 @@ T.GetTextDimension = T.get_text_dimension
 T.Update = T.update
 TextH = text_horizontal
 TextV = text_vertical
-
--- Suggesstions aaos vanera lekheko ho yo chae
 vec2 = vec2
 uvec2 = uvec2
 vec3 = vec3
 vec4 = vec4
-
 Print_vec3 = function(inVec3)
 	print(string.format("v(%f, %f, %f)", inVec3.x, inVec3.y, inVec3.z))
 end
-
-
 Key = key
-
 require "jkrgui.Config" -- #include "Config" vane jastai C ma
-
---[[
-        Depth value ranges from 0 to 100,
-        0 means nearest to the camera
-        100 means farthest from the camera
-        Depth is basically a  reference taken.
-]]
 Time = 0                                -- Increments each frame
 WindowDimension = GetWindowDimensions() -- Can get Window dimensions just by doing WindowDimension.x, WindowDimension.y
 DisplayDimension = get_display_dimensions()
@@ -204,10 +90,6 @@ function D(inx, iny, inz)
 	return vec3(inx, iny, 1)
 end
 
---[[
-        This is a fontObject, which holds a certain font of certain size
-]]
-
 Jkr.FontObject = {
 	mPath = " ",
 	mId = 0,
@@ -240,11 +122,6 @@ Jkr.FontObject = {
 		return { s = substr1, n = utf8.len(inString) - i }
 	end
 }
-
---[[
-        As everything is Widgets in flutter, it is similar here, everything is a ComponentObject,
-        It has position, dimension, focus and stuff like those
-]]
 
 Jkr.ComponentObject = {
 	mPosition_3f = vec3(0, 0, 0),

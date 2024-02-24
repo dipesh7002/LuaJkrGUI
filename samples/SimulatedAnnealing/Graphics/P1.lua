@@ -1,6 +1,9 @@
 local normal_color = Theme.Colors.Button.Normal * 8
 local hover_color = Theme.Colors.Button.Hover * 1.4
+normal_color.w = 0.7
+hover_color.w = 0.5
 local large_font = Com.GetFont("font", "large")
+local area_color = vec4(0.8, 0.8, 0.8, 0.5)
 
 SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),

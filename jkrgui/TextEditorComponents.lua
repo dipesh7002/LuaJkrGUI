@@ -346,6 +346,9 @@ Com.VisualTextEditObject = {
 		end
 		local cursorDimen = vec3(self.mCursor.mWidth, self.mVerticalDrawSpacing, 1)
 		self.mCursor:Update(cursorPos, cursorDimen)
+		if inDimension_3f.x == 0 then
+			self.mCursor:Update(vec3(0), vec3(0))
+		end
 		self.mPosition_3f = inPosition_3f
 		self.mDimension_3f = inDimension_3f
 		tracy.ZoneEnd()

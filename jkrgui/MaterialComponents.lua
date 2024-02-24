@@ -22,6 +22,10 @@ function LoadMaterialComponents(inLoadCompute)
 			"icons_material/arrow_drop_down/baseline-2x.png")
 		DropUp = Jkr.Components.Abstract.ImageObject:New(0, 0,
 			"icons_material/arrow_drop_up/baseline-2x.png")
+		radio_button_checked = Jkr.Components.Abstract.ImageObject:New(0, 0,
+			"icons_material/radio_button_checked/baseline-2x.png")
+		radio_button_unchecked = Jkr.Components.Abstract.ImageObject:New(40, 40,
+			"icons_material/radio_button_unchecked/baseline-2x.png")
 	else
 		-- These are ought to be cleaned up, but for now, this is it.
 		local Painter_Image = Jkr.Components.Abstract.PainterImageObject:New(40, 40)
@@ -35,7 +39,7 @@ function LoadMaterialComponents(inLoadCompute)
 			function()
 				Ip_Clear:BindImage()
 				Ip_RoundedCircle:BindPainter()
-				Ip_RoundedCircle:Paint(vec4(0, 0, 0.4, 0.4), vec4(1), vec4(0), ImagePrev, Ip_Clear)
+				Ip_RoundedCircle:Paint(vec4(0, 0, 1, 1), vec4(1), vec4(0), ImagePrev, Ip_Clear)
 			end
 		)
 		CheckedImagePreload = ImagePrev
@@ -263,6 +267,127 @@ function LoadMaterialComponents(inLoadCompute)
 				end
 			end
 		end
+	}
+
+	Com.RadioButton = {
+		mPosition_3f = nil,
+		mDimension_3f = nil,
+		mFontObject = nil,
+		mPadding = nil,
+		mTextLabel = {},
+		mRadioButtonChecked = {},
+		mRadioButtonUnChecked = {},
+		New = function(self, inFontObject, inMaxNoOfEntries, inPadding)
+			local Obj = {
+				mPosition_3f = nil,
+				mDimension_3f = nil,
+				mFontObject = inFontObject,
+				mPadding = inPadding,
+				mTextLabel = {},
+				mRadioButtonChecked = {},
+				mRadioButtonUnChecked = {},
+				area = {},
+				mMaxNoOfEntries = inMaxNoOfEntries,
+			}
+			setmetatable(Obj, self)
+			self.__index = self
+			for i = 1, inMaxNoOfEntries, 1 do
+				Obj.mTextLabel[i] = Com.TextLabelObject:New(" ", vec3(0, 0, 0), inFontObject)
+				Obj.mRadioButtonChecked[i] = Com.IconButton:New(vec3(0, 0, 0), vec3(0, 0, 0), radio_button_checked)
+				Obj.mRadioButtonUnChecked[i] = Com.IconButton:New(vec3(0, 0, 0), vec3(0, 0, 0), radio_button_unchecked)
+			end
+			return Obj
+		end,
+		GetCheckedValue = function (self, inIndex)
+			return self.mIndexTable[inIndex]	
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inTextLabelTable, inDefaultIndexTable)
+			if inTextLabelTable then
+				self.mTextLableStringTable = inTextLabelTable
+			end
+			if inDefaultIndexTable then
+				self.mIndexTable = inDefaultIndexTable
+			end
+			local no_of_entries = #self.mTextLableStringTable
+			self.mPosition_3f = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+			self.mDimension_3f = vec3(inDimension_3f.x, inDimension_3f.y, inDimension_3f.z)
+			local dimensionforicon = vec3(inDimension_3f.y, inDimension_3f.y, inDimension_3f.z)
+			local positionforicon = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+			local position_each_button = {}
+			for i = 1, no_of_entries, 1 do
+				position_each_button[i] = vec3(positionforicon.x, positionforicon.y, positionforicon.z)
+				for index, value in ipairs(self.mIndexTable) do
+					if i == value then
+						self.mRadioButtonChecked[i]:Update(positionforicon, dimensionforicon)
+						positionforicon.y = positionforicon.y + dimensionforicon.y + self.mPadding
+						goto continue
+					end
+				end
+				self.mRadioButtonUnChecked[i]:Update(positionforicon, dimensionforicon)
+				positionforicon.y = positionforicon.y + dimensionforicon.y + self.mPadding
+				::continue::
+			end
+
+
+			local position = vec3(inPosition_3f.x, inPosition_3f.y, inPosition_3f.z)
+			for i = 1, no_of_entries, 1 do
+				local dimens_string = self.mFontObject:GetDimension(self.mTextLableStringTable[i])
+				local positionfortext = vec3(position.x + dimensionforicon.x + 5,
+					position.y + dimensionforicon.y / 2 + dimens_string.y / 2.5, position.z)
+				self.mTextLabel[i]:Update(positionfortext, vec3(0, 0, 0), self.mTextLableStringTable[i])
+				position.y = position.y + dimensionforicon.y + self.mPadding
+			end
+
+			if inDimension_3f.x == 0 then
+				for i = 1, no_of_entries, 1 do
+					local dimens_string = self.mFontObject:GetDimension(self.mTextLableStringTable[i])
+					local positionfortext = vec3(position.x + dimensionforicon.x + 5,
+						position.y + dimensionforicon.y / 2 + dimens_string.y / 2.5, position.z)
+					self.mTextLabel[i]:Update(positionfortext, vec3(0, 0, 0), " ")
+					position.y = position.y + dimensionforicon.y + self.mPadding
+
+					for index, value in ipairs(self.mIndexTable) do
+						self.mRadioButtonChecked[i]:Update(positionforicon, dimensionforicon)
+						self.mRadioButtonChecked[i]:Update(positionforicon, dimensionforicon)
+						positionforicon.y = positionforicon.y + dimensionforicon.y + self.mPadding
+					end
+				end
+			end
+			local This = self
+
+			for i = 1, no_of_entries, 1 do
+				self.mRadioButtonChecked[i]:SetFunctions(
+					function()
+					end,
+					function()
+					end,
+					function()
+						This.mRadioButtonChecked[i]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+						Com.NewSimultaneousSingleTimeUpdate(
+							function()
+								This.mIndexTable[i] = false
+								This.mRadioButtonUnChecked[i]:Update(position_each_button[i], dimensionforicon)
+							end
+						)
+					end)
+				self.mRadioButtonUnChecked[i]:SetFunctions(
+					function()
+					end,
+					function()
+					end,
+					function()
+						This.mRadioButtonUnChecked[i]:Update(vec3(0, 0, 0), vec3(0, 0, 0))
+						Com.NewSimultaneousSingleTimeUpdate(
+							function()
+								This.mIndexTable[i] = true
+								This.mRadioButtonChecked[i]:Update(position_each_button[i], dimensionforicon)
+							end
+						)
+					end)
+			end
+		end
+
+
 	}
 
 	Com.TextButton = {
@@ -875,34 +1000,34 @@ function LoadMaterialComponents(inLoadCompute)
 				Com.VisualTextEditObject.CursorInsert(Obj.mLineEdit, inInitialString)
 			end
 			Obj.mLayout = Com.VLayout:New(0)
-			Obj.mLayout:AddComponents({Com.VLayout:New(0), Obj.mLineEdit, Obj.mLineIndicatorArea}, {0.20, 0.7, 0.10})
+			Obj.mLayout:AddComponents({ Com.VLayout:New(0), Obj.mLineEdit, Obj.mLineIndicatorArea }, { 0.20, 0.7, 0.10 })
 			Obj.mLayout:Update(vec3(200, 200, 1), vec3(2000, 2000, 1))
 			Obj.turnedOn = false
 			Com.NewEvent(
-				function ()
+				function()
 					if Obj.mLineEdit:IsClickedEvent() then
 						Obj.turnedOn = not Obj.turnedOn
 					end
 
-				if E.is_mousepress_event() and E.is_left_button_pressed() and not Obj.mLineEdit:IsClickedEvent() then
+					if E.is_mousepress_event() and E.is_left_button_pressed() and not Obj.mLineEdit:IsClickedEvent() then
 						Obj.turnedOn = false
 					end
 
 					if Obj.turnedOn then
-						Obj.mLineIndicatorArea:SetFillColor(vec4(1, 0, 0, 1))		
+						Obj.mLineIndicatorArea:SetFillColor(vec4(1, 0, 0, 1))
 					else
-						Obj.mLineIndicatorArea:SetFillColor(vec4(1, 1, 1, 1))		
+						Obj.mLineIndicatorArea:SetFillColor(vec4(1, 1, 1, 1))
 					end
 				end
 			)
 			return Obj
 		end,
-		Update = function (self, inPosition_3f, inDimension_3f)
+		Update = function(self, inPosition_3f, inDimension_3f)
 			tracy.ZoneBeginN("Material Line Edit")
 			self.mLayout:Update(inPosition_3f, inDimension_3f)
 			tracy.ZoneEnd()
 		end,
-		GetText = function (self)
+		GetText = function(self)
 			return self.mLineEdit.mStringBuffer
 		end
 	}

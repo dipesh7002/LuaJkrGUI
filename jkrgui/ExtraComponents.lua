@@ -63,7 +63,7 @@ Com.Canvas = {
 				-- print("IJ:", i, j)
 				self:Bind()
 				local red_intensity = inFloatVec[(i - 1) + (j - 1) * self.mCanvasSize_2f.x + 1]
-				self:Paint(vec4(i - 1, j - 1, 1, 1), vec4(red_intensity, 0, 0, 1), vec4(0), 1, 1, 1)	
+				self:Paint(vec4(i - 1, j - 1, 1, 1), vec4(-red_intensity, 0, red_intensity, 1), vec4(0), 1, 1, 1)	
 			end
 		end
 	end

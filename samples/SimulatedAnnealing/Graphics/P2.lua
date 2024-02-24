@@ -9,7 +9,8 @@ SN.Graphics.LayerListWindow = nil
 SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
     local AreaO = Com.AreaObject:New(vec3(0), vec3(0))
     Com.AreaObject.SetFillColor(AreaO, area_color)
-    SN.Graphics.LayerListWindow = Com.MaterialWindow:New(vec3(0), vec3(0), vec2(400, 30), "CreateNN", Com.GetFont("font", "large"))
+    SN.Graphics.LayerListWindow = Com.MaterialWindow:New(vec3(0), vec3(0), vec2(400, 30), "CreateNN",
+        Com.GetFont("font", "large"))
 
     local Layer1HLayout = Com.HLayout:New(0)
     local Layer1Text = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Layer1")
@@ -56,6 +57,12 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
     local LearningRateLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "0.05")
     LearningRateHLayout:AddComponents({ LearningRateText, LearningRateLineEdit }, { 0.5, 1 - 0.5 })
 
+    local RadioImageOnOffHLayout = Com.HLayout:New(0)
+    -- local RadioImageOnOffText= Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "Create Img")
+    local RadioImageOnOff = Com.RadioButton:New(large_font, 2, 2)
+    RadioImageOnOff:Update(vec3(0), vec3(0), { "Images" }, { false })
+    RadioImageOnOffHLayout:AddComponents({ Com.HLayout:New(0), RadioImageOnOff }, { 0.5, 1 - 0.5 })
+
     local CreateNNHLayout = Com.HLayout:New(0)
     local CreateNNButton = Com.TextButton:New(vec3(0), vec3(0), Com.GetFont("font", "large"), "Create NN & Img")
     CreateNNHLayout:AddComponents({ CreateNNButton, Com.HLayout:New(0) }, { 0.7, 1 - 0.7 })
@@ -69,8 +76,10 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
         Layer6HLayout,
         Layer7HLayout,
         Layer8HLayout,
-        Com.VLayout:New(0),
+        -- Com.VLayout:New(0),
         LearningRateHLayout,
+        -- Com.VLayout:New(0),
+        RadioImageOnOffHLayout,
         Com.VLayout:New(0),
         CreateNNHLayout,
         Com.VLayout:New(0)
@@ -85,10 +94,10 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
     SN.Graphics.LayerListWindow:SetCentralComponent(VLayout)
     SN.Graphics.LayerListWindow:Update(vec3(0), vec3(0), vec2(0))
 
-    VLayout.Update = function (self, inPosition_3f, inDimension_3f)
-       Com.VLayout.Update(self, inPosition_3f, inDimension_3f) 
-       local AreaPos = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z + 5)
-       AreaO:Update(AreaPos, inDimension_3f)
+    VLayout.Update = function(self, inPosition_3f, inDimension_3f)
+        Com.VLayout.Update(self, inPosition_3f, inDimension_3f)
+        local AreaPos = vec3(self.mPosition_3f.x, self.mPosition_3f.y, self.mPosition_3f.z + 5)
+        AreaO:Update(AreaPos, inDimension_3f)
     end
 
     local Obj = {}
@@ -102,7 +111,7 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
             Obj.mRemoved = true
         end
     end
-    
+
     Obj.GetTopologyByTextFieldsLayer = function()
         local layer1_neurons = tonumber(Layer1TextLineEdit:GetText())
         local layer2_neurons = tonumber(Layer2TextLineEdit:GetText())
@@ -112,11 +121,16 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
         local layer6_neurons = tonumber(Layer6TextLineEdit:GetText())
         local layer7_neurons = tonumber(Layer7TextLineEdit:GetText())
         local layer8_neurons = tonumber(Layer8TextLineEdit:GetText())
-        return { layer1_neurons, layer2_neurons, layer3_neurons, layer4_neurons, layer5_neurons, layer6_neurons, layer7_neurons, layer8_neurons }
+        return { layer1_neurons, layer2_neurons, layer3_neurons, layer4_neurons, layer5_neurons, layer6_neurons,
+            layer7_neurons, layer8_neurons }
     end
 
-    Obj.GetLearningRate = function ()
+    Obj.GetLearningRate = function()
         return tonumber(LearningRateLineEdit:GetText())
+    end
+
+    Obj.GetImageOnOffRadioButtonState = function()
+        return Com.RadioButton.GetCheckedValue(RadioImageOnOff, 1)
     end
 
     CreateNNButton:SetFunctions(
@@ -151,11 +165,12 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
 
     local PropagateForwardPictureHLayout = Com.HLayout:New(0)
     local PropagateForwardPictureButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Propagate Forward")
-    PropagateForwardPictureHLayout:AddComponents({ PropagateForwardPictureButton, Com.HLayout:New(0)}, { 0.5, 1 - 0.5 })
+    PropagateForwardPictureHLayout:AddComponents({ PropagateForwardPictureButton, Com.HLayout:New(0) }, { 0.5, 1 - 0.5 })
 
     local PropagateBackwardPictureHLayout = Com.HLayout:New(0)
     local PropagateBackwardPictureButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Propagate Backward")
-    PropagateBackwardPictureHLayout:AddComponents({ PropagateBackwardPictureButton, Com.HLayout:New(0) }, { 0.5, 1 - 0.5 })
+    PropagateBackwardPictureHLayout:AddComponents({ PropagateBackwardPictureButton, Com.HLayout:New(0) },
+        { 0.5, 1 - 0.5 })
 
     local UpdatePicHLayout = Com.HLayout:New(0)
     local UpdatePicButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Update")
@@ -217,21 +232,24 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
 
     -- ASSISTING SUBWINDOWS====================
     ----------------------------------------------------------------------------------------------------
+    local update_to_image = true
     local CreateNNSubWindow = {}
     Com.NewSimultaneousUpdate()
-    local createNNFunction = function ()
-            local c = SN.Graphics.InputPictureCanvas
-            local o = SN.Graphics.OutputPictureCanvas
-            local topology = CreateNNSubWindow.GetTopologyByTextFieldsLayer()
-            local learningRate = CreateNNSubWindow.GetLearningRate()
-            mero_NN = NN.SimpleNN:New(topology, learningRate)
-            Com.ClearSingleTimes()
-            local inputSize = math.round(math.sqrt(topology[1]))
-            local outputSize = math.round(math.sqrt(topology[#topology]))
-            if inputSize ~= SN.Graphics.InputPictureCanvas.mXSize or outputSize ~= SN.Graphics.OutputPictureCanvas.mXSize then
-                if SN.Graphics.PictureWindow then
-                    SN.Graphics.PictureWindow:Update(vec3(0), vec3(0))
-                end
+    local createNNFunction = function()
+        local c = SN.Graphics.InputPictureCanvas
+        local o = SN.Graphics.OutputPictureCanvas
+        local topology = CreateNNSubWindow.GetTopologyByTextFieldsLayer()
+        local learningRate = CreateNNSubWindow.GetLearningRate()
+        mero_NN = NN.SimpleNN:New(topology, learningRate)
+        Com.ClearSingleTimes()
+        local inputSize = math.round(math.sqrt(topology[1]))
+        local outputSize = math.round(math.sqrt(topology[#topology]))
+        if inputSize ~= SN.Graphics.InputPictureCanvas.mXSize or outputSize ~= SN.Graphics.OutputPictureCanvas.mXSize then
+            if SN.Graphics.PictureWindow then
+                SN.Graphics.PictureWindow:Update(vec3(0), vec3(0))
+            end
+            update_to_image = CreateNNSubWindow.GetImageOnOffRadioButtonState()
+            if update_to_image then
                 local inputCanvas = SN.Graphics.MakePictureCanvas(inputSize, inputSize)
                 local outputCanvas = SN.Graphics.MakePictureCanvas(outputSize, outputSize)
                 local expectOutCanvas = SN.Graphics.MakePictureCanvas(outputSize, outputSize)
@@ -239,16 +257,16 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
                 SN.Graphics.PictureWindow:Update(vec3(WindowDimension.x - 600, WindowDimension.y - 600, 80),
                     vec3(200, 600, 80))
             end
-            -- SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0))
-            Com.NewSimultaneousUpdate()
-            Com.NewSimultaneousSingleTimeUpdate(function()
-                SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph,
-                    true)
-            end)
-        
+        end
+        -- SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0))
+        Com.NewSimultaneousUpdate()
+        Com.NewSimultaneousSingleTimeUpdate(function()
+            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph,
+                true)
+        end)
     end
-    Com.NewSimultaneousSingleTimeUpdate(function ()
-       CreateNNSubWindow =  SN.Graphics.CreatePopupLayerListWindow(createNNFunction)
+    Com.NewSimultaneousSingleTimeUpdate(function()
+        CreateNNSubWindow = SN.Graphics.CreatePopupLayerListWindow(createNNFunction)
     end)
     ----------------------------------------------------------------------------------------------------
     ----------------------------------------------------------------------------------------------------
@@ -261,7 +279,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             CreateButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
         end,
         function()
-            CreateNNSubWindow.PopUp() 
+            CreateNNSubWindow.PopUp()
         end
     )
 
@@ -269,11 +287,13 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         local ImageF = Com.Canvas.GetVectorFloatSingleChannel(SN.Graphics.InputPictureCanvas)
         mero_NN:PropagateForwardVecFloat(ImageF)
         local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
-        Com.NewSimultaneousSingleTimeDispatch(
-            function()
-                Com.Canvas.DrawClearFromFloatSingleChannel(SN.Graphics.OutputPictureCanvas, Output)
-            end
-        )
+        if update_to_image then
+            Com.NewSimultaneousSingleTimeDispatch(
+                function()
+                    Com.Canvas.DrawClearFromFloatSingleChannel(SN.Graphics.OutputPictureCanvas, Output)
+                end
+            )
+        end
         SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
     end
     local propBackward = function()
@@ -321,40 +341,48 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     )
 
     local trainByBP = function(inShouldDisplay)
-        local i = SN.Graphics.InputPictureCanvas
-        local eo = SN.Graphics.ExpectedOutputPictureCanvas
-        local o = SN.Graphics.OutputPictureCanvas
-        local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize, o.mXSize * o.mYSize)
-        mero_NN:PropagateForwardVecFloat(InputOutputImageFloats[1])
-        mero_NN:PropagateBackwardVecFloat(InputOutputImageFloats[2])
-        local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
-        if inShouldDisplay then
-            Com.NewSimultaneousSingleTimeDispatch(
-                function()
-                    Com.Canvas.DrawClearFromFloatSingleChannel(i, InputOutputImageFloats[1])
-                    Com.Canvas.DrawClearFromFloatSingleChannel(eo, InputOutputImageFloats[2])
-                    Com.Canvas.DrawClearFromFloatSingleChannel(o, Output)
-                end
-            )
+        if update_to_image then
+            local i = SN.Graphics.InputPictureCanvas
+            local eo = SN.Graphics.ExpectedOutputPictureCanvas
+            local o = SN.Graphics.OutputPictureCanvas
+            local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize, o.mXSize * o.mYSize)
+            mero_NN:PropagateForwardVecFloat(InputOutputImageFloats[1])
+            mero_NN:PropagateBackwardVecFloat(InputOutputImageFloats[2])
+            local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+            if inShouldDisplay then
+                Com.NewSimultaneousSingleTimeDispatch(
+                    function()
+                        Com.Canvas.DrawClearFromFloatSingleChannel(i, InputOutputImageFloats[1])
+                        Com.Canvas.DrawClearFromFloatSingleChannel(eo, InputOutputImageFloats[2])
+                        Com.Canvas.DrawClearFromFloatSingleChannel(o, Output)
+                    end
+                )
+            end
         end
     end
 
+    SN.Graphics.GetCurrentNN = function()
+        return mero_NN
+    end
+
     local AddSAData = function(inShouldDisplay)
-        local i = SN.Graphics.InputPictureCanvas
-        local eo = SN.Graphics.ExpectedOutputPictureCanvas
-        local o = SN.Graphics.OutputPictureCanvas
-        local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize, o.mXSize * o.mYSize)
-        -- mero_NN:PropagateForwardVecFloat(InputOutputImageFloats[1])
-        mero_NN:AddSAData(InputOutputImageFloats[1], InputOutputImageFloats[2])
-        local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
-        if inShouldDisplay then
-            Com.NewSimultaneousSingleTimeDispatch(
-                function()
-                    Com.Canvas.DrawClearFromFloatSingleChannel(i, InputOutputImageFloats[1])
-                    Com.Canvas.DrawClearFromFloatSingleChannel(eo, InputOutputImageFloats[2])
-                    Com.Canvas.DrawClearFromFloatSingleChannel(o, Output)
-                end
-            )
+        if update_to_image then
+            local i = SN.Graphics.InputPictureCanvas
+            local eo = SN.Graphics.ExpectedOutputPictureCanvas
+            local o = SN.Graphics.OutputPictureCanvas
+            local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize, o.mXSize * o.mYSize)
+            -- mero_NN:PropagateForwardVecFloat(InputOutputImageFloats[1])
+            mero_NN:AddSAData(InputOutputImageFloats[1], InputOutputImageFloats[2])
+            local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+            if inShouldDisplay then
+                Com.NewSimultaneousSingleTimeDispatch(
+                    function()
+                        Com.Canvas.DrawClearFromFloatSingleChannel(i, InputOutputImageFloats[1])
+                        Com.Canvas.DrawClearFromFloatSingleChannel(eo, InputOutputImageFloats[2])
+                        Com.Canvas.DrawClearFromFloatSingleChannel(o, Output)
+                    end
+                )
+            end
         end
     end
 

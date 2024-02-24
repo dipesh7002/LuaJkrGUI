@@ -97,13 +97,13 @@ NN.ImageGetRandomInputInverseOutput = function(inSizeInput, inSizeOutput)
     local invec = std_vector_float()
 
     for i = 1, inSizeInput, 1 do
-        invec:add(math.round(math.random()))
+        invec:add(math.random())
         -- invec:add(1)
     end
 
     local outvec = std_vector_float()
     for i = 1, inSizeOutput, 1 do
-        outvec:add(math.round(invec[i]))
+        outvec:add(1 - invec[i])
         --outvec:add(0)
     end
     return { invec, outvec }
@@ -185,4 +185,16 @@ SN.Core.SetProblem_PythagoreanTriplet = function(inInitialTemperature, inSumValu
         local randj = (-randnum) ^ math.random(1, 2)
         return SN.State:New(inS.i + randi, inS.j + randj)
     end
+end
+
+
+SN.Core.CreateSnakeProblem = function (inGridSize)
+   local o = {}
+   local img = std_vector_float() 
+   for y = 1, inGridSize do
+        for x = 1, inGridSize do
+            img:add(0)         
+        end 
+   end
+   return o
 end
