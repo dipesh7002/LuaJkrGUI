@@ -33,6 +33,9 @@ Com.Canvas = {
 		self.mImage = Jkr.Components.Abstract.ImageObject:New(inWidth, inHeight)
 		self.mImageLabel = Com.ImageLabelObject:NewExisting(self.mImage, self.mPosition_3f, self.mDimension_3f)
 	end,
+	MakeNewImageLabel = function (self, inPosition_3f, inDimension_3f)
+		return Com.ImageLabelObject:NewExisting(self.mImage, inPosition_3f, inDimension_3f)
+	end,
 	Bind = function (self)
 		-- self.mPainterBrushes[1]:BindImage()
 		self.mPainterBrushes[self.CurrentBrushId]:BindPainter()

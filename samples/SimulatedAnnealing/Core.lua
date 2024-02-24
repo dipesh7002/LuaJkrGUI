@@ -86,7 +86,7 @@ NN.SimpleNN = {
     AddSAData = function(self, inInput, inOutput)
         self.mNN:add_sa_data(inInput, inOutput)
     end,
-    ApplySA = function (self, inTemperature, inIterations)
+    ApplySA = function(self, inTemperature, inIterations)
         if not inTemperature then inTemperature = 0.01 end
         if not inIterations then inIterations = 20000 end
         self.mNN:apply_sa(inTemperature, inIterations)
@@ -187,14 +187,185 @@ SN.Core.SetProblem_PythagoreanTriplet = function(inInitialTemperature, inSumValu
     end
 end
 
+SN.Core.CreateSnakeProblem = function(inGridSize)
+    local o = {}
+    o.up = 1
+    o.down = 2
+    o.right = 3
+    o.left = 4
+    o.none = 5
+    local img = {}
 
-SN.Core.CreateSnakeProblem = function (inGridSize)
-   local o = {}
-   local img = std_vector_float() 
-   for y = 1, inGridSize do
-        for x = 1, inGridSize do
-            img:add(0)         
-        end 
-   end
-   return o
+    o.CopyImage = function(inImage)
+        img = std_vector_float()
+        for y = 1, inGridSize do
+            for x = 1, inGridSize do
+                img:add(inImage[x + (y - 1) * inGridSize])
+            end
+        end
+    end
+
+    o.InitImage = function()
+        img = std_vector_float()
+        for y = 1, inGridSize do
+            for x = 1, inGridSize do
+                img:add(0)
+            end
+        end
+        o.SnakePath = {}
+    end
+
+    o.ClearImage = function()
+        for y = 1, inGridSize do
+            for x = 1, inGridSize do
+                img[x + (y - 1) * inGridSize] = 0
+            end
+        end
+        o.SnakePath = {}
+    end
+
+    o.PrintImage = function()
+        for y = 1, inGridSize do
+            for x = 1, inGridSize do
+                io.write(img[x + (y - 1) * inGridSize], " ")
+            end
+            io.write("\n")
+        end
+    end
+
+    local foodpos = uvec2(1, 1)
+    local snakepos = uvec2(1, 1)
+
+    o.EraseAt = function(x, y)
+        img[x + (y - 1) * inGridSize] = 0
+    end
+
+    o.PutFoodAt = function(x, y)
+        o.EraseAt(foodpos.x, foodpos.y)
+        img[x + (y - 1) * inGridSize] = 1.0
+        foodpos = uvec2(x, y)
+    end
+
+    o.PutSnakeAt = function(x, y)
+        -- o.EraseAt(snakepos.x, snakepos.y)
+        o.SnakePath[#o.SnakePath + 1] = uvec2(x, y)
+        for i = 1, #o.SnakePath, 1 do
+            -- print("Put Snake At", x + (y - 1) * inGridSize)
+            if i == 1 then
+                 img[x + (y - 1) * inGridSize] = -1
+            else
+                img[x + (y - 1) * inGridSize] = -0.1 * (#o.SnakePath)
+            end
+        end
+        snakepos = uvec2(x, y)
+    end
+
+    o.RandomlyPutFoodAndSnake = function()
+        local food_atx, food_aty = math.random(1, inGridSize), math.random(1, inGridSize)
+        local snake_atx, snake_aty = math.random(1, inGridSize), math.random(1, inGridSize)
+        o.PutFoodAt(food_atx, food_aty)
+        o.PutSnakeAt(snake_atx, snake_aty)
+    end
+
+    o.GetDistance = function()
+        return math.sqrt((foodpos.x - snakepos.x) ^ 2 + (foodpos.x - snakepos.y) ^ 2)
+    end
+
+    o.GetMag = function(u1, u2)
+        return math.sqrt((u1.x - u2.x) ^ 2 + (u1.y - u2.y) ^ 2)
+    end
+
+    local move_functions = {
+        function()
+            o.PutSnakeAt(snakepos.x, snakepos.y - 1)
+        end,
+        function()
+            o.PutSnakeAt(snakepos.x, snakepos.y + 1)
+        end,
+        function()
+            o.PutSnakeAt(snakepos.x + 1, snakepos.y)
+        end,
+        function()
+            o.PutSnakeAt(snakepos.x - 1, snakepos.y)
+        end,
+        function ()
+            
+        end
+    }
+    o.MoveTowardsFood = function()
+        local move = o.none
+        local foodpos = uvec2(foodpos.x, foodpos.y)
+        local snakepos = uvec2(snakepos.x, snakepos.y)
+        local mind = o.GetMag(foodpos, snakepos)
+        -- up
+        if snakepos.y - 1 >= 1 then
+            local snakepos_up = uvec2(snakepos.x, snakepos.y - 1)
+            local m = o.GetMag(foodpos, snakepos_up)
+            if m < mind then
+                mind = m
+                move = o.up
+            end
+        end
+
+        -- down
+        if snakepos.y + 1 <= inGridSize then
+            local snakepos_down = uvec2(snakepos.x, snakepos.y + 1)
+            local m = o.GetMag(foodpos, snakepos_down)
+            if m < mind then
+                mind = m
+                move = o.down
+            end
+        end
+
+        -- right
+        if snakepos.x + 1 <= inGridSize then
+            local snakepos_right = uvec2(snakepos.x + 1, snakepos.y)
+            local m = o.GetMag(foodpos, snakepos_right)
+            if m < mind then
+                mind = m
+                move = o.right
+            end
+        end
+
+        --left
+        if snakepos.y - 1 >= 1 then
+            local snakepos_left = uvec2(snakepos.x - 1, snakepos.y)
+            local m = o.GetMag(foodpos, snakepos_left)
+            if m < mind then
+                mind = m
+                move = o.left
+            end
+        end
+
+
+        local mind = o.GetMag(foodpos, snakepos)
+        if mind ~= 0 then
+            o.Move(move)
+            --move_functions[move]()
+        end
+
+        local ret = { 0, 0, 0, 0 }
+        if move ~= o.none then
+            ret[move] = 1
+        end
+        return { ret, mind }
+    end
+
+    o.Move = function(inMovement)
+        local should_move = false
+        if inMovement == o.up or inMovement == o.down then
+            should_move = (snakepos.y >= 1) and (snakepos.y <= inGridSize)
+        elseif inMovement == o.right or inMovement == o.left then
+            should_move = (snakepos.x >= 1) and (snakepos.x <= inGridSize)
+        end
+        if should_move then
+            move_functions[inMovement]()
+        end
+    end
+
+    o.GetImage = function()
+        return img
+    end
+
+    return o
 end

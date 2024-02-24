@@ -130,37 +130,3 @@ Com.ImageLabelObject = {
         ip.painter:Paint(ip.posdimen, ip.color, ip.param, self.mImageObjectAbs, inPainterWithRegisteredImage)
     end
 }
-
-Com.TextButtonObject = {
-    mPadding = 5,
-    mTextObject = nil,
-    mFunction = nil,
-    mPressed = false,
-    New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
-        -- "TextButtonObject")
-        local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
-        setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
-        setmetatable(Obj, self)
-        self.__index = self
-        Obj.mText = inText
-        Obj.mTextObject = {}
-        Obj.mPadding = {}
-        Obj.mFunction = {}
-        Obj.mPressed = {}
-        Obj.mPressed = false
-        Obj.mPadding = 5
-        local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + Obj.mPadding, inPosition_3f.z - 3)
-        Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject, true)
-        return Obj
-    end,
-    Update = function(self, inPosition_3f, inDimension_3f, inString)
-        Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
-        local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + self.mPadding, inPosition_3f.z - 3)
-        self.mTextObject:Update(Position, nil, inString, false)
-    end,
-    Event = function(self)
-    end,
-    SetFunction = function(self, inFunction)
-        self.mFunction = inFunction
-    end
-}

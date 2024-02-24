@@ -12,6 +12,7 @@ function LoadMaterialComponents(inLoadCompute)
 	local UnCheckedImagePreload = {}
 	local DropDown = {}
 	local DropUp = {}
+	local RoundedRectangle = {}
 
 	if not inLoadCompute then
 		CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
@@ -47,7 +48,58 @@ function LoadMaterialComponents(inLoadCompute)
 		DropDown = ImagePrev
 		DropUp = ImagePrev
 	end
+	Jkr.GLSL["RoundedButtonRectangleCanvas"] = CanvasHeader .. [[
+		vec2 center = vec2(0, 0);
+		vec2 hw = vec2(0.5, 0.5);
+		float radius = push.mParam.x;
+		vec2 Q = abs(xy_cartesian - center) - hw;
 
+		float color = distance(max(Q, vec2(0.0)), vec2(0.0)) + min(max(Q.x, Q.y), 0.0) - radius;
+		vec4 old_color = imageLoad(storageImage, to_draw_at);
+		vec4 final_color = vec4(pure_color.x * color, pure_color.y * color, pure_color.z * color, pure_color.w * color);
+		final_color = mix(final_color, old_color, 1 - color);
+		final_color = mix(pure_color, final_color, 1 - color);
+		final_color.a = smoothstep(0.95, 1, final_color.a);
+
+		imageStore(storageImage, to_draw_at, vec4(pure_color.xyz, final_color.a));
+	]]
+	RoundedRectangle = Com.Canvas:New(vec3(0), vec3(0))
+	Com.Canvas.AddPainterBrush(RoundedRectangle, Com.GetCanvasPainter("Clear", false))
+	Com.Canvas.AddPainterBrush(RoundedRectangle, Com.GetCanvasPainter("RoundedRectangle", true))
+
+	Com.TextButtonObject = {
+		mPadding = 5,
+		mTextObject = nil,
+		mFunction = nil,
+		mPressed = false,
+		New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
+			-- "TextButtonObject")
+			local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
+			setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
+			setmetatable(Obj, self)
+			self.__index = self
+			Obj.mText = inText
+			Obj.mTextObject = {}
+			Obj.mPadding = {}
+			Obj.mFunction = {}
+			Obj.mPressed = {}
+			Obj.mPressed = false
+			Obj.mPadding = 5
+			local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + Obj.mPadding, inPosition_3f.z - 3)
+			Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject, true)
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inString)
+			Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
+			local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + self.mPadding, inPosition_3f.z - 3)
+			self.mTextObject:Update(Position, nil, inString, false)
+		end,
+		Event = function(self)
+		end,
+		SetFunction = function(self, inFunction)
+			self.mFunction = inFunction
+		end
+	}
 
 	Com.ComboBox = {
 		New = function(self, inFontObject, inMaxNoOfEntries, inMaxNoStringLength, inDepth, inPadding)
@@ -298,8 +350,8 @@ function LoadMaterialComponents(inLoadCompute)
 			end
 			return Obj
 		end,
-		GetCheckedValue = function (self, inIndex)
-			return self.mIndexTable[inIndex]	
+		GetCheckedValue = function(self, inIndex)
+			return self.mIndexTable[inIndex]
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inTextLabelTable, inDefaultIndexTable)
 			if inTextLabelTable then

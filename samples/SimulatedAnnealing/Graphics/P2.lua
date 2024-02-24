@@ -61,7 +61,7 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
     -- local RadioImageOnOffText= Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "Create Img")
     local RadioImageOnOff = Com.RadioButton:New(large_font, 2, 2)
     RadioImageOnOff:Update(vec3(0), vec3(0), { "Images" }, { false })
-    RadioImageOnOffHLayout:AddComponents({ Com.HLayout:New(0), RadioImageOnOff }, { 0.5, 1 - 0.5 })
+    RadioImageOnOffHLayout:AddComponents({ Com.HLayout:New(0), RadioImageOnOff }, { 0.3, 1 - 0.3 })
 
     local CreateNNHLayout = Com.HLayout:New(0)
     local CreateNNButton = Com.TextButton:New(vec3(0), vec3(0), Com.GetFont("font", "large"), "Create NN & Img")
