@@ -104,7 +104,14 @@ SN.Graphics.CreatePopupLayerListWindow = function(inFunction)
     Obj.mRemoved = true
     Obj.PopUp = function()
         if Obj.mRemoved then
-            SN.Graphics.LayerListWindow:Update(vec3(0, 0, 50), vec3(300, WindowDimension.y / 2, 1), vec2(300, 30))
+            local from = {mPosition_3f = vec3(0), mDimension_3f = vec3(0)}
+            local to = {mPosition_3f = vec3(WindowDimension.x/4, WindowDimension.y / 4, 50), mDimension_3f = vec3(300, WindowDimension.y / 2, 1)}
+            Com.NewSimultaneousUpdate()
+            Com.AnimateSingleTimePosDimen(SN.Graphics.LayerListWindow, from, to, 0.3, 
+            function ()
+                SN.Graphics.LayerListWindow:Update(vec3(WindowDimension.x/4, WindowDimension.y / 4, 50), vec3(300, WindowDimension.y / 2, 1), vec2(300, 30))
+            end
+            )
             Obj.mRemoved = false
         else
             SN.Graphics.LayerListWindow:Update(vec3(0), vec3(0), vec2(0))

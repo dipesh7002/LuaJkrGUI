@@ -93,8 +93,35 @@ SN.Graphics.MakePictureWindow = function(InputPicCanvas, OutputPicCanvas, Expect
 end
 
 SN.Graphics.CreateGUI = function()
-    local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
-    Graph:Update(vec3(0, 0, 90), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    local Background = Com.Canvas:New(vec3(-WindowDimension.x /2, -WindowDimension.y / 2, 83), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    -- local Graph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    -- SN.Graphics.CircularGraph.Clear(Graph, vec4(0, 0, 1, 0.5))
+	Jkr.GLSL["GradientBackgroundCanvas"] = CanvasHeader .. [[
+        float xxx = push.mParam.x;
+        float range = (0.7 - 0.5) / 2;
+        float offset = (0.7 + 0.5) / 2;
+        float sinR = range * sin((2 * 3.1415 / 0.5) * xxx + 0.5) + offset;
+        float x_ = 1 -  to_draw_at.x  / 10 * (1 - sinR);
+        float y_ = 1 -  to_draw_at.y  / 10 * sinR;
+        float oldx = x_;
+        float oldy = y_;
+        x_ = smoothstep(oldy, 0.3, oldx);
+        y_ = smoothstep(oldx, 0.3, oldy);
+        float z = 0.5;
+        vec4 final_color = vec4(x_ + 0.8, 0, 0.5 + y_, 1);
+		imageStore(storageImage, to_draw_at, final_color);
+	]]
+    Com.Canvas.AddPainterBrush(Background, Com.GetCanvasPainter("Clear", false))
+    Com.Canvas.AddPainterBrush(Background, Com.GetCanvasPainter("GradientBackground", true))
+    Com.Canvas.MakeCanvasImage(Background, 1920 / 2, 1080 / 2)
+    Background:Update(vec3(-WindowDimension.x /2, -WindowDimension.y / 2, 90), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    --Graph:Update(vec3(0, 0, 83), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    local NewGraph = SN.Graphics.CircularGraph:New(vec3(0), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    NewGraph:Update(vec3(0, 0, 80), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+    SN.Graphics.CircularGraph.Clear(NewGraph, vec4(0, 1, 1, 0.1))
+    Background:Update(vec3(-WindowDimension.x /2, -WindowDimension.y / 2, 82), vec3(WindowDimension.x * 2, WindowDimension.y * 2, 1))
+
+    --Graph:Update(vec3(0, 0, 80), vec3(0))
     local Window = Com.MaterialWindow:New(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1),
         vec2(350, 30), "Simulated Annealing", Com.GetFont("font", "large"))
     -- TODO Error In Canvas NavBar if initialized here IDK Why
@@ -121,7 +148,7 @@ SN.Graphics.CreateGUI = function()
         end
         ClearNavBarColor()
 
-        local problemWindows = SN.Graphics.CreateProblemWindowsLayout({ Graph, Graph, Graph })
+        local problemWindows = SN.Graphics.CreateProblemWindowsLayout({ NewGraph, NewGraph, NewGraph })
 
         Com.NavigationBar.Update(NavBar, NavBarPosition, NavBarDimension, 1)
         local vlayout = Com.VLayout:New(0)
@@ -166,6 +193,18 @@ SN.Graphics.CreateGUI = function()
     Window:Update(vec3(WindowDimension.x - 400, 0, 50), vec3(400, WindowDimension.y, 1))
     SN.Graphics.PictureWindow = nil
 
+    local background_i = 0
+    Com.NewComponent_Dispatch()
+    local canvas = Com.Canvas
+    ComTable_Dispatch[com_disi] = Jkr.Components.Abstract.Dispatchable:New(
+        function ()
+            Background.CurrentBrushId = 2
+            canvas.Bind(Background)	
+            canvas.Paint(Background, vec4(0, 0, 1920 / 2, 1080 /2 ), vec4(1, 0, 0, 1), vec4(math.sin(background_i / 500), 0.4, 0, 0), 1920 / 2, 1080 /2, 1)
+            background_i = background_i + 1
+        end
+    )
+
     Com.NewEvent(
         function()
             if E.is_keypress_event() and E.is_key_pressed(Key.SDLK_SPACE) then
@@ -181,13 +220,14 @@ SN.Graphics.CreateGUI = function()
         function ()
            if E.is_key_pressed_continous(Key.SDL_SCANCODE_LALT) and E.is_left_button_pressed_continous() then
                 local relmousepos = E.get_relative_mouse_pos() 
-                Graph.mPosition_3f.x  = Graph.mPosition_3f.x + relmousepos.x
-                Graph.mPosition_3f.y = Graph.mPosition_3f.y + relmousepos.y
-                SN.Graphics.CircularGraph.Update(Graph, Graph.mPosition_3f, Graph.mDimension_3f)
+                NewGraph.mPosition_3f.x  = NewGraph.mPosition_3f.x + relmousepos.x
+                NewGraph.mPosition_3f.y = NewGraph.mPosition_3f.y + relmousepos.y
+                SN.Graphics.CircularGraph.Update(NewGraph, NewGraph.mPosition_3f, NewGraph.mDimension_3f)
            end
         end
-
     )
+    -- SN.Graphics.CircularGraph.Clear(Graph, vec4(0, 0, 0, 0))
+    --]]
 
     collectgarbage("collect")
 end

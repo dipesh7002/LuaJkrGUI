@@ -263,8 +263,14 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
     o.RandomlyPutFoodAndSnake = function()
         local food_atx, food_aty = math.random(1, inGridSize), math.random(1, inGridSize)
         local snake_atx, snake_aty = math.random(1, inGridSize), math.random(1, inGridSize)
-        o.PutFoodAt(food_atx, food_aty)
-        o.PutSnakeAt(snake_atx, snake_aty)
+
+        -- o.PutFoodAt(food_atx, food_aty)
+        -- o.PutSnakeAt(snake_atx, snake_aty)
+
+        o.PutFoodAt(1, 1)
+        o.PutSnakeAt(3, 1)
+        print("Food:", food_atx, food_aty)
+        print("Snake:", snake_atx, snake_aty)
     end
 
     o.GetDistance = function()
@@ -274,18 +280,26 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
     o.GetMag = function(u1, u2)
         return math.sqrt((u1.x - u2.x) ^ 2 + (u1.y - u2.y) ^ 2)
     end
+    local debug = function(inStr)
+            -- print(inStr)
+            -- print(snakepos.x, snakepos.y)
+    end
 
     local move_functions = {
         function()
+            debug("up")
             o.PutSnakeAt(snakepos.x, snakepos.y - 1)
         end,
         function()
+            debug("down")
             o.PutSnakeAt(snakepos.x, snakepos.y + 1)
         end,
         function()
+            debug("right")
             o.PutSnakeAt(snakepos.x + 1, snakepos.y)
         end,
         function()
+            debug("left")
             o.PutSnakeAt(snakepos.x - 1, snakepos.y)
         end,
         function ()
@@ -297,11 +311,15 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         local foodpos = uvec2(foodpos.x, foodpos.y)
         local snakepos = uvec2(snakepos.x, snakepos.y)
         local mind = o.GetMag(foodpos, snakepos)
+        print("=========================================")
         -- up
         if snakepos.y - 1 >= 1 then
             local snakepos_up = uvec2(snakepos.x, snakepos.y - 1)
             local m = o.GetMag(foodpos, snakepos_up)
-            if m < mind then
+            print("Up:", m)
+            print("Dist", mind)
+            if m <= mind and move ~= o.up then
+                print("Up")
                 mind = m
                 move = o.up
             end
@@ -311,7 +329,10 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         if snakepos.y + 1 <= inGridSize then
             local snakepos_down = uvec2(snakepos.x, snakepos.y + 1)
             local m = o.GetMag(foodpos, snakepos_down)
-            if m < mind then
+            print("Down:", m)
+            print("Dist", mind)
+            if m <= mind and move ~= o.down then
+                print("Down")
                 mind = m
                 move = o.down
             end
@@ -321,34 +342,48 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         if snakepos.x + 1 <= inGridSize then
             local snakepos_right = uvec2(snakepos.x + 1, snakepos.y)
             local m = o.GetMag(foodpos, snakepos_right)
-            if m < mind then
+            print("Right:", m)
+            print("Dist", mind)
+            if m <= mind and move ~= o.right then
+                print("Right")
                 mind = m
                 move = o.right
             end
         end
 
         --left
-        if snakepos.y - 1 >= 1 then
+        if snakepos.x - 1 >= 1 then
             local snakepos_left = uvec2(snakepos.x - 1, snakepos.y)
             local m = o.GetMag(foodpos, snakepos_left)
-            if m < mind then
+            print("Left:", m)
+            print("Dist", mind)
+            if m <= mind and move ~= o.left then
+                print("Left")
                 mind = m
                 move = o.left
             end
         end
 
+        print("=========================================")
 
-        local mind = o.GetMag(foodpos, snakepos)
-        if mind ~= 0 then
+        local newmind = o.GetMag(foodpos, snakepos)
+
+        if newmind ~= 0 then
             o.Move(move)
             --move_functions[move]()
+        end
+
+        if newmind ~= mind then
+            --print("Distance:", newmind, mind)
         end
 
         local ret = { 0, 0, 0, 0 }
         if move ~= o.none then
             ret[move] = 1
+        else
+            -- print("None")
         end
-        return { ret, mind }
+        return { ret, newmind }
     end
 
     o.Move = function(inMovement)

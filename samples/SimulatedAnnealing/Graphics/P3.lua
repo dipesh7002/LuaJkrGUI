@@ -142,7 +142,7 @@ SN.Graphics.CreateProblem3SolverWindow = function(inCircularGraph)
                 mero_NN:PropagateForwardVecFloat(problem_to_be_fed.GetImage())
                 local eo_i = problem_to_be_fed.MoveTowardsFood()
                 ii = eo_i[2]
-                print("Dist", ii)
+                -- print("Dist", ii)
                 local ExpectedOutput = eo_i[1]
                 local vecfloatExpOutput = std_vector_float()
                 for i = 1, #ExpectedOutput, 1 do

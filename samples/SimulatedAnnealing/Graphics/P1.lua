@@ -47,7 +47,7 @@ SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
 
     local SizeFactorHLayout = Com.HLayout:New(0)
     local SizeFactorText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "SizeFactor:")
-    local SizeFactorTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "0")
+    local SizeFactorTextLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1")
     SizeFactorHLayout:AddComponents({ SizeFactorText, SizeFactorTextLineEdit }, { 0.5, 1 - 0.5 })
 
     local StatusText = Com.TextButton:New(vec3(200, 200, 1), vec3(300, 300, 1), large_font, "Status")

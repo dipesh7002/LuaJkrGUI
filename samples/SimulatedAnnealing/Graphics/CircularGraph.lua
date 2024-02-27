@@ -56,7 +56,7 @@ SN.Graphics.CircularGraph = {
         Com.NewSingleTimeDispatch(function()
             Obj.mCanvas.CurrentBrushId = 1
             Com.Canvas.Bind(Obj.mCanvas)
-            Com.Canvas.Paint(Obj.mCanvas, vec4(0, 0, inDimension_3f.x, inDimension_3f.y), vec4(1, 1, 1, 1),
+            Com.Canvas.Paint(Obj.mCanvas, vec4(0, 0, inDimension_3f.x, inDimension_3f.y), vec4(0, 0, 0, 0),
                 vec4(1.2, 0, 0, 1), inDimension_3f.x, inDimension_3f.y, 1)
         end)
 
@@ -194,7 +194,7 @@ SN.Graphics.DrawNeuralNetworkToGraph = function(inNeuralNetwork, inGraph, inSimu
             radius / 2
         -- SN.Graphics.CircularGraph.UpdateGraphLine(inGraph, vec3(xposl, yposl, 50), vec3(xposr, yposr, 50), color)
         for i = 1, math.abs(inWeightValue) * 10, 1 do
-            inGraph:UpdateGraphLineBatch(vec3(xposl, yposl, 90), vec3(xposr, yposr, 90))
+            inGraph:UpdateGraphLineBatch(vec3(xposl, yposl, 80), vec3(xposr, yposr, 80))
         end
     end
 

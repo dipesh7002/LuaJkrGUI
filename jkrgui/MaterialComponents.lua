@@ -12,7 +12,6 @@ function LoadMaterialComponents(inLoadCompute)
 	local UnCheckedImagePreload = {}
 	local DropDown = {}
 	local DropUp = {}
-	local RoundedRectangle = {}
 
 	if not inLoadCompute then
 		CheckedImagePreload = Jkr.Components.Abstract.ImageObject:New(40, 40,
@@ -48,9 +47,10 @@ function LoadMaterialComponents(inLoadCompute)
 		DropDown = ImagePrev
 		DropUp = ImagePrev
 	end
+
 	Jkr.GLSL["RoundedButtonRectangleCanvas"] = CanvasHeader .. [[
 		vec2 center = vec2(0, 0);
-		vec2 hw = vec2(0.5, 0.5);
+		vec2 hw = vec2(0.90, 0.8);
 		float radius = push.mParam.x;
 		vec2 Q = abs(xy_cartesian - center) - hw;
 
@@ -63,19 +63,75 @@ function LoadMaterialComponents(inLoadCompute)
 
 		imageStore(storageImage, to_draw_at, vec4(pure_color.xyz, final_color.a));
 	]]
-	RoundedRectangle = Com.Canvas:New(vec3(0), vec3(0))
+	local normal_color = Theme.Colors.Button.Normal * 8
+	local hover_color = Theme.Colors.Button.Hover * 1.4
+	normal_color.w = 0.7
+	hover_color.w = 0.5
+
+	local RoundedRectangle = Com.Canvas:New(vec3(0), vec3(0))
 	Com.Canvas.AddPainterBrush(RoundedRectangle, Com.GetCanvasPainter("Clear", false))
-	Com.Canvas.AddPainterBrush(RoundedRectangle, Com.GetCanvasPainter("RoundedRectangle", true))
+	Com.Canvas.AddPainterBrush(RoundedRectangle, Com.GetCanvasPainter("RoundedButtonRectangle", true))
+	Com.Canvas.MakeCanvasImage(RoundedRectangle, 600, 200)
+
 
 	Com.TextButtonObject = {
-		mPadding = 5,
+		mPadding = nil,
 		mTextObject = nil,
 		mFunction = nil,
 		mPressed = false,
 		New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
 			-- "TextButtonObject")
+			-- local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
+			-- local Obj = Com.Canvas.MakeNewImageLabel(RoundedRectangle, inPosition_3f, inDimension_3f)
+			local Obj = Com.ImageLabelObject:NewExisting(RoundedRectangle.mImage, inPosition_3f, inDimension_3f)
+			setmetatable(self, Com.ImageLabelObject) -- Inherits Com.ImageLabelObject
+			setmetatable(Obj, self)
+			Obj.SetFillColor = function(self, inColor_4f)
+				Com.ImageLabelObject.TintColor(self, inColor_4f)
+			end
+			Com.NewSimulataneousDispatch()
+			Com.NewSimultaneousSingleTimeDispatch(
+				function()
+					RoundedRectangle.CurrentBrushId = 1
+					Com.Canvas.Bind(RoundedRectangle)
+					Com.Canvas.Paint(RoundedRectangle, vec4(1, 0, 0, 1), vec4(1, 1, 1, 1), vec4(1), 600, 200, 1)
+					RoundedRectangle.CurrentBrushId = 2
+					Com.Canvas.Bind(RoundedRectangle)	
+					Com.Canvas.Paint(RoundedRectangle, vec4(0, 0, 600, 200), vec4(1, 1, 1, 1), vec4(0.03, 0.4, 0, 0), 600, 200, 1)
+				end
+			)
+			self.__index = self
+			Obj.mText = inText
+			Obj.mTextObject = {}
+			Obj.mPadding = {}
+			Obj.mFunction = {}
+			Obj.mPressed = {}
+			Obj.mPressed = false
+			Obj.mPadding = 8
+			local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + Obj.mPadding, inPosition_3f.z - 3)
+			Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject, true)
+
+			return Obj
+		end,
+		Update = function(self, inPosition_3f, inDimension_3f, inString)
+			--Com.AreaObject.Update(self, inPosition_3f, inDimension_3f)
+			Com.ImageLabelObject.Update(self, inPosition_3f, inDimension_3f)
+			local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + self.mPadding, inPosition_3f.z - 3)
+			self.mTextObject:Update(Position, nil, inString, false)
+		end,
+		SetFunction = function(self, inFunction)
+			self.mFunction = inFunction
+		end
+	}
+
+	Com.TextButtonObjectFlat = {
+		mPadding = 5,
+		mTextObject = nil,
+		mFunction = nil,
+		mPressed = false,
+		New = function(self, inText, inFontObject, inPosition_3f, inDimension_3f)
 			local Obj = Com.AreaObject:New(inPosition_3f, inDimension_3f)
-			setmetatable(self, Com.AreaObject) -- Inherits Com.AreaObject
+			setmetatable(self, Com.ImageLabelObject) -- Inherits Com.ImageLabelObject
 			setmetatable(Obj, self)
 			self.__index = self
 			Obj.mText = inText
@@ -84,9 +140,10 @@ function LoadMaterialComponents(inLoadCompute)
 			Obj.mFunction = {}
 			Obj.mPressed = {}
 			Obj.mPressed = false
-			Obj.mPadding = 5
+			Obj.mPadding = 6
 			local Position = vec3(inPosition_3f.x + Obj.mPadding, inPosition_3f.y + Obj.mPadding, inPosition_3f.z - 3)
 			Obj.mTextObject = Com.TextLabelObject:New(inText, Position, inFontObject, true)
+
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inString)
@@ -94,12 +151,11 @@ function LoadMaterialComponents(inLoadCompute)
 			local Position = vec3(inPosition_3f.x + self.mPadding, inPosition_3f.y + self.mPadding, inPosition_3f.z - 3)
 			self.mTextObject:Update(Position, nil, inString, false)
 		end,
-		Event = function(self)
-		end,
 		SetFunction = function(self, inFunction)
 			self.mFunction = inFunction
 		end
 	}
+
 
 	Com.ComboBox = {
 		New = function(self, inFontObject, inMaxNoOfEntries, inMaxNoStringLength, inDepth, inPadding)
@@ -524,7 +580,7 @@ function LoadMaterialComponents(inLoadCompute)
 			return Obj
 		end,
 		SetCentralComponent = function(self, inComponent)
-			local titleBar = Com.TextButtonObject:New(self.mTitleText, self.mFontObject,
+			local titleBar = Com.TextButtonObjectFlat:New(self.mTitleText, self.mFontObject,
 				self.mPosition_3f,
 				vec3(self.mHitArea_2f.x, self.mHitArea_2f.y, 1))
 			local close_button = Com.IconButton:New(vec3(0, 0, self.mPosition_3f.z),
