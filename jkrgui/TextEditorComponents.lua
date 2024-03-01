@@ -94,7 +94,6 @@ Com.VisualLineWrapperObject = {
 		return Obj
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing)
-		tracy.ZoneBeginN("Visual Line Wrapper Object")
 		if inNewStringBuffer then
 			self.mStringBuffer = inNewStringBuffer
 		end
@@ -128,16 +127,14 @@ Com.VisualLineWrapperObject = {
 				visualCharsIndex = _vischars
 			end
 		end
-		tracy.ZoneEnd()
 	end,
 	EraseAll = function(self)
 		for i = 1, #self.mVisualLines, 1 do
-			self.mVisualLines[i]:Update(vec3(0), vec3(0), "")
+			self.mVisualLines[i]:Update(vec3(0), vec3(0), " ")
 		end
 	end,
 	WrapWithin = function(self, inString, inStartingIndex, inLinePosition_3f, inDimension_3f,
 						  inVisualLineIndex, inEndsWithNewline)
-		tracy.ZoneBeginN("Wrap Within")
 		local i = inStartingIndex
 		local dimens = self.mFontObject:GetDimension(inString)
 		local visualLineIndex = inVisualLineIndex
@@ -159,7 +156,6 @@ Com.VisualLineWrapperObject = {
 			inLinePosition_3f.y = inLinePosition_3f.y + self.mVerticalDrawSpacing
 			i = i + 1
 		end
-		tracy.ZoneEnd()
 		return i
 	end
 }
@@ -333,7 +329,6 @@ Com.VisualTextEditObject = {
 	end,
 	Update = function(self, inPosition_3f, inDimension_3f, inNewStringBuffer, inNewVerticalDrawSpacing,
 					  inCursorWidth)
-		tracy.ZoneBeginN("VisualTextEditObject")
 		Com.VisualLineWrapperObject.Update(self, inPosition_3f, inDimension_3f, inNewStringBuffer,
 			inNewVerticalDrawSpacing)
 		local vis = self:GetVisualCursorPosition()
@@ -351,7 +346,6 @@ Com.VisualTextEditObject = {
 		end
 		self.mPosition_3f = inPosition_3f
 		self.mDimension_3f = inDimension_3f
-		tracy.ZoneEnd()
 	end
 }
 

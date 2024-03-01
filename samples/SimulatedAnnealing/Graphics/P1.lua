@@ -11,9 +11,14 @@ SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
 
     -- TODO event system optimization
     local RunButtonHLayout = Com.HLayout:New(0)
-    local RunButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Run")
-    local IterationsText = Com.TextButton:New(vec3(0), vec3(0), large_font, "Iterations")
+    local RunButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "RunPT")
+    local IterationsText = Com.TextButton:New(vec3(0), vec3(0), large_font, "")
     RunButtonHLayout:AddComponents({ RunButton, IterationsText }, { 0.5, 1 - 0.5 })
+
+    local RunButtonSMHLayout = Com.HLayout:New(0)
+    local RunButtonSM = Com.TextButton:New(vec3(0), vec3(0), large_font, "RunSM")
+    local IterationsText = Com.TextButton:New(vec3(0), vec3(0), large_font, "Iterations")
+    RunButtonSMHLayout:AddComponents({ RunButtonSM, IterationsText }, { 0.5, 1 - 0.5 })
 
     local ClearButtonHLayout = Com.HLayout:New(0)
     local StopButton = Com.TextButton:New(vec3(0), vec3(0), large_font, "Stop")
@@ -65,6 +70,7 @@ SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
 
     local HComponents = {
         RunButtonHLayout,
+        RunButtonSMHLayout,
         ClearButtonHLayout,
         Com.HLayout:New(0),
         TemperatureHLayout,
@@ -149,6 +155,33 @@ SN.Graphics.CreateNumberPythagoreanTripletSolverWindow = function(CircularGraph)
 
             Com.ClearSingleTimes()
             SN.Core.SetProblem_PythagoreanTriplet(Temperature, SumTo)
+            SN.Solve(SN.State:New(I, J), Iterations, CallbackFunction)
+        end
+    )
+
+    RunButtonSM:SetFunctions(
+        function()
+            RunButtonSM:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            RunButtonSM:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function()
+            local Iterations = tonumber(IterationCountTextLineEdit:GetText())
+            local SumTo = tonumber(SumOfCountTextLineEdit:GetText())
+            local Temperature = tonumber(TemperatureTextLineEdit:GetText())
+            local I = tonumber(NumITextLineEdit:GetText())
+            local J = tonumber(NumJTextLineEdit:GetText())
+            local SizeFactor = tonumber(SizeFactorTextLineEdit:GetText())
+            if Iterations then
+                IterationsMax__ = Iterations
+            end
+            if SizeFactor then
+                SizeFactor__ = SizeFactor
+            end
+
+            Com.ClearSingleTimes()
+            SN.Core.SetProblem_SumTwoNumbers(Temperature, SumTo)
             SN.Solve(SN.State:New(I, J), Iterations, CallbackFunction)
         end
     )

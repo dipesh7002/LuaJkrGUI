@@ -22,6 +22,22 @@ NN.SimpleNN = {
         else
             Obj.mNN = neural.network(topology)
         end
+
+        Obj.SaveToFile = function (inFileName)
+           Obj.mNN:save_to_file(inFileName)
+        end
+
+        Obj.LoadFromFile = function (inFileName)
+            Obj.mNN:load_from_file(inFileName)
+            Obj.mTopology = {}
+            local topo = Obj.mNN:get_topology()
+            print("toposize", topo:size())
+            for i = 1, #topo, 1 do
+                print(topo[i])
+                Obj.mTopology[#Obj.mTopology+1] = topo[i]
+            end
+            print("TopologySize", #Obj.mTopology)
+        end
         return Obj
     end,
     PrintNeurons = function(self, inCallback_2fff)
@@ -90,6 +106,9 @@ NN.SimpleNN = {
         if not inTemperature then inTemperature = 0.01 end
         if not inIterations then inIterations = 20000 end
         self.mNN:apply_sa(inTemperature, inIterations)
+    end,
+    PrintMeanSE = function(self)
+        print("Current Mean SE:", self.mNN:get_current_mean_squared_error())
     end
 }
 
@@ -187,6 +206,40 @@ SN.Core.SetProblem_PythagoreanTriplet = function(inInitialTemperature, inSumValu
     end
 end
 
+SN.Core.SetProblem_SumTwoNumbers = function(inInitialTemperature, inSumValue)
+    SN.State = {
+        New = function(self, i, j)
+            local Obj = {}
+            setmetatable(Obj, self)
+            self.__index = self
+            Obj.i = i
+            Obj.j = j
+            return Obj
+        end,
+        Print = function(self)
+            io.write(string.format("State(%d, %d, %d)\n", self.i, self.j, SN.E(self)))
+        end
+    }
+
+    SN.InitialTemperature = inInitialTemperature
+    SN.CurrentTemperature = SN.InitialTemperature -- Initial Temperature
+    SN.temperature = function(inK)
+        SN.CurrentTemperature = SN.CurrentTemperature * inK
+        return SN.CurrentTemperature
+    end
+
+    SN.E = function(inS) -- Energy Function
+        return math.abs(inS.i + inS.j - inSumValue)
+    end
+
+    SN.neighbour = function(inS)
+        local randnum = math.random(1, 3)
+        local randi = (-randnum) ^ math.random(1, 2)
+        local randj = (-randnum) ^ math.random(1, 2)
+        return SN.State:New(inS.i + randi, inS.j + randj)
+    end
+end
+
 SN.Core.CreateSnakeProblem = function(inGridSize)
     local o = {}
     o.up = 1
@@ -263,14 +316,8 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
     o.RandomlyPutFoodAndSnake = function()
         local food_atx, food_aty = math.random(1, inGridSize), math.random(1, inGridSize)
         local snake_atx, snake_aty = math.random(1, inGridSize), math.random(1, inGridSize)
-
-        -- o.PutFoodAt(food_atx, food_aty)
-        -- o.PutSnakeAt(snake_atx, snake_aty)
-
-        o.PutFoodAt(1, 1)
-        o.PutSnakeAt(3, 1)
-        print("Food:", food_atx, food_aty)
-        print("Snake:", snake_atx, snake_aty)
+        o.PutFoodAt(food_atx, food_aty)
+        o.PutSnakeAt(snake_atx, snake_aty)
     end
 
     o.GetDistance = function()
@@ -287,19 +334,15 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
 
     local move_functions = {
         function()
-            debug("up")
             o.PutSnakeAt(snakepos.x, snakepos.y - 1)
         end,
         function()
-            debug("down")
             o.PutSnakeAt(snakepos.x, snakepos.y + 1)
         end,
         function()
-            debug("right")
             o.PutSnakeAt(snakepos.x + 1, snakepos.y)
         end,
         function()
-            debug("left")
             o.PutSnakeAt(snakepos.x - 1, snakepos.y)
         end,
         function ()
@@ -311,15 +354,12 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         local foodpos = uvec2(foodpos.x, foodpos.y)
         local snakepos = uvec2(snakepos.x, snakepos.y)
         local mind = o.GetMag(foodpos, snakepos)
-        print("=========================================")
+
         -- up
         if snakepos.y - 1 >= 1 then
             local snakepos_up = uvec2(snakepos.x, snakepos.y - 1)
             local m = o.GetMag(foodpos, snakepos_up)
-            print("Up:", m)
-            print("Dist", mind)
             if m <= mind and move ~= o.up then
-                print("Up")
                 mind = m
                 move = o.up
             end
@@ -329,10 +369,7 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         if snakepos.y + 1 <= inGridSize then
             local snakepos_down = uvec2(snakepos.x, snakepos.y + 1)
             local m = o.GetMag(foodpos, snakepos_down)
-            print("Down:", m)
-            print("Dist", mind)
             if m <= mind and move ~= o.down then
-                print("Down")
                 mind = m
                 move = o.down
             end
@@ -342,10 +379,7 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         if snakepos.x + 1 <= inGridSize then
             local snakepos_right = uvec2(snakepos.x + 1, snakepos.y)
             local m = o.GetMag(foodpos, snakepos_right)
-            print("Right:", m)
-            print("Dist", mind)
             if m <= mind and move ~= o.right then
-                print("Right")
                 mind = m
                 move = o.right
             end
@@ -355,43 +389,34 @@ SN.Core.CreateSnakeProblem = function(inGridSize)
         if snakepos.x - 1 >= 1 then
             local snakepos_left = uvec2(snakepos.x - 1, snakepos.y)
             local m = o.GetMag(foodpos, snakepos_left)
-            print("Left:", m)
-            print("Dist", mind)
             if m <= mind and move ~= o.left then
-                print("Left")
                 mind = m
                 move = o.left
             end
         end
 
-        print("=========================================")
 
         local newmind = o.GetMag(foodpos, snakepos)
-
         if newmind ~= 0 then
             o.Move(move)
-            --move_functions[move]()
         end
-
-        if newmind ~= mind then
-            --print("Distance:", newmind, mind)
-        end
-
         local ret = { 0, 0, 0, 0 }
         if move ~= o.none then
             ret[move] = 1
-        else
-            -- print("None")
         end
         return { ret, newmind }
     end
 
     o.Move = function(inMovement)
+        move_functions[inMovement]()
+    end
+
+    o.SafeMove = function (inMovement)
         local should_move = false
         if inMovement == o.up or inMovement == o.down then
-            should_move = (snakepos.y >= 1) and (snakepos.y <= inGridSize)
+            should_move = (snakepos.y - 1 >= 1) and (snakepos.y + 1 <= inGridSize)
         elseif inMovement == o.right or inMovement == o.left then
-            should_move = (snakepos.x >= 1) and (snakepos.x <= inGridSize)
+            should_move = (snakepos.x - 1 >= 1) and (snakepos.x + 1 <= inGridSize)
         end
         if should_move then
             move_functions[inMovement]()

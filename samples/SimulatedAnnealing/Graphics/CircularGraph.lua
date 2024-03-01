@@ -69,6 +69,7 @@ SN.Graphics.CircularGraph = {
         Obj.mLineBatch = Jkr.Components.Static.LineObject:NewBatch(Obj.mLineCount)
         Obj.mLineBatch:SetColor(vec4(0, 0, 0, 0.1))
         Obj.mCurrentBatchLine = Obj.mLineBatch.mStartId
+        Obj.mLinesMax = Obj.mLineBatch.mEndId
         Com.NewComponent()
         ComTable[com_i] = Jkr.Components.Abstract.Drawable:New(
             function()
@@ -79,11 +80,13 @@ SN.Graphics.CircularGraph = {
         Obj.mLinesNotCleared = 1
 
         Obj.UpdateGraphLineBatch = function(self, inPosition1_3f, inPosition2_3f)
-            local newp1 = vec3(inPosition1_3f.x + self.mPosition_3f.x, inPosition1_3f.y + self.mPosition_3f.y, inPosition1_3f.z)
-            local newp2 = vec3(inPosition2_3f.x + self.mPosition_3f.x, inPosition2_3f.y + self.mPosition_3f.y, inPosition2_3f.z)
-            Obj.mLineBatch:Update(newp1, newp2, Obj.mCurrentBatchLine)
-            Obj.mCurrentBatchLine = Obj.mCurrentBatchLine + 1
-            Obj.mLinesNotCleared = Obj.mLinesNotCleared + 1
+            if Obj.mCurrentBatchLine + 1 <= Obj.mLinesMax then
+                local newp1 = vec3(inPosition1_3f.x + self.mPosition_3f.x, inPosition1_3f.y + self.mPosition_3f.y, inPosition1_3f.z)
+                local newp2 = vec3(inPosition2_3f.x + self.mPosition_3f.x, inPosition2_3f.y + self.mPosition_3f.y, inPosition2_3f.z)
+                Obj.mLineBatch:Update(newp1, newp2, Obj.mCurrentBatchLine)
+                Obj.mCurrentBatchLine = Obj.mCurrentBatchLine + 1
+                Obj.mLinesNotCleared = Obj.mLinesNotCleared + 1
+            end
         end
         Obj.ResetGraphLineBatch = function(self)
             Obj.mCurrentBatchLine = Obj.mLineBatch.mStartId

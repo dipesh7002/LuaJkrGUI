@@ -198,6 +198,16 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     local LearningRateLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "0.05")
     LearningRateHLayout:AddComponents({ LearningRateText, LearningRateLineEdit }, { 0.5, 1 - 0.5 })
 
+    local FileSaveHLayoutBP = Com.HLayout:New(0)
+    local SaveToFileBP = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "SaveBP")
+    local LoadFromFileBP = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "LoadBP")
+    FileSaveHLayoutBP:AddComponents({SaveToFileBP, LoadFromFileBP}, {0.5, 1 - 0.5})
+
+    local FileSaveHLayoutSA = Com.HLayout:New(0)
+    local SaveToFileSA = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "SaveSA")
+    local LoadFromFileSA = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "LoadSA")
+    FileSaveHLayoutSA:AddComponents({SaveToFileSA, LoadFromFileSA}, {0.5, 1 - 0.5})
+
     local HComponents = {
         CreateButtonHLayout,
         Com.HLayout:New(0),
@@ -208,6 +218,8 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         TrainByBPHLayout,
         LearningRateHLayout,
         TrainingCountHLayout,
+        FileSaveHLayoutBP,
+        FileSaveHLayoutSA,
         Com.HLayout:New(0)
     }
 
@@ -222,7 +234,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     Window:SetCentralComponent(VLayout)
 
 
-    local mero_NN = {}
+    SN.Graphics.CurrentNN = {}
 
     ClearButton:SetFunctions(
         function()
@@ -247,7 +259,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         local o = SN.Graphics.OutputPictureCanvas
         local topology = CreateNNSubWindow.GetTopologyByTextFieldsLayer()
         local learningRate = CreateNNSubWindow.GetLearningRate()
-        mero_NN = NN.SimpleNN:New(topology, learningRate)
+        SN.Graphics.CurrentNN = NN.SimpleNN:New(topology, learningRate)
         Com.ClearSingleTimes()
         local inputSize = math.round(math.sqrt(topology[1]))
         local outputSize = math.round(math.sqrt(topology[#topology]))
@@ -268,7 +280,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
         -- SN.Graphics.CircularGraph.Clear(CircularGraph, vec4(1, 1, 1, 0))
         Com.NewSimultaneousUpdate()
         Com.NewSimultaneousSingleTimeUpdate(function()
-            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph,
+            SN.Graphics.DrawNeuralNetworkToGraph(SN.Graphics.CurrentNN, CircularGraph,
                 true)
         end)
     end
@@ -292,8 +304,8 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
 
     local propForward = function()
         local ImageF = Com.Canvas.GetVectorFloatSingleChannel(SN.Graphics.InputPictureCanvas)
-        mero_NN:PropagateForwardVecFloat(ImageF)
-        local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+        SN.Graphics.CurrentNN:PropagateForwardVecFloat(ImageF)
+        local Output = NN.SimpleNN.GetOutputFloatVec(SN.Graphics.CurrentNN, #SN.Graphics.CurrentNN.mTopology - 1)
         if update_to_image then
             Com.NewSimultaneousSingleTimeDispatch(
                 function()
@@ -301,12 +313,12 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
                 end
             )
         end
-        SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
+        SN.Graphics.DrawNeuralNetworkToGraph(SN.Graphics.CurrentNN, CircularGraph, true)
     end
     local propBackward = function()
         local ImageF = Com.Canvas.GetVectorFloatSingleChannel(SN.Graphics.ExpectedOutputPictureCanvas)
-        mero_NN:PropagateBackwardVecFloat(ImageF)
-        SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
+        SN.Graphics.CurrentNN:PropagateBackwardVecFloat(ImageF)
+        SN.Graphics.DrawNeuralNetworkToGraph(SN.Graphics.CurrentNN, CircularGraph, true)
     end
 
     PropagateForwardPictureButton:SetFunctions(
@@ -343,7 +355,7 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             UpdatePicButton:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
         end,
         function()
-            SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph, true)
+            SN.Graphics.DrawNeuralNetworkToGraph(SN.Graphics.CurrentNN, CircularGraph, true)
         end
     )
 
@@ -353,9 +365,9 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             local eo = SN.Graphics.ExpectedOutputPictureCanvas
             local o = SN.Graphics.OutputPictureCanvas
             local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize, o.mXSize * o.mYSize)
-            mero_NN:PropagateForwardVecFloat(InputOutputImageFloats[1])
-            mero_NN:PropagateBackwardVecFloat(InputOutputImageFloats[2])
-            local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+            SN.Graphics.CurrentNN:PropagateForwardVecFloat(InputOutputImageFloats[1])
+            SN.Graphics.CurrentNN:PropagateBackwardVecFloat(InputOutputImageFloats[2])
+            local Output = NN.SimpleNN.GetOutputFloatVec(SN.Graphics.CurrentNN, #SN.Graphics.CurrentNN.mTopology - 1)
             if inShouldDisplay then
                 Com.NewSimultaneousSingleTimeDispatch(
                     function()
@@ -369,8 +381,10 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
     end
 
     SN.Graphics.GetCurrentNN = function()
-        return mero_NN
+        return SN.Graphics.CurrentNN
     end
+
+    SN.Graphics.CurrentNN = SN.Graphics.CurrentNN
 
     local AddSAData = function(inShouldDisplay)
         if update_to_image then
@@ -379,8 +393,8 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             local o = SN.Graphics.OutputPictureCanvas
             local InputOutputImageFloats = NN.ImageGetRandomInputInverseOutput(i.mXSize * i.mYSize, o.mXSize * o.mYSize)
             -- mero_NN:PropagateForwardVecFloat(InputOutputImageFloats[1])
-            mero_NN:AddSAData(InputOutputImageFloats[1], InputOutputImageFloats[2])
-            local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
+            SN.Graphics.CurrentNN:AddSAData(InputOutputImageFloats[1], InputOutputImageFloats[2])
+            local Output = NN.SimpleNN.GetOutputFloatVec(SN.Graphics.CurrentNN, #SN.Graphics.CurrentNN.mTopology - 1)
             if inShouldDisplay then
                 Com.NewSimultaneousSingleTimeDispatch(
                     function()
@@ -406,8 +420,9 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
                 trainByBP(false)
             end
             trainByBP(true)
+            SN.Graphics.CurrentNN:PrintMeanSE()
             Com.NewSimultaneousSingleTimeUpdate(function()
-                SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, CircularGraph,
+                SN.Graphics.DrawNeuralNetworkToGraph(SN.Graphics.CurrentNN, CircularGraph,
                     true)
             end)
         end
@@ -425,7 +440,56 @@ SN.Graphics.CreateNNVisualizerWindow = function(CircularGraph)
             for i = 1, Itrs, 1 do
                 AddSAData(false)
             end
-            mero_NN:ApplySA()
+            SN.Graphics.CurrentNN:ApplySA()
+            SN.Graphics.CurrentNN:PrintMeanSE()
+        end
+    )
+
+    SaveToFileBP:SetFunctions(
+        function()
+            SaveToFileBP:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            SaveToFileBP:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+           SN.Graphics.CurrentNN.SaveToFile("BPNN.bin")
+        end
+    )
+    
+    LoadFromFileBP:SetFunctions(
+        function()
+            LoadFromFileBP:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            LoadFromFileBP:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+           SN.Graphics.CurrentNN.LoadFromFile("BPNN.bin")
+        end
+    )
+
+    SaveToFileSA:SetFunctions(
+        function()
+            SaveToFileSA:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            SaveToFileSA:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+           SN.Graphics.CurrentNN.SaveToFile("SANN.bin")
+        end
+    )
+
+    LoadFromFileSA:SetFunctions(
+        function()
+            LoadFromFileSA:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            LoadFromFileSA:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+           SN.Graphics.CurrentNN.SaveToFile("SANN.bin")
         end
     )
     return Window

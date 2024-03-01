@@ -2,8 +2,8 @@ local normal_color = Theme.Colors.Button.Normal * 8
 local hover_color = Theme.Colors.Button.Hover * 1.4
 local large_font = Com.GetFont("font", "large")
 SN.Graphics.PathGame = {}
-SN.Graphics.PathGame.DX = 8
-SN.Graphics.PathGame.DY = 8
+SN.Graphics.PathGame.DX = 5
+SN.Graphics.PathGame.DY = 5
 
 SN.Graphics.CreateProblem3SolverWindow = function(inCircularGraph)
     local pg = SN.Graphics.PathGame
@@ -36,13 +36,27 @@ SN.Graphics.CreateProblem3SolverWindow = function(inCircularGraph)
     local TrainingCountLineEdit = Com.MaterialLineEdit:New(vec3(0), vec3(0), large_font, "1")
     TrainingCountHLayout:AddComponents({ TrainingCountText, TrainingCountLineEdit }, { 0.5, 1 - 0.5 })
 
+    local FileSaveHLayoutBP = Com.HLayout:New(0)
+    local SaveToFileBP = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "SaveBP")
+    local LoadFromFileBP = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "LoadBP")
+    FileSaveHLayoutBP:AddComponents({SaveToFileBP, LoadFromFileBP}, {0.5, 1 - 0.5})
+
+    local FileSaveHLayoutSA = Com.HLayout:New(0)
+    local SaveToFileSA = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "SaveSA")
+    local LoadFromFileSA = Com.TextButton:New(vec3(400, 400, 4), vec3(400, 400, 4), large_font, "LoadSA")
+    FileSaveHLayoutSA:AddComponents({SaveToFileSA, LoadFromFileSA}, {0.5, 1 - 0.5})
+
     local HComponents = {
         RandomizeHLayout,
         PropagateForwardHLayout,
         TrainHLayout,
         TrainingCountHLayout,
+        Com.VLayout:New(0),
+        FileSaveHLayoutBP,
+        FileSaveHLayoutSA,
         Com.VLayout:New(0)
     }
+
     local HComponentsRatio = {}
     for i = 1, #HComponents, 1 do
         HComponentsRatio[i] = 0.04 * 2
@@ -98,14 +112,15 @@ SN.Graphics.CreateProblem3SolverWindow = function(inCircularGraph)
         mero_NN:PropagateForwardVecFloat(problem.GetImage())
         local Output = NN.SimpleNN.GetOutputFloatVec(mero_NN, #mero_NN.mTopology - 1)
 
-        local max = math.max(0, math.round(Output[1]))
-        local max_i = 0
+        local max = math.max(0, Output[1])
+        local max_i = 1
         for i = 1, #Output, 1 do
             if Output[i] > max then
                 max_i = i; max = Output[i]
             end
         end
-        problem.Move(max_i)
+        print(max_i)
+        problem.SafeMove(max_i)
 
         Com.NewSimultaneousSingleTimeUpdate(function()
             SN.Graphics.DrawNeuralNetworkToGraph(mero_NN, inCircularGraph, true)
@@ -166,6 +181,58 @@ SN.Graphics.CreateProblem3SolverWindow = function(inCircularGraph)
             TrainButtonBP:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
         end,
         trainBP
+    )
+
+    SaveToFileBP:SetFunctions(
+        function()
+            SaveToFileBP:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            SaveToFileBP:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+           SN.Graphics.CurrentNN.SaveToFile("BPNN.bin")
+        end
+    )
+    
+    LoadFromFileBP:SetFunctions(
+        function()
+            LoadFromFileBP:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            LoadFromFileBP:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+            Com.NewSimultaneousSingleTimeUpdate(function ()
+                SN.Graphics.CurrentNN.LoadFromFile("BPNN.bin")
+            end)
+        end
+    )
+
+    SaveToFileSA:SetFunctions(
+        function()
+            SaveToFileSA:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            SaveToFileSA:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+           SN.Graphics.CurrentNN.SaveToFile("SANN.bin")
+        end
+    )
+
+    LoadFromFileSA:SetFunctions(
+        function()
+            LoadFromFileSA:SetFillColor(vec4(hover_color.x, hover_color.y, hover_color.z, hover_color.w))
+        end,
+        function()
+            LoadFromFileSA:SetFillColor(vec4(normal_color.x, normal_color.y, normal_color.z, normal_color.w))
+        end,
+        function ()
+            Com.NewSimultaneousSingleTimeUpdate(function ()
+                SN.Graphics.CurrentNN.LoadFromFile("SANN.bin")
+            end)
+        end
     )
 
     return Window

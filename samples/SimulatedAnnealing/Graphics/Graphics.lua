@@ -10,7 +10,6 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
     local Window2 = SN.Graphics.CreateNNVisualizerWindow(inTable[2])
     local Window3 = SN.Graphics.CreateProblem3SolverWindow(inTable[3])
     problemWindows.Update = function(self, inPosition_3f, inDimension_3f, inWindowNo, inInverseSpeed)
-        tracy.ZoneBeginN("ProblemWindows Update")
         if inWindowNo then
             self.mCurrentWindow = inWindowNo
         end
@@ -48,7 +47,6 @@ SN.Graphics.CreateProblemWindowsLayout = function(inTable)
 
         self.mPosition_3f = inPosition_3f
         self.mDimension_3f = inDimension_3f
-        tracy.ZoneEnd()
     end
 
     problemWindows:AddComponents({ Window1, Window2, Window3 }, { 1 / 3, 1 / 3, 1 / 3 })

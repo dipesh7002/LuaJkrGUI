@@ -90,6 +90,11 @@ function D(inx, iny, inz)
 	return vec3(inx, iny, 1)
 end
 
+local ShapeRendererBound_Image = false
+local LineRendererBound_Fill = false
+local ShapeRendererBound_Rectangle = false
+
+
 Jkr.FontObject = {
 	mPath = " ",
 	mId = 0,
@@ -381,7 +386,6 @@ if not AlternativeTextRenderer then
 				Int(self.mId.y), GetIdentityMatrix())
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
-			tracy.ZoneBeginN("Jkr.TextObject.Update")
 			self.mPosition_3f = inPosition_3f
 			if (inString) then
 				self.mString = inString
@@ -390,7 +394,6 @@ if not AlternativeTextRenderer then
 			local str = string.rep(" ", self.mId.y)
 			T.Update(Int(self.mId.x), str, self.mPosition_3f)
 			T.Update(Int(self.mId.x), self.mString, self.mPosition_3f)
-			tracy.ZoneEnd()
 		end
 	}
 else
@@ -444,7 +447,6 @@ else
 				GetIdentityMatrix())
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inString, inShouldAlignBottom)
-			tracy.ZoneBeginN("Jkr.TextObject.Update")
 			self.mPosition_3f = inPosition_3f
 			if (inString) then
 				self.mString = inString
@@ -459,7 +461,6 @@ else
 				r.balt.update_pos_only(self.mId, Int(self.mFont.mId), self.mPosition_3f, self.mString,
 					should_align_button)
 			end
-			tracy.ZoneEnd()
 		end,
 	}
 end

@@ -510,11 +510,9 @@ function LoadMaterialComponents(inLoadCompute)
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f, inString)
-			tracy.ZoneBeginN("MaterialTextButton")
 			self.mText = inString
 			self.mTextButton:Update(inPosition_3f, inDimension_3f, inString)
 			Com.ButtonProxy.Update(self, inPosition_3f, inDimension_3f)
-			tracy.ZoneEnd()
 		end,
 		SetFillColor = function(self, inColor_4f)
 			self.mTextButton:SetFillColor(inColor_4f)
@@ -1131,9 +1129,7 @@ function LoadMaterialComponents(inLoadCompute)
 			return Obj
 		end,
 		Update = function(self, inPosition_3f, inDimension_3f)
-			tracy.ZoneBeginN("Material Line Edit")
 			self.mLayout:Update(inPosition_3f, inDimension_3f)
-			tracy.ZoneEnd()
 		end,
 		GetText = function(self)
 			return self.mLineEdit.mStringBuffer
