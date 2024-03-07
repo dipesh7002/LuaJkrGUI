@@ -69,6 +69,7 @@ void GlslMain()
     end
 end
 
+Jmath = Jmath
 
 Jkr.CreateInstance = function(inVarDesSet, inPoolSize)
     if not inVarDesSet then inVarDesSet = 1000 end
@@ -86,18 +87,71 @@ Jkr.CreateEventManager = function()
     return Jkr.EventManager()
 end
 
-Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
-    if not inCache then
-        inCache = Jkr.PainterCache(inInstance, Jkr.PainterType.Line)
+local DefaultCaches = {}
+Jkr.GetDefaultCache = function(inInstance, inRend)
+    if inRend == "Line" then
+        DefaultCaches["Line"] = Jkr.PainterCache(inInstance, Jkr.PainterType.Line)
         if ShouldLoadCaches then
-            inCache:Load("cache2/LineRendererCache.glsl")
+            DefaultCaches["Line"]:Load("cache2/LineRendererCache.glsl")
         else
-            inCache:Store("cache2/LineRendererCache.glsl",
+            DefaultCaches["Line"]:Store("cache2/LineRendererCache.glsl",
                 GetDefaultResource("Line", "Vertex"),
                 GetDefaultResource("Line", "Fragment"),
                 GetDefaultResource(nil, "Compute")
             )
         end
+        return DefaultCaches["Line"]
     end
-    return Jkr.LineRenderer(inInstance, inCompatibleWindow, inCache)
+end
+
+Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
+    if not inCache then
+        local DefaultCache = Jkr.GetDefaultCache(inInstance, "Line")
+        return Jkr.LineRenderer(inInstance, inCompatibleWindow, DefaultCache)
+    else
+        return Jkr.LineRenderer(inInstance, inCompatibleWindow, inCache)
+    end
+end
+
+function Integer(inX)
+    return math.floor(inX)
+end
+
+Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess)
+    local oldTime = 0.0
+    local i = 0
+    while not e:ShouldQuit() do
+        oldTime = w:GetWindowCurrentTime()
+        e:ProcessEvents()
+
+        -- /* All Updates are done here*/
+        w:BeginUpdates()
+        if (inUpdate) then inUpdate() end
+        w:EndUpdates()
+
+        -- /* All UI Renders are Recordeed here*/
+        w:BeginUIs()
+        if (inDraw) then inDraw() end
+        w:EndUIs()
+
+        -- /* All ComputeShader Invocations are Done here Renders are Recordeed here*/
+        w:BeginDispatches()
+        if (inDispatch) then inDispatch() end
+        w:EndDispatches()
+
+        -- /* All Draws (Main CmdBuffer Recording) is done here*/
+        w:BeginDraws(1, 1, 1, 1, 1)
+        w:ExecuteUIs() -- The UI CmdBuffer is executed onto the main CmdBuffer
+        w:EndDraws()
+
+        if (inPostProcess) then inPostProcess() end
+
+        -- /* Finally is presented onto the screen */
+        w:Present()
+        local delta = w:GetWindowCurrentTime() - oldTime
+        if (i % 100 == 0) then
+            w:SetTitle("FrameRate: " .. 1000 / delta)
+        end
+        i = i + 1
+    end
 end
