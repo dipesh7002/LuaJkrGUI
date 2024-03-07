@@ -3,7 +3,7 @@ local i = Jkr.CreateInstance()
 local w = Jkr.CreateWindow(i, "Hello")
 local e = Jkr.CreateEventManager()
 local l = Jkr.CreateLineRenderer(i, w)
-local line = l:Add(vec3(100, 100, 5), vec3(100, 100, 5))
+local line = l:Add(vec3(100, 100, 5), vec3(200, 200, 5))
 
 
 function Update()
