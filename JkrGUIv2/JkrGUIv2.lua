@@ -1,6 +1,48 @@
-local ShouldLoadCaches = false
+--[============================================================[
+        JKRGUI v2 - ALL RIGHT RESERVED (c)
+
+*userdata - means table in which you cannot insert elements.
+    This is similar to class in C++
+
+*factory function - These are the functions that are prefixed
+    CreateXXXX, that means you are creating an object.
+    *A table is returned by the factory function,
+    *all the local varia- bles in the factory function is
+        to be treated like private member variable in C++
+
+Notes:
+1. All the factory functions that is not in the namespace Jkr,
+    (is local to this file), will return userdata, that is
+    you cannot extend the table. And those which are in the
+    Jkr namespace will return a table which can be extended
+    with your functionality.
+
+
+CODING STANDARDS
+    -- if the argument type is a table make it plural
+            like numbers, keyframes etc
+]============================================================]
+
+-- True : Will compile and store caches
+-- False: Will load caches instead of compiling the shaders
+local ShouldLoadCaches_b = false
+
+--[============================================================[
+        DEFAULT RESOURCES
+
+ These are all the shaders (vertex, fragment, compute) that
+ are default but can be given by the application developer.
+ The Compute shader is not used anywhere in renderers, but
+ *can* be used, so we have kept it as is.
+
+ Currently there is a Line Renderer and a Shape Renderer
+]============================================================]
 
 local GetDefaultResource = function(inRenderer, inShaderType)
+    --[============================================================[
+            DEFAULT COMPUTE SHADER
+    ]============================================================]
+
     if inShaderType == "Compute" then
         return [[
 #version 450
@@ -22,13 +64,104 @@ void GlslMain()
        ]]
     end
 
-    if inRenderer == "ShapeFill" then
+    --[============================================================[
+            SHAPE RENDERER RESOURCES
+    ]============================================================]
+
+
+    if inRenderer == "ShapeFill" or inRenderer == "ShapeImage" then
         if inShaderType == "Vertex" then
             return [[
+#version 450
+#extension GL_EXT_debug_printf : enable
 
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec2 inTexCoord;
+layout(location = 0) out vec2 outTexCoord;
+
+layout(push_constant, std430) uniform pc {
+	mat4 Matrix;
+	vec4 Color;
+	vec4 mParams;
+} push;
+
+
+void GlslMain() {
+	vec4 dx = vec4(inPosition.x, inPosition.y, inPosition.z, 1.0);
+	gl_Position = push.Matrix * dx;
+	outTexCoord = inTexCoord;
+}
            ]]
+        else
+            if inRenderer == "ShapeFill" then
+                return [[
+#version 450
+#extension GL_EXT_debug_printf : enable
+layout(location = 0) out vec4 outColor;
+layout(location = 0) in vec2 inTexCoord;
+
+layout(push_constant, std430) uniform pc {
+	mat4 Matrix;
+	vec4 Color;
+	vec4 mParams;
+} push;
+
+void GlslMain()
+{
+	outColor = push.Color;
+}
+                ]]
+            elseif inRenderer == "ShapeImage" then
+                return [[
+#version 450
+#extension GL_EXT_debug_printf : enable
+
+layout(location = 0) out vec4 outColor;
+layout(set = 0, binding = 0) uniform sampler2D image;
+layout(location = 0) in vec2 inTexCoord;
+
+layout(push_constant, std430) uniform pc {
+	mat4 Matrix;
+	vec4 Color;
+	vec4 mParams;
+} push;
+
+void GlslMain()
+{
+	vec4 color = texture(image, inTexCoord);
+	outColor = vec4(color.r * push.Color.r, color.g * push.Color.g, color.b * push.Color.b, color.a * push.Color.a);
+}
+                ]]
+            elseif inRenderer == "ShapeImageVarDes" then
+                return [[
+#version 450
+#extension GL_EXT_debug_printf : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+
+layout(location = 0) out vec4 outColor;
+layout(set = 0, binding = 0) uniform sampler2D u_image[];
+layout(location = 0) in vec2 inTextCoord;
+
+layout(push_constant, std430) uniform pc {
+	mat4 Matrix;
+	vec4 Color;
+	vec4 mParams;
+} push;
+
+void GlslMain()
+{
+	vec4 color = texture(u_image[int(push.mParams.x)], inTextCoord);
+	outColor = vec4(color.r * push.Color.r, color.g * push.Color.g, color.b * push.Color.b, color.a * push.Color.a);
+}
+                ]]
+            end
         end
     end
+
+    --[============================================================[
+         LINE RENDERER RESOURCES
+    ]============================================================]
+
 
     if inRenderer == "Line" then
         if inShaderType == "Vertex" then
@@ -69,29 +202,15 @@ void GlslMain()
     end
 end
 
-Jmath = Jmath
-
-Jkr.CreateInstance = function(inVarDesSet, inPoolSize)
-    if not inVarDesSet then inVarDesSet = 1000 end
-    if not inPoolSize then inPoolSize = 1000 end
-    return Jkr.Instance(inVarDesSet, inPoolSize)
-end
-
-Jkr.CreateWindow = function(inJkrInstance, inTitle, inDimension_2f)
-    if not inTitle then inTitle = "JkrGUIv2" end
-    if not inDimension_2f then inDimension_2f = uvec2(900, 700) end
-    return Jkr.Window(inJkrInstance, inTitle, inDimension_2f.x, inDimension_2f.y)
-end
-
-Jkr.CreateEventManager = function()
-    return Jkr.EventManager()
-end
+--[============================================================[
+        GET DEFAULT CACHES
+    ]============================================================]
 
 local DefaultCaches = {}
 Jkr.GetDefaultCache = function(inInstance, inRend)
     if inRend == "Line" then
         DefaultCaches["Line"] = Jkr.PainterCache(inInstance, Jkr.PainterType.Line)
-        if ShouldLoadCaches then
+        if ShouldLoadCaches_b then
             DefaultCaches["Line"]:Load("cache2/LineRendererCache.glsl")
         else
             DefaultCaches["Line"]:Store("cache2/LineRendererCache.glsl",
@@ -101,23 +220,152 @@ Jkr.GetDefaultCache = function(inInstance, inRend)
             )
         end
         return DefaultCaches["Line"]
+    elseif inRend == "Shape" then
+        DefaultCaches["Shape"] = Jkr.ShapeRendererResources()
+        DefaultCaches["Shape"]:Add(
+            inInstance,
+            Jkr.FillType.Image,
+            Jkr.PipelineProperties.Default,
+            "cache2/ShapeImageCache.glsl",
+            GetDefaultResource("ShapeImage", "Vertex"),
+            GetDefaultResource("ShapeImage", "Fragment"),
+            GetDefaultResource(nil, "Compute"),
+            ShouldLoadCaches_b
+        )
+        DefaultCaches["Shape"]:Add(
+            inInstance,
+            Jkr.FillType.ContinousLine,
+            Jkr.PipelineProperties.Default,
+            "cache2/ShapeFillCache.glsl",
+            GetDefaultResource("ShapeFill", "Vertex"),
+            GetDefaultResource("ShapeFill", "Fragment"),
+            GetDefaultResource(nil, "Compute"),
+            ShouldLoadCaches_b
+        )
+        return DefaultCaches["Shape"]
     end
+end
+
+-- For no error squiggles in VSCode
+Jmath = Jmath
+
+--[============================================================[
+    CREATE JKR INSTANCE
+]============================================================]
+
+
+Jkr.CreateInstance = function(inVarDesSet, inPoolSize)
+    if not inVarDesSet then inVarDesSet = 1000 end
+    if not inPoolSize then inPoolSize = 1000 end
+    return Jkr.Instance(inVarDesSet, inPoolSize)
+end
+
+--[============================================================[
+    CREATE JKR WINDOW
+]============================================================]
+
+Jkr.CreateWindow = function(inJkrInstance, inTitle, inDimension_2f)
+    if not inTitle then inTitle = "JkrGUIv2" end
+    if not inDimension_2f then inDimension_2f = uvec2(900, 700) end
+    return Jkr.Window(inJkrInstance, inTitle, inDimension_2f.x, inDimension_2f.y)
+end
+
+--[============================================================[
+    CREATE JKR EVENT MANAGER
+]============================================================]
+
+Jkr.CreateEventManager = function()
+    return Jkr.EventManager()
+end
+
+
+--[============================================================[
+    CREATE LINE RENDERER
+]============================================================]
+
+
+local CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
+    local DefaultCache = inCache
+    if not inCache then
+        DefaultCache = Jkr.GetDefaultCache(inInstance, "Line")
+    end
+    return Jkr.LineRenderer(inInstance, inCompatibleWindow, DefaultCache)
 end
 
 Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
-    if not inCache then
-        local DefaultCache = Jkr.GetDefaultCache(inInstance, "Line")
-        return Jkr.LineRenderer(inInstance, inCompatibleWindow, DefaultCache)
+    local o = {}
+    local lr = CreateLineRenderer(inInstance, inCompatibleWindow, inCache)
+    local recycleBin = Jkr.RecycleBin()
+
+    o.Add = function(self, inP1_3f, inP2_3f)
+        if not recycleBin:IsEmpty() then
+            local i = recycleBin:Get()
+            lr:Update(i, inP1_3f, inP2_3f)
+            return i
+        else
+            return lr:Add(inP1_3f, inP2_3f)
+        end
+    end
+    o.Remove = function(self, inIndex)
+        recycleBin:Add(inIndex)
+    end
+    o.Draw = function(self, w, inColor, wx, wy, startId, endId, inMatrix)
+        lr:Draw(w, inColor, wx, wy, startId, endId, inMatrix)
+    end
+    o.Bind = function(self, w)
+        lr:Bind(w)
+    end
+    o.Dispatch = function(self, w)
+        lr:Dispatch(w)
+    end
+    return o
+end
+
+--[============================================================[
+    CREATE SHAPE RENDERER
+]============================================================]
+
+local CreateShapeRenderer = function(inInstance, inCompatibleWindow, inShapeRendererResouce)
+    if inShapeRendererResouce then
+        return Jkr.ShapeRenderer(inInstance, inCompatibleWindow, inShapeRendererResouce)
     else
-        return Jkr.LineRenderer(inInstance, inCompatibleWindow, inCache)
+        return Jkr.ShapeRenderer(inInstance, inCompatibleWindow, Jkr.GetDefaultCache(inInstance, "Shape"))
     end
 end
 
-function Integer(inX)
+Jkr.CreateShapeRenderer = function(inInstance, inCompatibleWindow, inShapeRendererResouce)
+    local o = {}
+    local sr = CreateShapeRenderer(inInstance, inCompatibleWindow, inShapeRendererResouce)
+    o.Add = function (self, inGenerator, inPosition_3f)
+      sr:Add(inGenerator, inPosition_3f)  
+    end
+    o.Update = function (self, inId, inGenerator, inPosition_3f)
+       sr:Update(inId, inGenerator, inPosition_3f) 
+    end
+    return o
+end
+
+local CreateShapeRendererEXT = function(inInstance, inCompatibleWindow, inCaches)
+    -- TODO
+end
+
+Jkr.CreateShaperRendererEXT = function(inInstance, inCompatibleWindow, inCache)
+    -- TODO
+end
+
+--[============================================================[
+    UTILITY FUNCTIONS
+]============================================================]
+
+function math.int(inX)
     return math.floor(inX)
 end
 
-Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess)
+--[============================================================[
+    MAIN LOOPS
+]============================================================]
+
+Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, inColor_4f)
     local oldTime = 0.0
     local i = 0
     while not e:ShouldQuit() do
@@ -127,6 +375,7 @@ Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess)
         -- /* All Updates are done here*/
         w:BeginUpdates()
         if (inUpdate) then inUpdate() end
+        WindowDimension = w:GetWindowDimension()
         w:EndUpdates()
 
         -- /* All UI Renders are Recordeed here*/
@@ -140,7 +389,12 @@ Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess)
         w:EndDispatches()
 
         -- /* All Draws (Main CmdBuffer Recording) is done here*/
-        w:BeginDraws(1, 1, 1, 1, 1)
+        if inColor_4f then
+            w:BeginDraws(inColor_4f.x, inColor_4f.y, inColor_4f.z, inColor_4f.a, 1)
+        else
+            w:BeginDraws(0, 0, 0, 1, 1)
+        end
+
         w:ExecuteUIs() -- The UI CmdBuffer is executed onto the main CmdBuffer
         w:EndDraws()
 
