@@ -312,6 +312,7 @@ end
 Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
     local o = {}
     local lr = CreateLineRenderer(inInstance, inCompatibleWindow, inCache)
+    o.handle = lr
     local recycleBin = Jkr.RecycleBin()
 
     o.Add = function(self, inP1_3f, inP2_3f)
@@ -353,6 +354,7 @@ end
 Jkr.CreateShapeRenderer = function(inInstance, inCompatibleWindow, inShapeRendererResouce)
     local o = {}
     local sr = CreateShapeRenderer(inInstance, inCompatibleWindow, inShapeRendererResouce)
+    o.handle = sr
     o.Add = function (self, inGenerator, inPosition_3f)
       return sr:Add(inGenerator, inPosition_3f)  
     end
@@ -381,6 +383,41 @@ end
 Jkr.CreateShaperRendererEXT = function(inInstance, inCompatibleWindow, inCache)
     -- TODO
 end
+
+--[============================================================[
+    CREATE TEXT RENDERER
+]============================================================]
+
+Jkr.CreateTextRendererBestTextBase = function ()
+    local o = {}
+    o.handle = Jkr.BestText_base()
+    return o
+end
+
+local CreateTextRendererBestTextAlt = function (inInstance, inShape, inBestTextBase, inCompatibleWindow)
+    return Jkr.BestText_Alt(inInstance, inShape, inBestTextBase)  
+end
+
+Jkr.CreateTextRendererBestTextAlt = function (inInstance, inShape, inBestTextBase, inCompatibleWindow)
+   local o = {} 
+   local tr = CreateTextRendererBestTextAlt(inInstance, inShape, inBestTextBase.handle, inCompatibleWindow)
+   o.handle = tr
+   o.Add = function (inFontId, inPosition_3f, inText)
+        return tr:Add(inFontId, inPosition_3f, inText)
+   end
+   o.Update = function (inImageId, inFontId, inPosition_3f, inText)
+        tr:Update(inImageId, inFontId, inPosition_3f, inText)
+   end
+   o.UpdatePosOnly = function (inImageId, inFontId, inPosition_3f, inText)
+        tr:UpdatePosOnly(inImageId, inFontId, inPosition_3f, inText)
+   end
+   o.Draw = function (inImageId, w, inColor, inMatrix)
+        tr:Draw(inImageId, w, inColor, inMatrix) 
+   end
+
+   return o
+end
+
 
 --[============================================================[
     UTILITY FUNCTIONS

@@ -5,8 +5,10 @@ local e = Jkr.CreateEventManager()
 local l = Jkr.CreateLineRenderer(i, w)
 
 local shape = Jkr.CreateShapeRenderer(i, w)
-local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
+local textBase = Jkr.CreateTextRendererBestTextBase()
+local TR = Jkr.CreateTextRendererBestTextAlt(i, shape, textBase, w)
 
+local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
 local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(100, 100))
 local id = shape:Add(lGenerator, vec3(10, 10, 20))
 
