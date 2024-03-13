@@ -20,7 +20,7 @@ Notes:
 
 CODING STANDARDS
     -- if the argument type is a table make it plural
-            like numbers, keyframes etc
+            like inNumbers, inKeyframes etc
 ]============================================================]
 
 -- True : Will compile and store caches
@@ -37,6 +37,15 @@ local ShouldLoadCaches_b = false
 
  Currently there is a Line Renderer and a Shape Renderer
 ]============================================================]
+
+-- For no error squiggles in VSCode
+Jkr = Jkr
+Jmath = Jmath
+vec3 = vec3
+vec4 = vec4
+vec2 = vec2
+uvec2 = uvec2
+
 
 local GetDefaultResource = function(inRenderer, inShaderType)
     --[============================================================[
@@ -224,6 +233,16 @@ Jkr.GetDefaultCache = function(inInstance, inRend)
         DefaultCaches["Shape"] = Jkr.ShapeRendererResources()
         DefaultCaches["Shape"]:Add(
             inInstance,
+            Jkr.FillType.Fill,
+            Jkr.PipelineProperties.Default,
+            "cache2/ShapeFillCache.glsl",
+            GetDefaultResource("ShapeFill", "Vertex"),
+            GetDefaultResource("ShapeFill", "Fragment"),
+            GetDefaultResource(nil, "Compute"),
+            ShouldLoadCaches_b
+        )
+        DefaultCaches["Shape"]:Add(
+            inInstance,
             Jkr.FillType.Image,
             Jkr.PipelineProperties.Default,
             "cache2/ShapeImageCache.glsl",
@@ -235,7 +254,7 @@ Jkr.GetDefaultCache = function(inInstance, inRend)
         DefaultCaches["Shape"]:Add(
             inInstance,
             Jkr.FillType.ContinousLine,
-            Jkr.PipelineProperties.Default,
+            Jkr.PipelineProperties.Line,
             "cache2/ShapeFillCache.glsl",
             GetDefaultResource("ShapeFill", "Vertex"),
             GetDefaultResource("ShapeFill", "Fragment"),
@@ -246,8 +265,6 @@ Jkr.GetDefaultCache = function(inInstance, inRend)
     end
 end
 
--- For no error squiggles in VSCode
-Jmath = Jmath
 
 --[============================================================[
     CREATE JKR INSTANCE
@@ -309,8 +326,8 @@ Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
     o.Remove = function(self, inIndex)
         recycleBin:Add(inIndex)
     end
-    o.Draw = function(self, w, inColor, wx, wy, startId, endId, inMatrix)
-        lr:Draw(w, inColor, wx, wy, startId, endId, inMatrix)
+    o.Draw = function(self, w, inColor, startId, endId, inMatrix)
+        lr:Draw(w, inColor, startId, endId, inMatrix)
     end
     o.Bind = function(self, w)
         lr:Bind(w)
@@ -337,10 +354,22 @@ Jkr.CreateShapeRenderer = function(inInstance, inCompatibleWindow, inShapeRender
     local o = {}
     local sr = CreateShapeRenderer(inInstance, inCompatibleWindow, inShapeRendererResouce)
     o.Add = function (self, inGenerator, inPosition_3f)
-      sr:Add(inGenerator, inPosition_3f)  
+      return sr:Add(inGenerator, inPosition_3f)  
     end
     o.Update = function (self, inId, inGenerator, inPosition_3f)
        sr:Update(inId, inGenerator, inPosition_3f) 
+    end
+    o.BindShapes = function(self, w)
+        sr:BindShapes(w)
+    end
+    o.BindFillMode = function (self, inFillMode, inWindow)
+        sr:BindFillMode(inFillMode, inWindow) 
+    end
+    o.Draw = function (self, w, inColor_4f, inWindowW, inWindowH, inStartShapeId, inEndShapeId, inMatrix)
+        sr:Draw(w, inColor_4f, inWindowW, inWindowH, inStartShapeId, inEndShapeId, inMatrix)
+    end
+    o.Dispatch = function (self, w)
+        sr:Dispatch(w)    
     end
     return o
 end
