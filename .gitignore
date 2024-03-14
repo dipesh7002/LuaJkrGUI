@@ -12,3 +12,4 @@ aJkrLua
 .vs/*.*
 *.vsidx
 .wsuo
+cmake_install.cmake
