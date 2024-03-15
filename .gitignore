@@ -13,3 +13,5 @@ aJkrLua
 *.vsidx
 .wsuo
 cmake_install.cmake
+*.pdb
+*.obj
