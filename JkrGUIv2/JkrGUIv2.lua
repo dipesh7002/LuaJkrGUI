@@ -46,6 +46,12 @@ vec4 = vec4
 vec2 = vec2
 uvec2 = uvec2
 
+--[============================================================[
+    UTILITY FUNCTIONS
+]============================================================]
+
+math.int = math.floor
+
 
 local GetDefaultResource = function(inRenderer, inShaderType)
     --[============================================================[
@@ -284,7 +290,7 @@ end
 Jkr.CreateWindow = function(inJkrInstance, inTitle, inDimension_2f)
     if not inTitle then inTitle = "JkrGUIv2" end
     if not inDimension_2f then inDimension_2f = uvec2(900, 700) end
-    return Jkr.Window(inJkrInstance, inTitle, inDimension_2f.x, inDimension_2f.y)
+    return Jkr.Window(inJkrInstance, inTitle, math.int(inDimension_2f.x), math.int(inDimension_2f.y))
 end
 
 --[============================================================[
@@ -355,23 +361,36 @@ Jkr.CreateShapeRenderer = function(inInstance, inCompatibleWindow, inShapeRender
     local o = {}
     local sr = CreateShapeRenderer(inInstance, inCompatibleWindow, inShapeRendererResouce)
     o.handle = sr
-    o.Add = function (self, inGenerator, inPosition_3f)
-      return sr:Add(inGenerator, inPosition_3f)  
+
+    local recycleBin = Jkr.RecycleBin()
+    o.Add = function(self, inGenerator, inPosition_3f)
+        if not recycleBin:IsEmpty() then
+            local i = recycleBin:Get()
+            sr:Update(inGenerator, inPosition_3f)
+            return i
+        else
+            return sr:Add(inGenerator, inPosition_3f)
+        end
     end
-    o.Update = function (self, inId, inGenerator, inPosition_3f)
-       sr:Update(inId, inGenerator, inPosition_3f) 
+
+    o.Remove = function(self, inId)
+        recycleBin:Add(inId)
+    end
+
+    o.Update = function(self, inId, inGenerator, inPosition_3f)
+        sr:Update(inId, inGenerator, inPosition_3f)
     end
     o.BindShapes = function(self, w)
         sr:BindShapes(w)
     end
-    o.BindFillMode = function (self, inFillMode, inWindow)
-        sr:BindFillMode(inFillMode, inWindow) 
+    o.BindFillMode = function(self, inFillMode, inWindow)
+        sr:BindFillMode(inFillMode, inWindow, Jkr.CmdParam.UI)
     end
-    o.Draw = function (self, w, inColor_4f, inWindowW, inWindowH, inStartShapeId, inEndShapeId, inMatrix)
+    o.Draw = function(self, w, inColor_4f, inWindowW, inWindowH, inStartShapeId, inEndShapeId, inMatrix)
         sr:Draw(w, inColor_4f, inWindowW, inWindowH, inStartShapeId, inEndShapeId, inMatrix)
     end
-    o.Dispatch = function (self, w)
-        sr:Dispatch(w)    
+    o.Dispatch = function(self, w)
+        sr:Dispatch(w, Jkr.CmdParam.UI)
     end
     return o
 end
@@ -385,47 +404,76 @@ Jkr.CreateShaperRendererEXT = function(inInstance, inCompatibleWindow, inCache)
 end
 
 --[============================================================[
-    CREATE TEXT RENDERER
+    CREATE TEXT RENDERERS
 ]============================================================]
 
-Jkr.CreateTextRendererBestTextBase = function ()
+local CreateTextRendererBestTextAlt = function(inInstance, inShapeHandle, inBestTextBase)
+    return Jkr.BestText_Alt(inInstance, inShapeHandle, inBestTextBase)
+end
+
+Jkr.CreateTextRendererBestTextAlt = function(inInstance, inShapeRenderer)
     local o = {}
-    o.handle = Jkr.BestText_base()
-    return o
-end
-
-local CreateTextRendererBestTextAlt = function (inInstance, inShape, inBestTextBase, inCompatibleWindow)
-    return Jkr.BestText_Alt(inInstance, inShape, inBestTextBase)  
-end
-
-Jkr.CreateTextRendererBestTextAlt = function (inInstance, inShape, inBestTextBase, inCompatibleWindow)
-   local o = {} 
-   local tr = CreateTextRendererBestTextAlt(inInstance, inShape, inBestTextBase.handle, inCompatibleWindow)
-   o.handle = tr
-   o.Add = function (inFontId, inPosition_3f, inText)
+    local bt = Jkr.BestText_base()
+    local tr = CreateTextRendererBestTextAlt(inInstance, inShapeRenderer.handle, bt)
+    o.AddFontFace = function(self, inFontFileName, inSize)
+        return bt:AddFontFace(inFontFileName, inSize)
+    end
+    o.Add = function(self, inFontId, inPosition_3f, inText)
         return tr:Add(inFontId, inPosition_3f, inText)
-   end
-   o.Update = function (inImageId, inFontId, inPosition_3f, inText)
-        tr:Update(inImageId, inFontId, inPosition_3f, inText)
-   end
-   o.UpdatePosOnly = function (inImageId, inFontId, inPosition_3f, inText)
-        tr:UpdatePosOnly(inImageId, inFontId, inPosition_3f, inText)
-   end
-   o.Draw = function (inImageId, w, inColor, inMatrix)
-        tr:Draw(inImageId, w, inColor, inMatrix) 
-   end
-
-   return o
+    end
+    o.Update = function(self, inTextImageId, inFontId, inPosition_3f, inText)
+        tr:Update(inTextImageId, inFontId, inPosition_3f, inText)
+    end
+    o.UpdatePosOnly = function(self, inTextImageId, inFontId, inPosition_3f, inText)
+        tr:UpdatePosOnly(inTextImageId, inFontId, inPosition_3f, inText)
+    end
+    o.Draw = function(self, inTextImageId, w, inColor, inMatrix)
+        tr:Draw(inTextImageId, w, inColor, inMatrix)
+    end
+    return o
 end
 
 
 --[============================================================[
-    UTILITY FUNCTIONS
+    CREATE CUSTOM PAINTER
 ]============================================================]
 
-function math.int(inX)
-    return math.floor(inX)
+Jkr.CreateCustomPainterImage = function(i, w, inWidth, inHeight)
+    return Jkr.CustomPainterImage(i, w, inWidth, inHeight)
 end
+
+local CreateCustomImagePainter = function(inCacheFileName, inComputeShader)
+    return Jkr.CustomImagePainter(inCacheFileName, inComputeShader)
+end
+
+Jkr.CreateCustomImagePainter = function(inCacheFileName, inComputeShader)
+    local o = {}
+    local cp = CreateCustomImagePainter(inCacheFileName, inComputeShader)
+
+    o.Load = function(self, i, w)
+        cp:Load(i, w)
+    end
+
+    o.Store = function(self, i, w)
+        cp:Store(i, w)
+    end
+
+    o.Bind = function(self, w, inCmdParam)
+        cp:Bind(w, inCmdParam)
+    end
+
+    o.BindImageFromImage = function(self, w, inCustomImagePainter, inCmdParam)
+        cp:BindImageFromImage(w, inCustomImagePainter, inCmdParam)
+    end
+
+    o.Draw = function(self, w, inPushConstant, inX, inY, inZ, inCmdParam)
+        cp:Draw(w, inPushConstant, inX, inY, inZ, inCmdParam)
+    end
+
+    return o
+end
+
+
 
 --[============================================================[
     MAIN LOOPS

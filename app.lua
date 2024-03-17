@@ -1,16 +1,20 @@
 require "JkrGUIv2.JkrGUIv2"
 local i = Jkr.CreateInstance()
-local w = Jkr.CreateWindow(i, "Hello", vec2(800, 500))
+local w = Jkr.CreateWindow(i, "Hello", vec2(500, 500))
 local e = Jkr.CreateEventManager()
 local l = Jkr.CreateLineRenderer(i, w)
 
 local shape = Jkr.CreateShapeRenderer(i, w)
-local textBase = Jkr.CreateTextRendererBestTextBase()
-local TR = Jkr.CreateTextRendererBestTextAlt(i, shape, textBase, w)
+local TR = Jkr.CreateTextRendererBestTextAlt(i, shape)
 
 local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
-local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(100, 100))
+local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
 local id = shape:Add(lGenerator, vec3(10, 10, 20))
+local font = TR:AddFontFace("font.ttf", 20)
+local font_small = TR:AddFontFace("font.ttf", 15)
+local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
+
+TR:Update(text, font, vec3(100, 100, 5), "Are you a Star?")
 
 local Matrix = function()
    return Jmath.Ortho(
@@ -46,8 +50,11 @@ function Draw()
    l:Bind(w)
    l:Draw(w, vec4(1, 0, 0, 1), line, line, Matrix())
    shape:BindShapes(w)
-   shape:BindFillMode(Jkr.FillType.RectangleFill, w)
+   shape:BindFillMode(Jkr.FillType.Fill, w)
    shape:Draw(w, vec4(1, 0, 0, 1), id, id, Matrix())
+   shape:BindShapes(w)
+   shape:BindFillMode(Jkr.FillType.Image, w)
+   TR:Draw(text, w, vec4(1, 0, 0, 1), Matrix())
 end
 
 function Dispatch()
