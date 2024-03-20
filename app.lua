@@ -14,7 +14,19 @@ local font = TR:AddFontFace("font.ttf", 20)
 local font_small = TR:AddFontFace("font.ttf", 15)
 local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
 
-TR:Update(text, font, vec3(100, 100, 5), "Are you a Star?")
+local MultiThreading = Jkr.MultiThreading(i)
+MultiThreading:Inject("m", shape)
+local f = MultiThreading:Get("m")
+
+MultiThreading:AddJob(
+   [[
+      print(m)
+      print("HelloEveryone")
+   ]]
+)
+
+
+TR:Update(text, font_small, vec3(100, 100, 5), "Are you a Star?")
 
 local Matrix = function()
    return Jmath.Ortho(
