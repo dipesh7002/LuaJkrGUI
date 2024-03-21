@@ -319,11 +319,11 @@ Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
     local o = {}
     local lr = CreateLineRenderer(inInstance, inCompatibleWindow, inCache)
     o.handle = lr
-    local recycleBin = Jkr.RecycleBin()
+    o.recycleBin = Jkr.RecycleBin()
 
     o.Add = function(self, inP1_3f, inP2_3f)
-        if not recycleBin:IsEmpty() then
-            local i = recycleBin:Get()
+        if not o.recycleBin:IsEmpty() then
+            local i = o.recycleBin:Get()
             lr:Update(i, inP1_3f, inP2_3f)
             return i
         else
@@ -331,7 +331,7 @@ Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
         end
     end
     o.Remove = function(self, inIndex)
-        recycleBin:Add(inIndex)
+        o.recycleBin:Add(inIndex)
     end
     o.Draw = function(self, w, inColor, startId, endId, inMatrix)
         lr:Draw(w, inColor, startId, endId, inMatrix)
@@ -342,6 +342,7 @@ Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
     o.Dispatch = function(self, w)
         lr:Dispatch(w)
     end
+
     return o
 end
 

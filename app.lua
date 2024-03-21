@@ -1,5 +1,7 @@
 require "JkrGUIv2.JkrGUIv2"
+
 local i = Jkr.CreateInstance()
+local MultiThreading = Jkr.MultiThreading(i)
 local w = Jkr.CreateWindow(i, "Hello", vec2(500, 500))
 local e = Jkr.CreateEventManager()
 local l = Jkr.CreateLineRenderer(i, w)
@@ -14,19 +16,35 @@ local font = TR:AddFontFace("font.ttf", 20)
 local font_small = TR:AddFontFace("font.ttf", 15)
 local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
 
-local MultiThreading = Jkr.MultiThreading(i)
-MultiThreading:Inject("m", shape)
-local f = MultiThreading:Get("m")
+local f___ = l
+local b__ = {
+   [1] = function()
+      print("What the fuck is Happending")
+   end
+}
 
-MultiThreading:AddJob(
-   [[
-      print(m)
-      print("HelloEveryone")
-   ]]
-)
+local dfff = Jkr.DefaultCustomImagePainterPushConstant()
+dfff.x = vec4(0)
+dfff.y = vec4(1)
+dfff.z = vec4(2)
 
+MultiThreading:Inject("LineRenderer", l)
+MultiThreading:Inject("window", w)
+MultiThreading:Inject("fffd", dfff)
+MultiThreading:Inject("FUCK", b__)
 
-TR:Update(text, font_small, vec3(100, 100, 5), "Are you a Star?")
+MultiThreading:AddJobF(function()
+   --local i = LineRenderer:Add(vec3(5, 5, 5), vec3(7, 7, 7))
+   print(fffd:GetSum())
+end)
+
+-- local xxxx = MultiThreading:Get("fffd")
+-- print(xxxx.y.x)
+for i = 1, 10, 1 do
+   MultiThreading:AddJobF(function()
+   end)
+end
+
 
 local Matrix = function()
    return Jmath.Ortho(
