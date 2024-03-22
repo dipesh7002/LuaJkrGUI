@@ -23,19 +23,49 @@ local b__ = {
    end
 }
 
+
+local OBJECT = {}
+local shittyp = 15
+
+function CreateObject()
+   local ddd = { { 7, 6, 5, function()
+      print("This is a function begin called", shittyp)
+   end }, 5, Jkr.DefaultCustomImagePainterPushConstant() }
+   ddd[3].x.x = 0
+
+   OBJECT.FUCKYOU = function(self)
+      print(ddd[1][1], ddd[2], ddd[3])
+      return ddd
+   end
+
+   OBJECT.ddd = ddd[3]
+
+   return OBJECT
+end
+
+local OBJECT = CreateObject()
+
 local dfff = Jkr.DefaultCustomImagePainterPushConstant()
 dfff.x = vec4(0)
 dfff.y = vec4(1)
 dfff.z = vec4(2)
 
+MultiThreading:Inject("SUSPECT", OBJECT)
 MultiThreading:Inject("LineRenderer", l)
 MultiThreading:Inject("window", w)
 MultiThreading:Inject("fffd", dfff)
 MultiThreading:Inject("FUCK", b__)
+MultiThreading:Inject("mmmm", MultiThreading)
 
-MultiThreading:AddJobF(function()
+MultiThreading:InjectScriptF(function()
    --local i = LineRenderer:Add(vec3(5, 5, 5), vec3(7, 7, 7))
-   print(fffd:GetSum())
+   local fasdf = SUSPECT.FUCKYOU()
+   --print(fasdf[3])
+   local uu = mmmm:CastToType(SUSPECT.ddd, Jkr.AllTypes.DefaultCustomImagePainterPushConstant)
+   print(uu)
+   print(uu.x)
+   --print(mmmm)
+   --SUSPECT:Show()
 end)
 
 -- local xxxx = MultiThreading:Get("fffd")
