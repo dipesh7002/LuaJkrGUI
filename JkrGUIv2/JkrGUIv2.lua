@@ -317,31 +317,34 @@ end
 
 Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
     local o = {}
-    local lr = CreateLineRenderer(inInstance, inCompatibleWindow, inCache)
-    o.handle = lr
+    o.handle = CreateLineRenderer(inInstance, inCompatibleWindow, inCache)
     o.recycleBin = Jkr.RecycleBin()
 
-    o.Add = function(self, inP1_3f, inP2_3f)
-        if not o.recycleBin:IsEmpty() then
-            local i = o.recycleBin:Get()
-            lr:Update(i, inP1_3f, inP2_3f)
-            return i
-        else
-            return lr:Add(inP1_3f, inP2_3f)
+    o.CreateMethods = function(self)
+        self.Add = function(self, inP1_3f, inP2_3f)
+            if not self.recycleBin:IsEmpty() then
+                local i = self.recycleBin:Get()
+                self.handle:Update(i, inP1_3f, inP2_3f)
+                return i
+            else
+                return self.handle:Add(inP1_3f, inP2_3f)
+            end
+        end
+        self.Remove = function(self, inIndex)
+            self.recycleBin:Add(inIndex)
+        end
+        self.Draw = function(self, w, inColor, startId, endId, inMatrix)
+            self.handle:Draw(w, inColor, startId, endId, inMatrix)
+        end
+        self.Bind = function(self, w)
+            self.handle:Bind(w)
+        end
+        self.Dispatch = function(self, w)
+            self.handle:Dispatch(w)
         end
     end
-    o.Remove = function(self, inIndex)
-        o.recycleBin:Add(inIndex)
-    end
-    o.Draw = function(self, w, inColor, startId, endId, inMatrix)
-        lr:Draw(w, inColor, startId, endId, inMatrix)
-    end
-    o.Bind = function(self, w)
-        lr:Bind(w)
-    end
-    o.Dispatch = function(self, w)
-        lr:Dispatch(w)
-    end
+
+    o:CreateMethods()
 
     return o
 end

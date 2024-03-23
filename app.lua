@@ -24,10 +24,11 @@ local b__ = {
 }
 
 
-local OBJECT = {}
 local shittyp = 15
 
 function CreateObject()
+   local OBJECT = {}
+   OBJECT.ddd = Jkr.DefaultCustomImagePainterPushConstant()
    local ddd = { { 7, 6, 5, function()
       print("This is a function begin called", shittyp)
    end }, 5, Jkr.DefaultCustomImagePainterPushConstant() }
@@ -38,34 +39,30 @@ function CreateObject()
       return ddd
    end
 
-   OBJECT.ddd = ddd[3]
 
    return OBJECT
 end
-
-local OBJECT = CreateObject()
 
 local dfff = Jkr.DefaultCustomImagePainterPushConstant()
 dfff.x = vec4(0)
 dfff.y = vec4(1)
 dfff.z = vec4(2)
 
-MultiThreading:Inject("SUSPECT", OBJECT)
+MultiThreading:Inject("SUSPECT", CreateObject())
 MultiThreading:Inject("LineRenderer", l)
 MultiThreading:Inject("window", w)
 MultiThreading:Inject("fffd", dfff)
 MultiThreading:Inject("FUCK", b__)
 MultiThreading:Inject("mmmm", MultiThreading)
 
-MultiThreading:InjectScriptF(function()
-   --local i = LineRenderer:Add(vec3(5, 5, 5), vec3(7, 7, 7))
-   local fasdf = SUSPECT.FUCKYOU()
-   --print(fasdf[3])
-   local uu = mmmm:CastToType(SUSPECT.ddd, Jkr.AllTypes.DefaultCustomImagePainterPushConstant)
-   print(uu)
-   print(uu.x)
-   --print(mmmm)
-   --SUSPECT:Show()
+MultiThreading:AddJobF(function()
+   --local uu = mmmm:CastToType(SUSPECT.ddd, Jkr.AllTypes.DefaultCustomImagePainterPushConstant)
+   --print(SUSPECT.ddd)
+   --   print(LineRenderer.recycleBin)
+   local func = load(string.dump(LineRenderer.CreateMethods))
+   func(LineRenderer)
+   local i = LineRenderer:Add(vec3(5, 4, 6), vec3(6, 7, 4))
+   mmmm:Inject("Result", i)
 end)
 
 -- local xxxx = MultiThreading:Get("fffd")
