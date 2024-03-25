@@ -345,8 +345,13 @@ Jkr.CreateLineRenderer = function(inInstance, inCompatibleWindow, inCache)
     end
 
     o:CreateMethods()
-
     return o
+end
+
+function Fetch(inObject)
+    local f = string.dump(inObject.CreateMethods)
+    local func = load(f)
+    func(inObject)
 end
 
 --[============================================================[
