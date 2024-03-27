@@ -57,8 +57,8 @@ local GetDefaultResource = function(inRenderer, inShaderType)
     --[============================================================[
             DEFAULT COMPUTE SHADER
     ]============================================================]
-
-    if inShaderType == "Compute" then
+    local is3D = inRenderer == "Simple3D"
+    if inShaderType == "Compute" and not is3D then
         return [[
 #version 450
 #extension GL_EXT_debug_printf : enable
@@ -215,6 +215,57 @@ void GlslMain()
             ]]
         end
     end
+
+    if inRenderer == "Simple3D" then
+        if inShaderType == "Vertex" then
+            return [[
+                // Vertex Shader
+                #version 450
+                #pragma shader_stage(vertex)
+                #extension GL_EXT_debug_printf : enable
+                layout(location = 0) in vec3 inPosition;
+                layout(location = 1) in vec3 inNormal;
+                layout(location = 2) in vec2 inUV;
+                layout(location = 3) in vec3 inColor;
+                layout(location = 0) out vec3 outColor;
+
+                layout(push_constant, std430) uniform pc {
+                    mat4 mvp;
+                } push;
+
+                void GlslMain()
+                {
+                        gl_Position = push.mvp * vec4(inPosition, 1.0);
+                        gl_Position.y = - gl_Position.y;
+                        outColor = inColor;
+                }
+            ]]
+        elseif inShaderType == "Fragment" then
+            return [[
+                #version 450
+                #pragma shader_stage(fragment)
+                #extension GL_EXT_debug_printf : enable
+
+                layout(location = 0) in vec3 inColor;
+                layout(location = 0) out vec4 outColor;
+
+                void GlslMain()
+                {
+                    outColor = vec4(inColor, 1);
+                }
+            ]]
+        elseif inShaderType == "Compute" then
+            return [[
+                #version 450
+                #pragma shader_stage(compute)
+
+                void GlslMain()
+                {
+
+                }
+            ]]
+        end
+    end
 end
 
 --[============================================================[
@@ -277,9 +328,10 @@ end
 ]============================================================]
 
 
-Jkr.CreateInstance = function(inVarDesSet, inPoolSize)
+Jkr.CreateInstance = function(inVarDesSet, inPoolSize, inThreadsCount)
     if not inVarDesSet then inVarDesSet = 1000 end
     if not inPoolSize then inPoolSize = 1000 end
+    if not inThreadsCount then inThreadsCount = 7 end
     return Jkr.Instance(inVarDesSet, inPoolSize)
 end
 
@@ -287,10 +339,11 @@ end
     CREATE JKR WINDOW
 ]============================================================]
 
-Jkr.CreateWindow = function(inJkrInstance, inTitle, inDimension_2f)
+Jkr.CreateWindow = function(inJkrInstance, inTitle, inDimension_2f, inThreadCount)
     if not inTitle then inTitle = "JkrGUIv2" end
     if not inDimension_2f then inDimension_2f = uvec2(900, 700) end
-    return Jkr.Window(inJkrInstance, inTitle, math.int(inDimension_2f.x), math.int(inDimension_2f.y))
+    if not inThreadCount then inThreadCount = 4 end
+    return Jkr.Window(inJkrInstance, inTitle, math.int(inDimension_2f.x), math.int(inDimension_2f.y), inThreadCount)
 end
 
 --[============================================================[
@@ -482,7 +535,41 @@ Jkr.CreateCustomImagePainter = function(inCacheFileName, inComputeShader)
     return o
 end
 
+--[============================================================[
+    SHAPE Renderer 3D
+]============================================================]
 
+function Jkr.CreateShapeRenderer3D(i, w)
+    return Jkr.Shape3D(i, w)
+end
+
+--[============================================================[
+    Simple 3D Renderer
+]============================================================]
+
+function Jkr.CreateSimple3DRenderer(i, w)
+    return Jkr.Simple3D(i, w)
+end
+
+--[============================================================[
+    MultiThreading
+]============================================================]
+
+function Jkr.MultiThreadingInject(inMultiThreading, inTable)
+    if inTable then
+        for i = 1, #inTable, 1 do
+            inMultiThreading:Inject(inTable[i][1], inTable[i][2])
+        end
+    end
+end
+
+function InjectMultiThreading()
+end
+
+function ConfigureMultiThreading(inMultiThreading)
+    inMultiThreading:Inject("__MultiThreadingFetchInjected__", Jkr.MultiThreadingFetchInjected)
+    inMultiThreading:Inject("__GetDefaultResource__", GetDefaultResource)
+end
 
 --[============================================================[
     MAIN LOOPS
