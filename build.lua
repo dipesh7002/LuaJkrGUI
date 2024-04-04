@@ -1,3 +1,10 @@
-Jkr.BuildSystem.CreateLuaLibraryEnvironment("jkrguiApp", "C:/Users/sansk/OneDrive/Pictures/jkrgui", "native/",
-          "x64-debug",
-          false)
+LibraryName = "jkrguiApp"
+JkrGUIRepoPath = "C:/Users/sansk/OneDrive/Pictures/jkrgui"
+NativeFolder = "native/" -- Where native C++ files are to be generated
+BuildType = "x64-debug"
+
+
+
+Jkr.BuildSystem.CreateLuaLibraryEnvironment(LibraryName, JkrGUIRepoPath, NativeFolder, BuildType, false)
+
+os.exit(0)
