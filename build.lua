@@ -6,5 +6,3 @@ BuildType = "x64-debug"
 
 
 Jkr.BuildSystem.CreateLuaLibraryEnvironment(LibraryName, JkrGUIRepoPath, NativeFolder, BuildType, false)
-
-os.exit(0)

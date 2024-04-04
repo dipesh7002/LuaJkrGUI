@@ -1,4 +1,5 @@
 require "JkrGUIv2.JkrGUIv2"
+require "jkrguiApp"
 
 local i = Jkr.CreateInstance(nil, nil, 4)
 local MT = Jkr.MultiThreading(i)
