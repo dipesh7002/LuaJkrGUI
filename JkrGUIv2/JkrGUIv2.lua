@@ -575,7 +575,7 @@ end
     MAIN LOOPS
 ]============================================================]
 
-Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, inColor_4f)
+Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, inColor_4f, inMT, inMTDraw)
     local oldTime = 0.0
     local i = 0
     while not e:ShouldQuit() do
@@ -593,7 +593,7 @@ Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, 
         if (inDraw) then inDraw() end
         w:EndUIs()
 
-        -- /* All ComputeShader Invocations are Done here Renders are Recordeed here*/
+        -- /* All ComputeShader Invocations are Done here*/
         w:BeginDispatches()
         if (inDispatch) then inDispatch() end
         w:EndDispatches()
@@ -604,7 +604,8 @@ Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, 
         else
             w:BeginDraws(0, 0, 0, 1, 1)
         end
-
+        if (inMTDraw) then inMTDraw() end
+        if (inMT) then inMT:Wait() end
         w:ExecuteUIs() -- The UI CmdBuffer is executed onto the main CmdBuffer
         w:EndDraws()
 

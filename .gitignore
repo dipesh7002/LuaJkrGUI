@@ -33,5 +33,6 @@ foo.h
 main.c
 CMakeCCompilerId.c
 CMakeCXXCompilerId.cpp
-
+build.lua
+app.lua
 

@@ -30,6 +30,7 @@ Jkr.MultiThreadingInject(
       { "__w__",        w },
       { "__shape3d__",  shape3d },
       { "__simple3d__", simple3d },
+      { "__mt__",       MT }
    }
 )
 
@@ -45,6 +46,14 @@ MT:AddJobF(
          __getResources("Simple3D", "Compute"),
          true
       )
+   end
+)
+
+MT:AddJobF(
+   function()
+      local cubeId = __shape3d__:Add("res/models/Box.gltf")
+      __mt__:Inject("cubeId", cubeId)
+      print("Has been added", cubeId)
    end
 )
 
@@ -97,4 +106,12 @@ end
 function PostProcess()
 end
 
-Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess)
+function MTDraw()
+   MT:AddJobF(
+      function()
+
+      end
+   )
+end
+
+Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw)
