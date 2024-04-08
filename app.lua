@@ -109,7 +109,10 @@ end
 function MTDraw()
    MT:AddJobF(
       function()
-
+         print(__w__)
+         __w__:BeginThreadCommandBuffer(0)
+         __shape3d__:Bind(__w__, 0)
+         __w__:EndThreadCommandBuffer(0)
       end
    )
 end
