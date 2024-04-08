@@ -1,5 +1,4 @@
 require "JkrGUIv2.JkrGUIv2"
-require "jkrguiApp"
 
 local i = Jkr.CreateInstance(nil, nil, 4)
 local MT = Jkr.MultiThreading(i)
@@ -18,8 +17,6 @@ local id = shape:Add(lGenerator, vec3(10, 10, 20))
 local font = TR:AddFontFace("font.ttf", 20)
 local font_small = TR:AddFontFace("font.ttf", 15)
 local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
-
-jkrguiApp.hello()
 
 ConfigureMultiThreading(MT)
 
@@ -44,15 +41,15 @@ MT:AddJobF(
                               __getResources("Simple3D", "Vertex"),
                               __getResources("Simple3D", "Fragment"),
                               __getResources("Simple3D", "Compute"),
-                              true
+                              false
                     )
           end
 )
 
 MT:AddJobF(
           function()
-                    local cubeId = __shape3d__:Add("Bo.glTF")
-                    __mt__:Inject("cubeId", cubeId)
+                    local cubeId = __shape3d__:Add("res/models/Box.gltf")
+                    __mt__:Inject("__cubeId__", cubeId)
                     print("Has been added", cubeId)
           end
 )
@@ -108,6 +105,30 @@ function PostProcess()
 end
 
 function MTDraw()
+          MT:AddJobF(
+                    function()
+                              local Def = Jkr.DefaultPushConstant3D()
+                              local model = Jmath.GetIdentityMatrix4x4()        -- model
+                              model = Jmath.Scale(model, vec3(1, 1, 1))
+                              local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
+                              local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
+                              Def.m1 = projection * view * model
+                              Def.m2 = model
+                              local cid = math.floor(__cubeId__)
+                              local indexCount = __shape3d__:GetIndexCount(cid)
+                              __w__:BeginThreadCommandBuffer(0)
+                              __w__:SetDefaultViewport(0)
+                              __w__:SetDefaultScissor(0)
+                              __shape3d__:Bind(__w__, 0)
+                              __simple3d__:Bind(__w__, 0)
+                              __simple3d__:Draw(__w__, __shape3d__, Def, indexCount, 1, 0)
+                              __w__:EndThreadCommandBuffer(0)
+                    end
+          )
 end
 
-Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw)
+function MTExecute()
+          w:ExecuteThreadCommandBuffer(0)
+end
+
+Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw, MTExecute)

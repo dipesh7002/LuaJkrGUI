@@ -1,5 +1,4 @@
 require "JkrGUIv2.JkrGUIv2"
-require "jkrguiApp"
 
 local i = Jkr.CreateInstance(nil, nil, 4)
 local MT = Jkr.MultiThreading(i)
@@ -18,8 +17,6 @@ local id = shape:Add(lGenerator, vec3(10, 10, 20))
 local font = TR:AddFontFace("font.ttf", 20)
 local font_small = TR:AddFontFace("font.ttf", 15)
 local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
-
-jkrguiApp.hello()
 
 ConfigureMultiThreading(MT)
 
