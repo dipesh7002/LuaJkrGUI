@@ -44,7 +44,7 @@ MT:AddJobF(
          __getResources("Simple3D", "Vertex"),
          __getResources("Simple3D", "Fragment"),
          __getResources("Simple3D", "Compute"),
-         true
+         false
       )
    end
 )
@@ -52,7 +52,7 @@ MT:AddJobF(
 MT:AddJobF(
    function()
       local cubeId = __shape3d__:Add("res/models/Box.gltf")
-      __mt__:Inject("cubeId", cubeId)
+      __mt__:Inject("__cubeId__", cubeId)
       print("Has been added", cubeId)
    end
 )
@@ -71,6 +71,7 @@ end
 
 local I = 0
 function Update()
+   MT:Wait()
    Matrix = function()
       local Ortho = Jmath.Ortho(
          0.0,
@@ -109,12 +110,28 @@ end
 function MTDraw()
    MT:AddJobF(
       function()
-         print(__w__)
+         local Def = Jkr.DefaultPushConstant3D()
+         local model = Jmath.GetIdentityMatrix4x4()                             -- model
+         model = Jmath.Scale(model, vec3(1, 1, 1))
+         local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
+         local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
+         Def.m1 = projection * view * model
+         Def.m2 = model
+         local cid = math.floor(__cubeId__)
+         local indexCount = __shape3d__:GetIndexCount(cid)
          __w__:BeginThreadCommandBuffer(0)
+         __w__:SetDefaultViewport(0)
+         __w__:SetDefaultScissor(0)
          __shape3d__:Bind(__w__, 0)
+         __simple3d__:Bind(__w__, 0)
+         __simple3d__:Draw(__w__, __shape3d__, Def, indexCount, 1, 0)
          __w__:EndThreadCommandBuffer(0)
       end
    )
 end
 
-Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw)
+function MTExecute()
+   w:ExecuteThreadCommandBuffer(0)
+end
+
+Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw, MTExecute)

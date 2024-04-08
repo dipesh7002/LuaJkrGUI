@@ -216,6 +216,9 @@ void GlslMain()
         end
     end
 
+    --[============================================================[
+         3D RENDERER RESOURCES
+    ]============================================================]
     if inRenderer == "Simple3D" then
         if inShaderType == "Vertex" then
             return [[
@@ -230,12 +233,13 @@ void GlslMain()
                 layout(location = 0) out vec3 outColor;
 
                 layout(push_constant, std430) uniform pc {
-                    mat4 mvp;
+                    mat4 m1;
+                    mat4 m2;
                 } push;
 
                 void GlslMain()
                 {
-                        gl_Position = push.mvp * vec4(inPosition, 1.0);
+                        gl_Position = push.m1 * vec4(inPosition, 1.0);
                         gl_Position.y = - gl_Position.y;
                         outColor = inColor;
                 }
@@ -248,6 +252,11 @@ void GlslMain()
 
                 layout(location = 0) in vec3 inColor;
                 layout(location = 0) out vec4 outColor;
+
+                layout(push_constant, std430) uniform pc {
+                    mat4 m1;
+                    mat4 m2;
+                } push;
 
                 void GlslMain()
                 {
@@ -575,7 +584,7 @@ end
     MAIN LOOPS
 ]============================================================]
 
-Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, inColor_4f, inMT, inMTDraw)
+Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, inColor_4f, inMT, inMTDraw, inExecute)
     local oldTime = 0.0
     local i = 0
     while not e:ShouldQuit() do
@@ -606,6 +615,7 @@ Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, 
         end
         if (inMTDraw) then inMTDraw() end
         if (inMT) then inMT:Wait() end
+        if (inExecute) then inExecute() end
         w:ExecuteUIs() -- The UI CmdBuffer is executed onto the main CmdBuffer
         w:EndDraws()
 
