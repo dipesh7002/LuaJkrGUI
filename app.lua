@@ -1,4 +1,6 @@
 require "JkrGUIv2.JkrGUIv2"
+require "jkrguiApp"
+jkrguiApp = jkrguiApp
 
 local i = Jkr.CreateInstance(nil, nil, 4)
 local MT = Jkr.MultiThreading(i)
@@ -10,6 +12,9 @@ local shape = Jkr.CreateShapeRenderer(i, w)
 local TR = Jkr.CreateTextRendererBestTextAlt(i, shape)
 local shape3d = Jkr.CreateShapeRenderer3D(i, w)
 local simple3d = Jkr.CreateSimple3DRenderer(i, w)
+local extended3d = Jkr.CreateSimple3DRenderer(i, w)
+local extended3dUniform = Jkr.Uniform3D(i)
+extended3dUniform.AddTexture(0, "res/models/CesiumLogoFlat.png")
 
 local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
 local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
@@ -23,12 +28,19 @@ ConfigureMultiThreading(MT)
 Jkr.MultiThreadingInject(
    MT,
    {
-      { "__i__",        i },
-      { "__w__",        w },
-      { "__shape3d__",  shape3d },
-      { "__simple3d__", simple3d },
-      { "__mt__",       MT }
+      { "__i__",          i },
+      { "__w__",          w },
+      { "__shape3d__",    shape3d },
+      { "__simple3d__",   simple3d },
+      { "__extended3d__", extended3d },
+      { "__mt__",         MT }
    }
+)
+
+MT:InjectScriptF(
+   function()
+      require "jkrguiApp"
+   end
 )
 
 MT:AddJobF(
@@ -40,6 +52,18 @@ MT:AddJobF(
          "cache2/Simple3D.glsl",
          __getResources("Simple3D", "Vertex"),
          __getResources("Simple3D", "Fragment"),
+         __getResources("Simple3D", "Compute"),
+         false
+      )
+
+      local vshader = jkrguiApp.GetBRDFVertexShader()
+      local fshader = jkrguiApp.GetBRDFFragmentShader()
+      __extended3d__:Compile(
+         __i__,
+         __w__,
+         "cache2/extended3D.glsl",
+         vshader,
+         fshader,
          __getResources("Simple3D", "Compute"),
          false
       )
