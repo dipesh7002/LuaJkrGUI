@@ -1,5 +1,8 @@
+#include "Renderers/Renderer_base.hpp"
+#include "Renderers/ThreeD/Shape3D.hpp"
 #include <Misc/ThreeD/Uniform3D.hpp>
 #include <Renderers/ThreeD/Simple3D.hpp>
+#include <WindowMulT.hpp>
 #include <sol/sol.hpp>
 
 #ifdef _WIN32
@@ -60,6 +63,7 @@ const std::string_view BRDFFragment = R"FragmentShader(
 	vec3 materialcolor()
 	{
 		return vec3(texture(image, vUV));
+		//return vec3(1, 1, 1);
 	}
 
 	// Normal Distribution Function
@@ -149,10 +153,10 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
           jkrguiApp.set_function("GetBRDFFragmentShader", [&]() { return BRDFFragment; });
 
           struct UBO {
-                    glm::mat4 view;
-                    glm::mat4 proj;
+                    alignas(16) glm::mat4 view;
+                    alignas(16) glm::mat4 proj;
                     glm::vec3 campos;
-                    glm::vec4 lights[10];
+                    alignas(16) glm::vec4 lights[10];
           } ubo;
           jkrguiApp.set_function("GetUBO", [](glm::mat4 inView, glm::mat4 inProj, glm::vec3 inCamPos, glm::vec4 inLightPos) {
                     UBO ubo;
@@ -160,14 +164,32 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                     ubo.proj = inProj;
                     ubo.campos = inCamPos;
                     ubo.lights[0] = inLightPos;
+                    return ubo;
           });
 
           jkrguiApp.set_function("AddBufferToUniform",
                                  [](Jkr::Misc::_3D::Uniform3D& inUniform, int inDstBinding) { inUniform.AddBuffer(inDstBinding, sizeof(UBO)); });
 
           jkrguiApp.set_function("UpdateBufferToUniform", [](Jkr::Misc::_3D::Uniform3D& inUniform, int inDstBinding, UBO inubo) {
-                    inUniform.UpdateBuffer(inDstBinding, inubo);
+                    inUniform.UpdateBuffer<UBO>(inDstBinding, inubo);
           });
 
+          struct PushConstant {
+                    glm::mat4 mvp;
+                    glm::vec3 rough;
+                    glm::vec3 rgb;
+          };
+          jkrguiApp.set_function("DrawBRDF",
+                                 [](Jkr::Misc::_3D::Simple3D& inSimple3D,
+                                    Jkr::WindowMulT& inWindow,
+                                    Jkr::Renderer::_3D::Shape& inShape,
+                                    int inModelId,
+                                    glm::mat4 inModel,
+                                    glm::vec3 inRough,
+                                    glm::vec3 inRGB,
+                                    Jkr::Window::ParameterContext inParam) {
+                                           PushConstant p = {.mvp = inModel, .rough = inRough, .rgb = inRGB};
+                                           inSimple3D.Draw<PushConstant>(inWindow, inShape, p, inShape.GetIndexCount(inModelId), 1, inParam);
+                                 });
           return 1;
 }

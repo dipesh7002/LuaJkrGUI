@@ -13,8 +13,6 @@ local TR = Jkr.CreateTextRendererBestTextAlt(i, shape)
 local shape3d = Jkr.CreateShapeRenderer3D(i, w)
 local simple3d = Jkr.CreateSimple3DRenderer(i, w)
 local extended3d = Jkr.CreateSimple3DRenderer(i, w)
-local extended3dUniform = Jkr.Uniform3D(i)
-extended3dUniform.AddTexture(0, "res/models/CesiumLogoFlat.png")
 
 local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
 local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
@@ -55,24 +53,33 @@ MT:AddJobF(
          __getResources("Simple3D", "Compute"),
          false
       )
+   end
+)
 
-      local vshader = jkrguiApp.GetBRDFVertexShader()
-      local fshader = jkrguiApp.GetBRDFFragmentShader()
-      __extended3d__:Compile(
-         __i__,
-         __w__,
-         "cache2/extended3D.glsl",
-         vshader,
-         fshader,
-         __getResources("Simple3D", "Compute"),
-         false
-      )
+local vshader = jkrguiApp.GetBRDFVertexShader()
+local fshader = jkrguiApp.GetBRDFFragmentShader()
+extended3d:Compile(
+   i,
+   w,
+   "cache2/extended3D.glsl",
+   vshader,
+   fshader,
+   GetDefaultResource("Simple3D", "Compute"),
+   false
+)
+local Extended3dUniform = Jkr.Uniform3D(i, extended3d)
+Extended3dUniform:AddTexture(0, "res/models/CesiumLogoFlat.png")
+jkrguiApp.AddBufferToUniform(Extended3dUniform, 1)
+MT:Inject("__extended3dUniform__", Extended3dUniform)
+
+MT:AddJobF(
+   function()
    end
 )
 
 MT:AddJobF(
    function()
-      local cubeId = __shape3d__:Add("res/models/Box.gltf")
+      local cubeId = __shape3d__:Add("res/models/BoxTextured.gltf")
       __mt__:Inject("__cubeId__", cubeId)
       print("Has been added", cubeId)
    end
@@ -89,6 +96,10 @@ local Matrix = function()
    )
 end
 
+local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
+local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
+local ubo = jkrguiApp.GetUBO(view, projection, vec3(5, 5, 5), vec4(10, 5, 5, 1))
+jkrguiApp.UpdateBufferToUniform(Extended3dUniform, 1, ubo)
 
 local I = 0
 function Update()
@@ -110,14 +121,29 @@ function Update()
 end
 
 function Draw()
-   l:Bind(w)
-   l:Draw(w, vec4(1, 0, 0, 1), line, line, Matrix())
-   shape:BindShapes(w)
-   shape:BindFillMode(Jkr.FillType.Fill, w)
-   shape:Draw(w, vec4(1, 0, 0, 1), id, id, Matrix())
-   shape:BindShapes(w)
-   shape:BindFillMode(Jkr.FillType.Image, w)
-   TR:Draw(text, w, vec4(1, 0, 0, 1), Matrix())
+   -- l:Bind(w)
+   -- l:Draw(w, vec4(1, 0, 0, 1), line, line, Matrix())
+   -- shape:BindShapes(w)
+   -- shape:BindFillMode(Jkr.FillType.Fill, w)
+   -- shape:Draw(w, vec4(1, 0, 0, 1), id, id, Matrix())
+   -- shape:BindShapes(w)
+   -- shape:BindFillMode(Jkr.FillType.Image, w)
+   -- TR:Draw(text, w, vec4(1, 0, 0, 1), Matrix())
+
+   -- local Def = Jkr.DefaultPushConstant3D()
+   -- local model = Jmath.GetIdentityMatrix4x4()                               -- model
+   -- model = Jmath.Scale(model, vec3(1, 1, 1))
+   -- local view = Jmath.LookAt(vec3(-10, 5, 5), vec3(5, 0, 0), vec3(0, 1, 0)) -- view
+   -- local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
+   -- Def.m1 = projection * view * model
+   -- Def.m2 = model
+   -- local cid = math.floor(0)
+   -- local indexCount = shape3d:GetIndexCount(cid)
+   -- w:SetDefaultViewport(-2)
+   -- w:SetDefaultScissor(-2)
+   -- shape3d:Bind(w, -2)
+   -- simple3d:Bind(w, -2)
+   -- simple3d:Draw(w, shape3d, Def, indexCount, 1, -2)
 end
 
 function Dispatch()
@@ -131,28 +157,65 @@ end
 function MTDraw()
    MT:AddJobF(
       function()
-         local Def = Jkr.DefaultPushConstant3D()
-         local model = Jmath.GetIdentityMatrix4x4()                             -- model
-         model = Jmath.Scale(model, vec3(1, 1, 1))
-         local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
-         local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
-         Def.m1 = projection * view * model
-         Def.m2 = model
-         local cid = math.floor(__cubeId__)
-         local indexCount = __shape3d__:GetIndexCount(cid)
-         __w__:BeginThreadCommandBuffer(0)
-         __w__:SetDefaultViewport(0)
-         __w__:SetDefaultScissor(0)
-         __shape3d__:Bind(__w__, 0)
-         __simple3d__:Bind(__w__, 0)
-         __simple3d__:Draw(__w__, __shape3d__, Def, indexCount, 1, 0)
-         __w__:EndThreadCommandBuffer(0)
+         -- local Def = Jkr.DefaultPushConstant3D()
+         -- local model = Jmath.GetIdentityMatrix4x4()                              -- model
+         -- model = Jmath.Scale(model, vec3(1, 1, 1))
+         -- local view = Jmath.LookAt(vec3(15, 5, 5), vec3(5, 0, 0), vec3(0, 1, 0)) -- view
+         -- local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
+         -- Def.m1 = projection * view * model
+         -- Def.m2 = model
+         -- local cid = math.floor(__cubeId__)
+         -- local indexCount = __shape3d__:GetIndexCount(cid)
+         -- __w__:BeginThreadCommandBuffer(0)
+
+
+
+         -- __w__:SetDefaultViewport(0)
+         -- __w__:SetDefaultScissor(0)
+         -- __shape3d__:Bind(__w__, 0)
+         -- __simple3d__:Bind(__w__, 0)
+         -- __simple3d__:Draw(__w__, __shape3d__, Def, indexCount, 1, 0)
+
+
+         -- local modelx = Jmath.GetIdentityMatrix4x4() -- model
+         -- modelx = Jmath.Scale(modelx, vec3(1, 1, 1))
+         -- __w__:SetDefaultViewport(0)
+         -- __w__:SetDefaultScissor(0)
+         -- __shape3d__:Bind(__w__, 0)
+         -- __extended3d__:Bind(__w__, 0)
+         -- __extended3dUniform__:Bind(__w__, 0)
+         -- jkrguiApp.DrawBRDF(__simple3d__, __w__, __shape3d__, 0, modelx, vec3(1, 1, 1), vec3(1, 1, 0), 0)
+         -- __w__:EndThreadCommandBuffer(0)
+      end
+   )
+
+   MT:AddJobF(
+      function()
+         local model = Jmath.GetIdentityMatrix4x4() -- model
+         -- model = Jmath.Scale(model, vec3(0.5, 0.5, 0.5))
+         -- __w__:BeginThreadCommandBuffer(1)
+         -- __w__:SetDefaultViewport(1)
+         -- __w__:SetDefaultScissor(1)
+         -- __shape3d__:Bind(__w__, 1)
+         -- __extended3dUniform__:Bind(__w__, 1)
+         -- __extended3d__:Bind(__w__, 1)
+         -- jkrguiApp.DrawBRDF(__simple3d__, __w__, __shape3d__, 0, model, vec3(1, 1, 1), vec3(1, 1, 0), 1)
+         -- __w__:EndThreadCommandBuffer(1)
       end
    )
 end
 
 function MTExecute()
-   w:ExecuteThreadCommandBuffer(0)
-end
+   -- w:ExecuteThreadCommandBuffer(0)
+   -- w:ExecuteThreadCommandBuffer(1)
+   local modelx = Jmath.GetIdentityMatrix4x4() -- model
+   modelx = Jmath.Scale(modelx, vec3(1, 1, 1))
+   w:SetDefaultViewport(-3)
+   w:SetDefaultScissor(-3)
+   shape3d:Bind(w, -3)
+   Extended3dUniform:Bind(w, -3)
+   extended3d:Bind(w, -3)
+   jkrguiApp.DrawBRDF(simple3d, w, shape3d, 0, modelx, vec3(1, 1, 1), vec3(1, 1, 0), -3)
+ --
 
 Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw, MTExecute)
