@@ -216,6 +216,8 @@ function MTExecute()
    Extended3dUniform:Bind(w, -3)
    extended3d:Bind(w, -3)
    jkrguiApp.DrawBRDF(simple3d, w, shape3d, 0, modelx, vec3(1, 1, 1), vec3(1, 1, 0), -3)
- --
+end
+
+--
 
 Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, PostProcess, nil, MT, MTDraw, MTExecute)
