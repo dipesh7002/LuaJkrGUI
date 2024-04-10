@@ -108,7 +108,7 @@ function MTDraw()
           MT:AddJobF(
                     function()
                               local Def = Jkr.DefaultPushConstant3D()
-                              local model = Jmath.GetIdentityMatrix4x4()        -- model
+                              local model = Jmath.GetIdentityMatrix4x4()                             -- model
                               model = Jmath.Scale(model, vec3(1, 1, 1))
                               local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
                               local projection = Jmath.Perspective(0.45, 1, 0.1, 100)

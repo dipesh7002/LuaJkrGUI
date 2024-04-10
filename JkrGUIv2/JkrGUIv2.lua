@@ -612,11 +612,11 @@ Jkr.DebugMainLoop = function(w, e, inUpdate, inDispatch, inDraw, inPostProcess, 
         if inColor_4f then
             w:BeginDraws(inColor_4f.x, inColor_4f.y, inColor_4f.z, inColor_4f.a, 1)
         else
-            w:BeginDraws(0.8, 0.8, 0.8, 1, 0)
+            w:BeginDraws(0.8, 0.8, 0.8, 1, 1)
         end
-        --w:ExecuteUIs() -- The UI CmdBuffer is executed onto the main CmdBuffer
         if (inMT) then inMT:Wait() end
         if (inExecute) then inExecute() end
+        --w:ExecuteUIs() -- The UI CmdBuffer is executed onto the main CmdBuffer
         w:EndDraws()
 
         if (inPostProcess) then inPostProcess() end
