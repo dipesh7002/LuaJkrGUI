@@ -36,4 +36,3 @@ CMakeCXXCompilerId.cpp
 build.lua
 app.lua
 CMakeLists.txt
-*.cpp
