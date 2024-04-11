@@ -13,7 +13,8 @@ local TR = Jkr.CreateTextRendererBestTextAlt(i, shape)
 local shape3d = Jkr.CreateShapeRenderer3D(i, w)
 local simple3d = Jkr.CreateSimple3DRenderer(i, w)
 local extended3d = Jkr.CreateSimple3DRenderer(i, w)
---shape3d:Add(CubeGenerator, vec3(0, 0, 0))
+local CubeGenerator = Jkr.Generator(Jkr.Shapes.Cube3D, vec3(1))
+shape3d:Add(CubeGenerator, vec3(0, 0, 0))
 
 local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
 local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
@@ -21,7 +22,6 @@ local id = shape:Add(lGenerator, vec3(10, 10, 20))
 local font = TR:AddFontFace("font.ttf", 20)
 local font_small = TR:AddFontFace("font.ttf", 15)
 local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
-local CubeGenerator = Jkr.Generator(Jkr.Shapes.Cube3D, vec3(1))
 
 
 
@@ -75,9 +75,9 @@ function Update()
    MT:Inject("I", shit__I)
    local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
    local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
-   local ubo = jkrguiApp.GetUBO(view, projection, vec3(5, 5, 5), vec4(10, 5, 5, 1))
+   local ubo = jkrguiApp.GetUBO(view, projection, vec3(5, 5, 5), vec4(5, math.sin(shit__I * 1000) * 10, 5, 1))
    jkrguiApp.UpdateBufferToUniform(Extended3dUniform, 1, ubo)
-   shit__I = shit__I + 0.001
+   shit__I = shit__I + 0.0001
 end
 
 function Draw()
@@ -109,7 +109,7 @@ function MTDraw()
          modely = Jmath.Scale(modely, vec3(0.01, 0.01, 0.01))
          modely = Jmath.Translate(modely, vec3(8, 0.4, 0.4))
          modely = Jmath.Rotate_deg(modely, I * 10000, vec3(0, 0, 1))
-         jkrguiApp.DrawBRDF(__extended3d__, __w__, __shape3d__, 1, modely, vec3(1, 1, 1), vec3(1, 1, 0), 0)
+         jkrguiApp.DrawBRDF(__extended3d__, __w__, __shape3d__, 2, modely, vec3(1, 1, 1), vec3(1, 1, 0), 0)
          __w__:EndThreadCommandBuffer(0)
       end
    )
