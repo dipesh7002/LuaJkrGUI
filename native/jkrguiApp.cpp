@@ -189,7 +189,13 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                                     glm::vec3 inRGB,
                                     Jkr::Window::ParameterContext inParam) {
                                            PushConstant p = {.mvp = inModel, .rough = inRough, .rgb = inRGB};
-                                           inSimple3D.Draw<PushConstant>(inWindow, inShape, p, inShape.GetIndexCount(inModelId), 1, inParam);
+                                           inSimple3D.Draw<PushConstant>(inWindow,
+                                                                         inShape,
+                                                                         p,
+                                                                         inShape.GetIndexOffsetAbsolute(inModelId),
+                                                                         inShape.GetIndexCount(inModelId),
+                                                                         1,
+                                                                         inParam);
                                  });
           return 1;
 }
