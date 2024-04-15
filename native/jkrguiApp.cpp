@@ -200,5 +200,3 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                                  });
           return 1;
 }
-
-extern "C" DLLEXPORT int printThisShit(lua_State* L) { ksai_print("KSAII, Shit has been printed()()"); }

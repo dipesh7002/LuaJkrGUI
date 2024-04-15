@@ -19,6 +19,8 @@ Notes:
 
 
 CODING STANDARDS
+    -- always  for member functions that are not meant to be used
+            use "m" prefix, like mNumber, mComplex
     -- if the argument type is a table make it plural
             like inNumbers, inKeyframes etc
 ]============================================================]
@@ -51,6 +53,18 @@ uvec2 = uvec2
 ]============================================================]
 
 math.int = math.floor
+ImportShared = function(inLibName)
+    local libName = inLibName
+    if ANDROID then
+        libName = "lib" .. inLibName .. ".so"
+    elseif _WIN32 then
+        libName = inLibName .. ".dll"
+    elseif APPLE then
+        libName = "lib" .. inLibName .. ".so"
+    end
+    local f = package.loadlib(libName, "luaopen_" .. inLibName)
+    f()
+end
 
 
 GetDefaultResource = function(inRenderer, inShaderType)
@@ -578,6 +592,7 @@ end
 function ConfigureMultiThreading(inMultiThreading)
     inMultiThreading:Inject("__MultiThreadingFetchInjected__", Jkr.MultiThreadingFetchInjected)
     inMultiThreading:Inject("__GetDefaultResource__", GetDefaultResource)
+    inMultiThreading:Inject("ImportShared", ImportShared)
 end
 
 --[============================================================[

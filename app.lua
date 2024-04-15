@@ -1,6 +1,5 @@
 require "JkrGUIv2.JkrGUIv2"
-require "jkrguiApp"
-jkrguiApp = jkrguiApp
+ImportShared("jkrguiApp")
 
 local i = Jkr.CreateInstance(nil, nil, 4)
 local MT = Jkr.MultiThreading(i)
@@ -19,8 +18,8 @@ shape3d:Add(CubeGenerator, vec3(0, 0, 0))
 --local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
 local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
 local id = shape:Add(lGenerator, vec3(10, 10, 20))
-local font = TR:AddFontFace("font.ttf", 20)
-local font_small = TR:AddFontFace("font.ttf", 15)
+local font = TR:AddFontFace("res/fonts/font.ttf", 20)
+local font_small = TR:AddFontFace("res/fonts/font.ttf", 15)
 local text = TR:Add(font, vec3(100, 100, 5), "जय श्री राम")
 
 ConfigureMultiThreading(MT)
@@ -32,13 +31,13 @@ Jkr.MultiThreadingInject(
       { "__shape3d__",    shape3d },
       { "__simple3d__",   simple3d },
       { "__extended3d__", extended3d },
-      { "__mt__",         MT }
+      { "__mt__",         MT },
    }
 )
 
 MT:InjectScriptF(
    function()
-      require "jkrguiApp"
+      ImportShared("jkrguiApp")
    end
 )
 
@@ -61,8 +60,10 @@ MT:Inject("__extended3dUniform__", Extended3dUniform)
 
 MT:AddJobF(
    function()
-      local cubeId = __shape3d__:Add("res/models/BoxTextured.gltf")
-      local duckId = __shape3d__:Add("res/models/Duck.gltf")
+      local CubeModel = Jkr.glTF_Model("res/models/Duck.gltf")
+      local cubeId = __shape3d__:Add(CubeModel)
+      local duckModel = Jkr.glTF_Model("res/models/Duck.gltf")
+      local duckId = __shape3d__:Add(duckModel)
       __mt__:Inject("__cubeId__", cubeId)
    end
 )
