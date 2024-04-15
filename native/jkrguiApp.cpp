@@ -1,5 +1,6 @@
 #include "Renderers/Renderer_base.hpp"
 #include "Renderers/ThreeD/Shape3D.hpp"
+#include "ksai_config.hpp"
 #include <Misc/ThreeD/Uniform3D.hpp>
 #include <Renderers/ThreeD/Simple3D.hpp>
 #include <WindowMulT.hpp>
@@ -8,7 +9,7 @@
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else
-#define DLLEXPORT
+#define DLLEXPORT __attribute__((visibility("default")))
 #endif
 
 const std::string_view BRDFVertex = R"VertexShader(
@@ -199,3 +200,5 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                                  });
           return 1;
 }
+
+extern "C" DLLEXPORT int printThisShit(lua_State* L) { ksai_print("KSAII, Shit has been printed()()"); }
