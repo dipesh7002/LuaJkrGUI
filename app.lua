@@ -13,7 +13,7 @@ local shape3d = Jkr.CreateShapeRenderer3D(i, w)
 local simple3d = Jkr.CreateSimple3DRenderer(i, w)
 local extended3d = Jkr.CreateSimple3DRenderer(i, w)
 local CubeGenerator = Jkr.Generator(Jkr.Shapes.Cube3D, vec3(1, 1, 1))
-shape3d:Add(CubeGenerator, vec3(0, 0, 0))
+--shape3d:Add(CubeGenerator, vec3(0, 0, 0))
 
 --local line = l:Add(vec3(100, 100, 1), vec3(500, 500, 1))
 local lGenerator = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
@@ -58,12 +58,13 @@ jkrguiApp.AddBufferToUniform(Extended3dUniform, 1)
 Extended3dUniform:AddTexture(0, "res/models/CesiumLogoFlat.png")
 MT:Inject("__extended3dUniform__", Extended3dUniform)
 
+local SimpleSkinUniform = Jkr.Uniform3D(i, extended3d)
+
 MT:AddJobF(
    function()
-      local CubeModel = Jkr.glTF_Model("res/models/Duck.gltf")
+      --local CubeModel = Jkr.glTF_Model("res/models/Duck.gltf")
+      local CubeModel = Jkr.glTF_Model("res/models/SimpleSkin/SimpleSkin.gltf")
       local cubeId = __shape3d__:Add(CubeModel)
-      local duckModel = Jkr.glTF_Model("res/models/Duck.gltf")
-      local duckId = __shape3d__:Add(duckModel)
       __mt__:Inject("__cubeId__", cubeId)
    end
 )
@@ -72,11 +73,11 @@ local shit__I = 0
 function Update()
    MT:Wait()
    MT:Inject("I", shit__I)
-   local view = Jmath.LookAt(vec3(5, 5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
+   local view = Jmath.LookAt(vec3(0, -5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
    local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
    local ubo = jkrguiApp.GetUBO(view, projection, vec3(5, 5, 5), vec4(math.sin(shit__I * 1000) * 5, 10, 5, 1))
    jkrguiApp.UpdateBufferToUniform(Extended3dUniform, 1, ubo)
-   shit__I = shit__I + 0.0001
+   -- shit__I = shit__I + 0.0001
 end
 
 function Draw()
@@ -101,14 +102,14 @@ function MTDraw()
          modelx = Jmath.Rotate_deg(modelx, I * 10000, vec3(1, 0, 0))
          __shape3d__:Bind(__w__, 0)
          __extended3d__:Bind(__w__, 0)
-         __extended3dUniform__:Bind(__w__, 0)
+         __extended3dUniform__:Bind(__w__, __extended3d__, 0)
          jkrguiApp.DrawBRDF(__extended3d__, __w__, __shape3d__, 0, modelx, vec3(1, 1, 1), vec3(1, 1, 0), 0)
 
          local modely = Jmath.GetIdentityMatrix4x4() -- model
          modely = Jmath.Scale(modely, vec3(0.01, 0.01, 0.01))
          modely = Jmath.Translate(modely, vec3(8, 0.4, 0.4))
          modely = Jmath.Rotate_deg(modely, I * 10000, vec3(1, 1, 1))
-         jkrguiApp.DrawBRDF(__extended3d__, __w__, __shape3d__, 2, modely, vec3(1, 1, 1), vec3(1, 1, 0), 0)
+         --jkrguiApp.DrawBRDF(__extended3d__, __w__, __shape3d__, 1, modely, vec3(1, 1, 1), vec3(1, 1, 0), 0)
          __w__:EndThreadCommandBuffer(0)
       end
    )
