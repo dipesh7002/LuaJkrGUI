@@ -557,6 +557,75 @@ Jkr.CreateCustomImagePainter = function(inCacheFileName, inComputeShader)
 
     return o
 end
+--[============================================================[
+    GLTF Utils 3D
+]============================================================]
+
+Jkr.GetGLTFInfo = function(inLoadedGLTF, inShouldPrint)
+    if (inShouldPrint) then
+        io.write(string.format(
+            [[
+GLTF:-
+Vertices = %d,
+Indices = %d,
+Images = %d,
+Textures = %d,
+Materials = %d,
+Nodes = %d,
+Skins = %d,
+Animations = %d,
+ActiveAnimation = %d,
+                ]],
+            inLoadedGLTF:GetVerticesSize(),
+            inLoadedGLTF:GetIndicesSize(),
+            inLoadedGLTF:GetImagesSize(),
+            inLoadedGLTF:GetTexturesSize(),
+            inLoadedGLTF:GetMaterialsSize(),
+            inLoadedGLTF:GetNodesSize(),
+            inLoadedGLTF:GetSkinsSize(),
+            inLoadedGLTF:GetAnimationsSize(),
+            inLoadedGLTF:GetActiveAnimation()
+        ))
+    end
+end
+
+Jkr.GetGLTFShaderLayoutString = function(inLoadedGLTF)
+    local BindingIndex = 0
+    local Layout = [[
+
+    ]]
+    if inLoadedGLTF:GetSkinsSize() ~= 0 then
+        Layout = 
+        string.format(
+        [[
+
+struct JointInfluence {
+    vec4 mJointIndices;
+    vec4 mJointWeights;
+};
+
+layout(std140, binding = 1) readonly buffer JointInfluenceSSBOIn {
+   JointInfluence inJointInfluence[ ];
+};
+
+        ]], BindingIndex
+        )
+        BindingIndex = BindingIndex + 1
+
+        Layout = Layout ..
+        string.format(
+            [[
+
+layout(set = 0, binding = %d, std140) uniform JointMatrix {
+    mat4 mJointMatrix[%d];
+} jointMatrixUBO;
+
+            ]], BindingIndex, inLoadedGLTF:GetJointsCount(0)
+        )
+        BindingIndex = BindingIndex + 1;
+    end
+    return Layout
+end
 
 --[============================================================[
     SHAPE Renderer 3D
