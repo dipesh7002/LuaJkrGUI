@@ -604,7 +604,7 @@ struct JointInfluence {
     vec4 mJointWeights;
 };
 
-layout(std140, binding = 1) readonly buffer JointInfluenceSSBOIn {
+layout(std140, binding = %d) readonly buffer JointInfluenceSSBOIn {
    JointInfluence inJointInfluence[ ];
 };
 
