@@ -557,6 +557,7 @@ Jkr.CreateCustomImagePainter = function(inCacheFileName, inComputeShader)
 
     return o
 end
+
 --[============================================================[
     GLTF Utils 3D
 ]============================================================]
@@ -604,7 +605,7 @@ struct JointInfluence {
     vec4 mJointWeights;
 };
 
-layout(std140, binding = %d) readonly buffer JointInfluenceSSBOIn {
+layout(std140, set = 0, binding = %d) readonly buffer JointInfluenceSSBOIn {
    JointInfluence inJointInfluence[ ];
 };
 
@@ -616,7 +617,7 @@ layout(std140, binding = %d) readonly buffer JointInfluenceSSBOIn {
         string.format(
             [[
 
-layout(set = 0, binding = %d, std140) uniform JointMatrix {
+layout(std140, set = 0, binding = %d) uniform JointMatrix {
     mat4 mJointMatrix[%d];
 } jointMatrixUBO;
 
@@ -625,6 +626,44 @@ layout(set = 0, binding = %d, std140) uniform JointMatrix {
         BindingIndex = BindingIndex + 1;
     end
     return Layout
+end
+
+Jkr.GetGLTFVertexShader = function(inGLTF)
+      return [[
+
+#version 450
+#pragma shader_stage(vertex)
+#extension GL_EXT_debug_printf : enable
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec2 inUV;
+layout(location = 3) in vec3 inColor;
+layout(location = 0) out vec3 outColor;
+
+      ]]
+       .. Jkr.GetGLTFShaderLayoutString(inGLTF) .. 
+      [[
+
+layout(push_constant, std430) uniform pc {
+   mat4 m1;
+   mat4 m2;
+} push;
+
+void GlslMain()
+{
+    vec4 jweight = inJointInfluence[gl_VertexIndex].mJointWeights;
+    vec4 jindex = inJointInfluence[gl_VertexIndex].mJointIndices;
+    mat4 jointMatrices[2] = jointMatrixUBO.mJointMatrix;
+    mat4 skinMat = jweight.x * jointMatrices[int(jindex.x)] 
+                                + jweight.y * jointMatrices[int(jindex.y)]
+                                + jweight.z * jointMatrices[int(jindex.z)]
+                                + jweight.w * jointMatrices[int(jindex.w)] ; 
+    gl_Position = push.m1 * skinMat * vec4(inPosition, 1.0);
+    gl_Position.y = - gl_Position.y;
+    outColor = inColor;
+}
+
+    ]]
 end
 
 --[============================================================[

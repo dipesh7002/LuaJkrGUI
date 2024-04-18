@@ -1,4 +1,6 @@
 #include "jkrguiApp.hpp"
+#include "Renderers/Renderer_base.hpp"
+#include "Renderers/ThreeD/Simple3D.hpp"
 
 extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                sol::state_view s(L);
@@ -32,7 +34,7 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                               glm::vec3 rgb;
                };
                jkrguiApp.set_function("DrawBRDF",
-                                      [](Jkr::Misc::_3D::Simple3D& inSimple3D,
+                                      [](Jkr::Renderer::_3D::Simple3D& inSimple3D,
                                          Jkr::WindowMulT& inWindow,
                                          Jkr::Renderer::_3D::Shape& inShape,
                                          int inModelId,
@@ -44,5 +46,21 @@ extern "C" DLLEXPORT int luaopen_jkrguiApp(lua_State* L) {
                                                      inSimple3D.Draw<PushConstant>(inWindow, inShape, p, inShape.GetIndexOffsetAbsolute(inModelId), inShape.GetIndexCount(inModelId), 1, inParam);
                                       });
 
+               struct PushConstant2 {
+                              glm::mat4 m1;
+                              glm::mat4 m2;
+               };
+               jkrguiApp.set_function(
+                         "DrawSkinned",
+                         [](Jkr::WindowMulT& inWindow,
+                            Jkr::Renderer::_3D::Shape& inShape,
+                            Jkr::Renderer::_3D::Simple3D& inSimple,
+                            glm::mat4 inM1,
+                            glm::mat4 inM2,
+                            int inModelId,
+                            Jkr::Renderer::CmdParam inParam) {
+                                        inSimple.Draw(
+                                                  inWindow, inShape, PushConstant2{.m1 = inM1, .m2 = inM2}, inShape.GetIndexOffsetAbsolute(inModelId), inShape.GetIndexCount(inModelId), 1, inParam);
+                         });
                return 1;
 }
