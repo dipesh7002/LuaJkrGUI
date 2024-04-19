@@ -32,7 +32,7 @@ Jkr.MultiThreadingInject(
       { "_shape3d_",    shape3d },
       { "_simple3d_",   simple3d },
       { "_extended3d_", extended3d },
-      { "_skinned3d_", skinned3d },
+      { "_skinned3d_",  skinned3d },
       { "_mt_",         MT },
    }
 )
@@ -46,18 +46,19 @@ MT:InjectScriptF(
 
 
 function CompileBRDFShader()
-      local vshader = jkrguiApp.GetBRDFVertexShader()
-      local fshader = jkrguiApp.GetBRDFFragmentShader()
-      extended3d:Compile(
-         i,
-         w,
-         "cache2/extended3D.glsl",
-         vshader,
-         fshader,
-         GetDefaultResource("Simple3D", "Compute"),
-         false
-      )
+   local vshader = jkrguiApp.GetBRDFVertexShader()
+   local fshader = jkrguiApp.GetBRDFFragmentShader()
+   extended3d:Compile(
+      i,
+      w,
+      "cache2/extended3D.glsl",
+      vshader,
+      fshader,
+      GetDefaultResource("Simple3D", "Compute"),
+      false
+   )
 end
+
 CompileBRDFShader()
 
 
@@ -74,16 +75,17 @@ Jkr.GetGLTFInfo(SimpleSkinModel, true)
 
 
 function CompileSkinnedShader()
-      skinned3d:Compile(
-            i, 
-            w,
-            "res/models/SimpleSkin/VFC.glsl",
-            Jkr.GetGLTFVertexShader(SimpleSkinModel),
-            GetDefaultResource("Simple3D", "Fragment"),
-            GetDefaultResource("Simple3D", "Compute"),
-            false
-      )
+   skinned3d:Compile(
+      i,
+      w,
+      "res/models/SimpleSkin/VFC.glsl",
+      Jkr.GetGLTFVertexShader(SimpleSkinModel),
+      GetDefaultResource("Simple3D", "Fragment"),
+      GetDefaultResource("Simple3D", "Compute"),
+      false
+   )
 end
+
 CompileSkinnedShader()
 local skinnedShaderUniform3D = Jkr.Uniform3D(i, skinned3d, SimpleSkinModel, 0, true)
 MT:Inject("_skinnedShaderUniform3D_", skinnedShaderUniform3D)
@@ -103,7 +105,8 @@ function Update()
    MT:Inject("I", shit_I)
    local view = Jmath.LookAt(vec3(0, -5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
    local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
-   local ubo = jkrguiApp.GetUBO(Jmath.GetIdentityMatrix4x4(), Jmath.GetIdentityMatrix4x4(), vec3(5, 5, 5), vec4(math.sin(shit_I * 1000) * 5, 10, 5, 1))
+   local ubo = jkrguiApp.GetUBO(Jmath.GetIdentityMatrix4x4(), Jmath.GetIdentityMatrix4x4(), vec3(5, 5, 5),
+      vec4(math.sin(shit_I * 1000) * 5, 10, 5, 1))
    jkrguiApp.UpdateBufferToUniform(Extended3dUniform, 1, ubo)
    skinnedShaderUniform3D:UpdateByGLTFAnimation(SimpleSkinModel, shit_I, 0)
    shit_I = shit_I + 0.0001
@@ -135,10 +138,10 @@ function MTDraw()
          _shape3d_:Bind(_w_, 0)
          _skinned3d_:Bind(_w_, 0)
          _skinnedShaderUniform3D_:Bind(_w_, _skinned3d_, 0)
-         local view = Jmath.LookAt(vec3(0, -5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
+         local view       = Jmath.LookAt(vec3(0, -5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
          local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
-         local model  = Jmath.GetIdentityMatrix4x4()
-         jkrguiApp.DrawSkinned(_w_, _shape3d_, _skinned3d_, projection * view *  model, Jmath.GetIdentityMatrix4x4(), 0, 0)
+         local model      = Jmath.GetIdentityMatrix4x4()
+         jkrguiApp.DrawSkinned(_w_, _shape3d_, _skinned3d_, projection * view * model, Jmath.GetIdentityMatrix4x4(), 0, 0)
 
 
          _w_:EndThreadCommandBuffer(0)
