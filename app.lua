@@ -135,7 +135,10 @@ function MTDraw()
          _shape3d_:Bind(_w_, 0)
          _skinned3d_:Bind(_w_, 0)
          _skinnedShaderUniform3D_:Bind(_w_, _skinned3d_, 0)
-         jkrguiApp.DrawSkinned(_w_, _shape3d_, _skinned3d_, Jmath.GetIdentityMatrix4x4(), Jmath.GetIdentityMatrix4x4(), 0, 0)
+         local view = Jmath.LookAt(vec3(0, -5, 5), vec3(0, 0, 0), vec3(0, 1, 0)) -- view
+         local projection = Jmath.Perspective(0.45, 1, 0.1, 100)
+         local model  = Jmath.GetIdentityMatrix4x4()
+         jkrguiApp.DrawSkinned(_w_, _shape3d_, _skinned3d_, projection * view *  model, Jmath.GetIdentityMatrix4x4(), 0, 0)
 
 
          _w_:EndThreadCommandBuffer(0)
