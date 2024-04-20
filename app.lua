@@ -19,18 +19,21 @@ Jkr.ConfigureMultiThreading(mt, {
    { "mtSimple3d", simple3d }
 })
 
+
 local function Compile()
    local loadDefaultResource = load(string.dump(mtGetDefaultResource))
    local createShapesHelper = load(string.dump(mtCreateShapesHelper))
    local createCamera3D = load(string.dump(mtCreateCamera3D))
+
    mtSimple3d:Compile(mtI, mtW, "res/cache/simple3d.glsl", loadDefaultResource("Simple3D", "Vertex"),
       loadDefaultResource("Simple3D", "Fragment"), loadDefaultResource("Simple3D", "Compute"), false)
    local h = createShapesHelper(mtShape3d)
    h.AddDemoPlane()
+
    local camera = createCamera3D()
-   camera.SetAttributes(vec3(10, 10, 10), vec3(0, 0, 0))
+   camera.SetAttributes(vec3(0, 0, 0), vec3(10, 10, 10))
    local dimension = mtW:GetWindowDimension()
-   camera.SetPerspective(0.717, dimension.x / dimension.y, 0.01, 1000)
+   camera.SetPerspective(0.45, 16 / 9, 0.1, 100)
    mtMt:Inject("mtH", h)
    mtMt:Inject("mtCamera", camera)
 end
@@ -43,6 +46,8 @@ local DrawToZero = function()
    mtW:SetDefaultScissor(0)
    mtSimple3d:Bind(mtW, 0)
    local pc = Jkr.DefaultPushConstant3D();
+   pc.m1 = mtCamera.mMatrix
+   pc.m1 = Jmath.Scale(mtCamera.mMatrix, vec3(0.01, 0.01, 0.01))
    mtShape3d:Bind(mtW, 0)
    mtSimple3d:Draw(mtW, mtShape3d, pc, 0, mtShape3d:GetIndexCount(0), 1, 0)
    mtW:EndThreadCommandBuffer(0)
@@ -61,8 +66,14 @@ local Draw = function()
    wid.Draw()
 end
 
-local Update = function()
+local Event = function()
    wid.Event()
+   if e:IsKeyPressed(Key.SDLK_HASH) then
+      print("a")
+   end
+end
+
+local Update = function()
    wid.Update()
 end
 
@@ -71,5 +82,5 @@ local Dispatch = function()
 end
 
 
-
+e:SetEventCallBack(Event)
 Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, nil, vec4(0, 0, 0, 1), mt, MThreaded, MExecute)
