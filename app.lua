@@ -1,45 +1,75 @@
 require "JkrGUIv2.Basic"
 require "JkrGUIv2.Widgets"
+require "JkrGUIv2.Threed"
+require "JkrGUIv2.Multit"
 
-local SampraInstance = Jkr.CreateInstance()
-local SampraWindow = Jkr.CreateWindow(SampraInstance, "Samprahar Returns", vec2(600, 300))
-local SampraEvent = Jkr.CreateEventManager()
-local SampraWidget = Jkr.CreateWidgetRenderer(SampraInstance, SampraWindow)
-local Font = SampraWidget.CreateFont("res/fonts/font.ttf", 16)
-local TextLabel = SampraWidget.CreateTextLabel(vec3(200, 200, 20), vec3(0), Font, "Hellow", vec4(1, 1, 1, 1))
+local i = Jkr.CreateInstance()
+local w = Jkr.CreateWindow(i, "Samprahar Returns", vec2(600, 300))
+local e = Jkr.CreateEventManager()
+local wid = Jkr.CreateWidgetRenderer(i, w)
+local mt = Jkr.MultiThreading(i)
+local shape3d = Jkr.CreateShapeRenderer3D(i, w)
+local simple3d = Jkr.CreateSimple3DPipeline(i, w)
 
-local CustomImage = Jkr.CreateCustomPainterImage(SampraInstance, SampraWindow, 100, 100)
-local CustomPainter = Jkr.CreateCustomImagePainter("res/cache/CustomPainter.glsl",
-   Jkr.GetDefaultResource("CustomImagePainter", "RoundedRectangle"))
-CustomPainter:Store(SampraInstance, SampraWindow)
-CustomImage:Register(SampraInstance, CustomPainter.handle) -- TODO Wrap This
+Jkr.ConfigureMultiThreading(mt, {
+   { "mtMt",       mt },
+   { "mtI",        i },
+   { "mtW",        w },
+   { "mtShape3d",  shape3d },
+   { "mtSimple3d", simple3d }
+})
 
-local Rectangle = Jkr.Generator(Jkr.Shapes.RectangleFill, uvec2(50, 50))
-local ShapeRenderer = Jkr.CreateShapeRenderer(SampraInstance, SampraWindow)
-local RectangleId = ShapeRenderer:Add(Rectangle, vec3(50, 50, 50))
-local Image = ShapeRenderer:AddImage(100, 100)
+local function Compile()
+   local loadDefaultResource = load(string.dump(mtGetDefaultResource))
+   local createShapesHelper = load(string.dump(mtCreateShapesHelper))
+   local createCamera3D = load(string.dump(mtCreateCamera3D))
+   mtSimple3d:Compile(mtI, mtW, "res/cache/simple3d.glsl", loadDefaultResource("Simple3D", "Vertex"),
+      loadDefaultResource("Simple3D", "Fragment"), loadDefaultResource("Simple3D", "Compute"), false)
+   local h = createShapesHelper(mtShape3d)
+   h.AddDemoPlane()
+   local camera = createCamera3D()
+   camera.SetAttributes(vec3(10, 10, 10), vec3(0, 0, 0))
+   local dimension = mtW:GetWindowDimension()
+   camera.SetPerspective(0.717, dimension.x / dimension.y, 0.01, 1000)
+   mtMt:Inject("mtH", h)
+   mtMt:Inject("mtCamera", camera)
+end
+mt:AddJobF(Compile)
+mt:Wait()
+
+local DrawToZero = function()
+   mtW:BeginThreadCommandBuffer(0)
+   mtW:SetDefaultViewport(0)
+   mtW:SetDefaultScissor(0)
+   mtSimple3d:Bind(mtW, 0)
+   local pc = Jkr.DefaultPushConstant3D();
+   mtShape3d:Bind(mtW, 0)
+   mtSimple3d:Draw(mtW, mtShape3d, pc, 0, mtShape3d:GetIndexCount(0), 1, 0)
+   mtW:EndThreadCommandBuffer(0)
+end
+
+local MThreaded = function()
+   mt:AddJobF(DrawToZero)
+end
+
+local MExecute = function()
+   w:ExecuteThreadCommandBuffer(0)
+end
+
 
 local Draw = function()
-   SampraWidget.Draw()
+   wid.Draw()
 end
 
 local Update = function()
-   SampraWidget.Event()
-   SampraWidget.Update()
+   wid.Event()
+   wid.Update()
 end
 
 local Dispatch = function()
-   CustomPainter:Bind(SampraWindow, Jkr.CmdParam.None)
-   CustomPainter:BindImageFromImage(SampraWindow, CustomImage, Jkr.CmdParam.None)
-   local pc = Jkr.DefaultCustomImagePainterPushConstant()
-   pc.x = vec4(10, 5, 5, 5)
-   pc.y = vec4(1, 0, 0, 1)
-   pc.z = vec4(0.8, 5, 5, 5)
-   --CustomPainter:Draw(SampraWindow, pc, 50, 50, 1, Jkr.CmdParam.None)
-   ShapeRenderer:CopyToImage(Image, CustomImage)
-   ShapeRenderer:Dispatch(SampraWindow)
-
-   SampraWidget.Dispatch()
+   wid.Dispatch()
 end
 
-Jkr.DebugMainLoop(SampraWindow, SampraEvent, Update, Dispatch, Draw, nil, vec4(0, 0, 0, 1))
+
+
+Jkr.DebugMainLoop(w, e, Update, Dispatch, Draw, nil, vec4(0, 0, 0, 1), mt, MThreaded, MExecute)
